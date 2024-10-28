@@ -7,3 +7,6 @@ The WHOMM Project aims to provide a performant distributed rendering engine.
 # System Context
 
 ![System Context Diagramm](docs/diagrams/SystemContext.png)
+
+# Containers 
+![Containers](docs/diagrams/Containers.png)
