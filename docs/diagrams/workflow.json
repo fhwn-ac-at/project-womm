@@ -1,0 +1,47 @@
+{
+  "workflow": {
+    "name": "Name of the workflow (only words, '-', '_')",
+    "description": "Description of the workflow and its purpose",
+    "tasks": [
+      {
+        "name": "Task name",
+        "dependencies": [
+          {
+            "type": "task|artifact",
+            "id": "Identifier for the task or artifact"
+          }
+        ],
+        "parameters": {
+          "description": "Here custom parameters for the task can be defined."
+        },
+        "results": [
+          "Expected artifact identifiers created by this task"
+        ],
+        "priority": "Number representing the priority of the task, lower value means higher priority (Type integer)",
+        "retryPolicy": {
+          "maxRetryCount": "Number of times this task can be retried on failure (Type integer)",
+          "retryDelay": "Delay between retries, e.g., 5s, 1m | Integer representing time in ms",
+          "exponentialBackoff": "Boolean indicating whether exponential backoff is used, if true the delay will be exponential starting at the retry delay"
+        },
+        "timeout": "Timeout for task execution, e.g., 30m | Integer representing time in ms",
+        "onError": {
+          "action": "What happens when an error occurs (retry, cancel, escalate)",
+          "escalationWorkflow": "Optional workflow to trigger if error cannot be resolved"
+        },
+        "completionCriteria": [
+          {
+            "type": "artifact|trigger",
+            "id": "Identifier of the artifact"
+          }
+        ]
+      }
+    ],
+    "completionCriteria": [
+      {
+        "type": "task|artifact",
+        "id": "Identifier for the task or artifact"
+      }
+    ],
+    "cleanupPolicy": "Policy for cleaning up artifacts after workflow completion (e.g., immediate, after 1 day)"
+  }
+}
