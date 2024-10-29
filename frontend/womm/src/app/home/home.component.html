@@ -1,0 +1,20 @@
+<mat-toolbar color="primary">
+  <span>My App</span>
+  <span class="spacer"></span>
+  <button mat-button>Home</button>
+  <button mat-button>About</button>
+  <button mat-button>Contact</button>
+</mat-toolbar>
+
+
+<div class="content">
+  <input
+    type="file"
+    id="fileUpload"
+    (change)="onFileSelected($event)"
+    multiple
+    accept="video/*"
+    style="display: none;"
+  />
+  <button mat-raised-button color="accent" (click)="openFileExplorer()">Upload Video</button>
+</div>
