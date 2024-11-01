@@ -49,6 +49,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Metalama.Framework": {
+              "target": "Package",
+              "version": "[2024.2.29, )"
+            },
             "Microsoft.Extensions.Hosting": {
               "target": "Package",
               "version": "[8.0.1, )"
@@ -119,6 +123,18 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Metalama.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[2024.2.29, )"
+            },
+            "Metalama.Framework": {
+              "target": "Package",
+              "version": "[2024.2.29, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            },
             "Microsoft.Extensions.Options": {
               "target": "Package",
               "version": "[8.0.2, )"

@@ -49,3 +49,8 @@ C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\obj\Debug
 C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\obj\Debug\net8.0\app.genruntimeconfig.cache
 C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\obj\Debug\net8.0\ref\app.dll
 C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\appsettings.json
+C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\Metalama.Framework.dll
+C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\Metalama.SystemTypes.dll
+C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\Metalama.Framework.RunTime.dll
+C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\JetBrains.Annotations.dll
+C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\Metalama.Extensions.DependencyInjection.dll

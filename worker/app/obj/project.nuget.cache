@@ -1,9 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "gFQ9k9zaMXZxnHoDXIxt8NmPH8iVrkNyjvQBv8APn29ZwMBemLNSEGE+LH0e2gMNzhu23anoxXYOsvLtY+E0Zg==",
+  "dgSpecHash": "p1MYPkR+kb8lpIai7RQ0lvEBFXSx+MqMn6xiyAT2KE5Eqe+WOtpjT9oqzRugSioI6rMJH5WeElXnD7EaqwfiLw==",
   "success": true,
   "projectFilePath": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\app.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\micha\\.nuget\\packages\\jetbrains.annotations\\2022.3.1\\jetbrains.annotations.2022.3.1.nupkg.sha512",
+    "C:\\Users\\micha\\.nuget\\packages\\metalama.compiler\\2024.2.16\\metalama.compiler.2024.2.16.nupkg.sha512",
+    "C:\\Users\\micha\\.nuget\\packages\\metalama.extensions.dependencyinjection\\2024.2.29\\metalama.extensions.dependencyinjection.2024.2.29.nupkg.sha512",
+    "C:\\Users\\micha\\.nuget\\packages\\metalama.framework\\2024.2.29\\metalama.framework.2024.2.29.nupkg.sha512",
+    "C:\\Users\\micha\\.nuget\\packages\\metalama.framework.redist\\2024.2.29\\metalama.framework.redist.2024.2.29.nupkg.sha512",
+    "C:\\Users\\micha\\.nuget\\packages\\metalama.framework.runtime\\2024.2.9\\metalama.framework.runtime.2024.2.9.nupkg.sha512",
+    "C:\\Users\\micha\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\microsoft.extensions.configuration\\8.0.0\\microsoft.extensions.configuration.8.0.0.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\microsoft.extensions.configuration.binder\\8.0.2\\microsoft.extensions.configuration.binder.8.0.2.nupkg.sha512",
@@ -32,6 +39,7 @@
     "C:\\Users\\micha\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\8.0.0\\microsoft.extensions.options.configurationextensions.8.0.0.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\rabbitmq.client\\6.8.1\\rabbitmq.client.6.8.1.nupkg.sha512",
+    "C:\\Users\\micha\\.nuget\\packages\\system.collections.immutable\\5.0.0\\system.collections.immutable.5.0.0.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\system.diagnostics.eventlog\\8.0.1\\system.diagnostics.eventlog.8.0.1.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\system.threading.channels\\7.0.0\\system.threading.channels.7.0.0.nupkg.sha512"

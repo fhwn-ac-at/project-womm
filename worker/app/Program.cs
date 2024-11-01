@@ -28,9 +28,9 @@
     .Build();
 
             host.Services
-                .GetRequiredService<Driver>();
-            SetupDummyQueues();
-            host.Run();
+                .GetRequiredService<Driver>().Run();
+            //SetupDummyQueues();
+            
         }
 
         private static void SetupDummyQueues()

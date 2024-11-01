@@ -14,5 +14,10 @@
   </ItemGroup>
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)microsoft.extensions.configuration.usersecrets\8.0.1\buildTransitive\net6.0\Microsoft.Extensions.Configuration.UserSecrets.props" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.configuration.usersecrets\8.0.1\buildTransitive\net6.0\Microsoft.Extensions.Configuration.UserSecrets.props')" />
+    <Import Project="$(NuGetPackageRoot)metalama.compiler\2024.2.16\buildTransitive\Metalama.Compiler.props" Condition="Exists('$(NuGetPackageRoot)metalama.compiler\2024.2.16\buildTransitive\Metalama.Compiler.props')" />
+    <Import Project="$(NuGetPackageRoot)metalama.framework\2024.2.29\buildTransitive\Metalama.Framework.props" Condition="Exists('$(NuGetPackageRoot)metalama.framework\2024.2.29\buildTransitive\Metalama.Framework.props')" />
   </ImportGroup>
+  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <PkgMetalama_Framework Condition=" '$(PkgMetalama_Framework)' == '' ">C:\Users\micha\.nuget\packages\metalama.framework\2024.2.29</PkgMetalama_Framework>
+  </PropertyGroup>
 </Project>
