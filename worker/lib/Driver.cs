@@ -29,9 +29,9 @@
 
         private readonly IWorkItemVisitor<IWorkItemResult> _workItemHandler;
 
-        private JSONWorkItemQueue _taskQueue;
+        private IModel _taskChannel;
 
-        private JSONWorkItemQueue _resultQueue;
+        private IModel _resultChannel;
 
         public Driver(
             IOptions<DriverOptions> options,
@@ -46,23 +46,63 @@
             
             _options = options.Value;
             _workItemConverter = workItemConverter;
-            this._resultConverter = resultConverter;
+            _resultConverter = resultConverter;
             _workItemHandler = workItemHandler;
         }
 
-        public void Run() 
+        public void Run()
         {
-            _taskQueue = new JSONWorkItemQueue(_options.Tasks);
-            _taskQueue.OnItemAdded += this.NewTaskAddedCallback;
-            _resultQueue = new JSONWorkItemQueue(_options.Results);
+            _resultChannel = DeclareQueueChannel(_options.Results);
+            _taskChannel = DeclareQueueChannel(_options.Tasks);
+
+            var consumer = new EventingBasicConsumer(_taskChannel);
+            consumer.Received += NewTaskAddedCallback;
+                
+                (model, ea) =>
+            {
+                //TODO: Implement Logic
+            };
+            _taskChannel.BasicConsume(queue: _options.Tasks.QueueName,
+                                 autoAck: true,
+                                 consumer: consumer);
         }
 
-        private void NewTaskAddedCallback(object? sender, QueueItemAddedEventArgs<string> e)
+        private void NewTaskAddedCallback(object? sender, BasicDeliverEventArgs e)
         {
-            var newItem = _workItemConverter.Convert(e.Item);
+            var body = e.Body.ToArray();
+            string parsedBody = Encoding.UTF8.GetString(body);
+
+            var newItem = _workItemConverter.Convert(parsedBody);
             var result = newItem.Accept(_workItemHandler);
+            PublishResult(result);
+        }
+
+        private IModel DeclareQueueChannel(QueueServerOptions options)
+        {
+            var factory = new ConnectionFactory
+            {
+                HostName = options.HostName,
+                Port = options.Port,
+            };
+
+            var connection = factory.CreateConnection();
+            var channel = connection.CreateModel();
+            channel.QueueDeclare(queue: options.QueueName);
+
+            return channel;
+        }
+
+        private void PublishResult(IWorkItemResult result)
+        {
             var convertedResult = _resultConverter.Convert(result);
-            _resultQueue.Enqueue(convertedResult);
+
+            var body = Encoding.UTF8.GetBytes(convertedResult);
+
+            _resultChannel.BasicPublish(
+                exchange: string.Empty,
+                routingKey: _options.Results.RoutingKey,
+                basicProperties: null,
+                body: body);
         }
     }
 }
