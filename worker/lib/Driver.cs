@@ -3,17 +3,11 @@
     using lib.aspects.logging;
     using lib.item_hanlder;
     using lib.parser;
-    using lib.queue;
     using lib.settings;
     using Microsoft.Extensions.Options;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.ComponentModel.DataAnnotations;
-    using System.Linq;
-    using System.Runtime.InteropServices.Marshalling;
     using System.Text;
     using System.Threading.Channels;
     using System.Threading.Tasks;
@@ -57,11 +51,7 @@
 
             var consumer = new EventingBasicConsumer(_taskChannel);
             consumer.Received += NewTaskAddedCallback;
-                
-                (model, ea) =>
-            {
-                //TODO: Implement Logic
-            };
+
             _taskChannel.BasicConsume(queue: _options.Tasks.QueueName,
                                  autoAck: true,
                                  consumer: consumer);

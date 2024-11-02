@@ -8,9 +8,9 @@
 
     public class Split : IWorkItem
     {
-        public void Accept(IWorkItemVisitor visitor)
+        public T Accept<T>(IWorkItemVisitor<T> visitor)
         {
-            visitor.Visit(this);
+            return visitor.Visit(this);
         }
     }
 }

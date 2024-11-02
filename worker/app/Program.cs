@@ -28,34 +28,7 @@
     .Build();
 
             host.Services
-                .GetRequiredService<Driver>().Run();
-            //SetupDummyQueues();
-            
-        }
-
-        private static void SetupDummyQueues()
-        {
-            var taskFactory = new ConnectionFactory 
-            { 
-                HostName = "localhost", 
-                Port = 123
-            };
-            using var taskConnection = taskFactory.CreateConnection();
-            using var taskChannel = taskConnection.CreateModel();
-
-            taskChannel.QueueDeclare(queue: "tasks",
-                                 durable: false,
-                                 exclusive: false,
-                                 autoDelete: false,
-                                 arguments: null);
-
-            const string message = "Test Task";
-            var body = Encoding.UTF8.GetBytes(message);
-
-            taskChannel.BasicPublish(exchange: string.Empty,
-                                 routingKey: string.Empty,
-                                 basicProperties: null,
-                                 body: body);
+                .GetRequiredService<Driver>().Run(); 
         }
     }
 }
