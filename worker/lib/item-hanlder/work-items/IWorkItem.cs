@@ -8,6 +8,6 @@
 
     public interface IWorkItem
     {
-        public void Accept(IWorkItemVisitor visitor);
+        public T Accept<T>(IWorkItemVisitor<T> visitor);
     }
 }

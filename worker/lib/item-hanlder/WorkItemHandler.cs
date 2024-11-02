@@ -7,9 +7,9 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class WorkItemHandler : IWorkItemVisitor
+    internal class WorkItemHandler : IWorkItemVisitor<IWorkItemResult>
     {
-        public void Visit(Split item)
+        public IWorkItemResult Visit(Split item)
         {
             throw new NotImplementedException();
         }

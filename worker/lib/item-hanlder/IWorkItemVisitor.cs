@@ -7,8 +7,8 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public interface IWorkItemVisitor
+    public interface IWorkItemVisitor<T>
     {
-        public void Visit(Split item);
+        public T Visit(Split item);
     }
 }

@@ -6,7 +6,10 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class WorkItemAddedEventArgs : EventArgs
+    public interface IQueue<T> 
     {
+        public void Enqueue(T item);
+
+        public event EventHandler<QueueItemAddedEventArgs<T>> OnItemAdded;
     }
 }

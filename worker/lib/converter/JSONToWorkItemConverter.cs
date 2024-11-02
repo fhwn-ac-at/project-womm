@@ -10,7 +10,7 @@
 
     internal class JSONToWorkItemConverter : IConverter<string, IWorkItem>
     {
-        public IWorkItem Parse(string input)
+        public IWorkItem Convert(string input)
         {
             throw new NotImplementedException();
         }

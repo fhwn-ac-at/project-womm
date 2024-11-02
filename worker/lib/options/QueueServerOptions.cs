@@ -19,6 +19,6 @@
         public string QueueName { get; set; }
 
         [Required]
-        public string RootKey { get; set; }
+        public string RoutingKey { get; set; }
     }
 }

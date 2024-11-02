@@ -25,40 +25,44 @@
 
         private readonly IConverter<string, IWorkItem> _workItemConverter;
 
-        private readonly IWorkItemVisitor _workItemHandler;
-        private readonly WorkItemQueue _taskQueue;
-        private WorkItemQueue _resultQueue;
+        private readonly IConverter<IWorkItemResult, string> _resultConverter;
+
+        private readonly IWorkItemVisitor<IWorkItemResult> _workItemHandler;
+
+        private JSONWorkItemQueue _taskQueue;
+
+        private JSONWorkItemQueue _resultQueue;
 
         public Driver(
             IOptions<DriverOptions> options,
             IConverter<string, IWorkItem> workItemConverter,
-            IWorkItemVisitor workItemHandler)
+            IConverter<IWorkItemResult, string> resultConverter,
+            IWorkItemVisitor<IWorkItemResult> workItemHandler)
         {
-            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(resultConverter);
             ArgumentNullException.ThrowIfNull(workItemConverter);
             ArgumentNullException.ThrowIfNull(workItemHandler);
-            ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(options.Value);
             
             _options = options.Value;
             _workItemConverter = workItemConverter;
+            this._resultConverter = resultConverter;
             _workItemHandler = workItemHandler;
-
-            _taskQueue = new WorkItemQueue(_options.Tasks);
-            _taskQueue.OnWorkItemAdded += this.NewTaskAddedCallback;
-
-            _resultQueue = new WorkItemQueue(_options.Results);
         }
 
         public void Run() 
         {
-            _taskQueue.Start();
-            _resultQueue.Start();
+            _taskQueue = new JSONWorkItemQueue(_options.Tasks);
+            _taskQueue.OnItemAdded += this.NewTaskAddedCallback;
+            _resultQueue = new JSONWorkItemQueue(_options.Results);
         }
 
-        private void NewTaskAddedCallback(object? sender, WorkItemAddedEventArgs e)
+        private void NewTaskAddedCallback(object? sender, QueueItemAddedEventArgs<string> e)
         {
-            throw new NotImplementedException();
+            var newItem = _workItemConverter.Convert(e.Item);
+            var result = newItem.Accept(_workItemHandler);
+            var convertedResult = _resultConverter.Convert(result);
+            _resultQueue.Enqueue(convertedResult);
         }
     }
 }
