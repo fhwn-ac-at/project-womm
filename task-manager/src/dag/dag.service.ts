@@ -15,17 +15,20 @@ import { Model } from 'mongoose';
 import { workerData } from 'worker_threads';
 import { expand } from 'rxjs';
 import { WorkflowDefinition } from 'src/workflows/entities/workflow-definition.entity';
+import { CycleDetectorService } from './cycle-detector/cycle-detector.service';
+import { DagCycleError } from './errors/dag-cycle.error';
 
 @Injectable()
 export class DagService {
 
   public constructor(
     @InjectModel(DAGDto.name)
-    private readonly dagDtoModel: Model<DAGDto>
+    private readonly dagDtoModel: Model<DAGDto>,
+    private readonly cycleDetector: CycleDetectorService
   ) { }
 
 
-  public parse(definition: WorkflowDefinition): DAG {
+  public async parse(definition: WorkflowDefinition): Promise<DAG> {
     const taskNodes: DagNode[] = definition.tasks.map((t, i) => this.convertTaskToDagNode(t, `w-${definition.name}-t-${i}`));
     const taskMap: Map<string, DagNode> = new Map(taskNodes.map(n => [n.task.name, n]));
     const artifactMap: Map<string, DagNode> = new Map(taskNodes.flatMap(n => n.task.results.map(a => [a, n])));
@@ -63,10 +66,15 @@ export class DagService {
       }
     }
 
-    //TODO: Check for cycles. If there are cycles throw an error.
     const dag = new DAG();
     dag.nodes = taskNodes;
     dag.workflowDefinitionId = definition.id;
+
+    const cycleDetectorResponse = await this.cycleDetector.checkForCycle(dag);
+    if (cycleDetectorResponse.hasCycle) {
+      throw new DagCycleError(cycleDetectorResponse);
+    }
+
     return dag;
   }
 

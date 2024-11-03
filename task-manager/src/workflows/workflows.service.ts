@@ -18,7 +18,7 @@ export class WorkflowsService {
 
   async create(createWorkflowDto: WorkflowDefinitionDto) {
     const workflow = await this.save(createWorkflowDto.workflow);
-    const dag = this.dagService.parse(workflow);
+    const dag = await this.dagService.parse(workflow);
     await this.dagService.save(dag);
     return this.dagService.converDAGToDto(dag);
   }
