@@ -9,10 +9,20 @@ import { DagEdge } from './entities/dag-edge.entity';
 import { DAGDto } from './dto/dag.dto';
 import { DagNodeDto } from './dto/dag-node.dto';
 import { DagEdgeDto } from './dto/dag-edge.dto';
+import { CreateWorkflowDefinition } from 'src/workflows/entities/create-workflow-definition.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { workerData } from 'worker_threads';
+import { expand } from 'rxjs';
 import { WorkflowDefinition } from 'src/workflows/entities/workflow-definition.entity';
 
 @Injectable()
 export class DagService {
+
+  public constructor(
+    @InjectModel(DAGDto.name)
+    private readonly dagDtoModel: Model<DAGDto>
+  ) { }
 
 
   public parse(definition: WorkflowDefinition): DAG {
@@ -56,14 +66,15 @@ export class DagService {
     //TODO: Check for cycles. If there are cycles throw an error.
     const dag = new DAG();
     dag.nodes = taskNodes;
+    dag.workflowDefinitionId = definition.id;
     return dag;
   }
 
-  public converToDto(dag: DAG): DAGDto {
+  public converDAGToDto(dag: DAG): DAGDto {
     var nodes = dag.nodes.map(n => {
       var dto = new DagNodeDto();
       dto.id = n.id;
-      dto.taskId = n.task.name;
+      dto.task = n.task;
       dto.edges = n.edges.map(e => {
         const edto = new DagEdgeDto();
         edto.artifactId = e.artifactId;
@@ -77,7 +88,43 @@ export class DagService {
 
     var dto = new DAGDto();
     dto.nodes = nodes;
+    dto.workflowDefinitionId = dag.workflowDefinitionId;
     return dto;
+  }
+
+  public convertDtoToDAG(dto: DAGDto): DAG {
+    const nodes: DagNode[] = dto.nodes.map(nd => {
+      const node = new DagNode;
+      node.edges = []
+      node.id = nd.id;
+      node.task = nd.task
+      return node;
+    });
+    const nodeMap: Map<string, DagNode> = new Map(nodes.map(n => [n.id, n]));
+
+    for (const nodeDto of dto.nodes) {
+      const node = nodeMap.get(nodeDto.id);
+      for (const edgeDto of nodeDto.edges) {
+        const edge = new DagEdge();
+        edge.artifactId = edgeDto.artifactId;
+        edge.conditionType = edgeDto.conditionType;
+        edge.from = nodeMap.get(edgeDto.fromId)
+        edge.to = nodeMap.get(edgeDto.toId);
+        node.edges.push(edge);
+      }
+    }
+
+    const dag = new DAG();
+    dag.nodes = nodes;
+    dag.workflowDefinitionId = dto.workflowDefinitionId;
+    return dag;
+  }
+
+  public async save(dag: DAG) {
+    const dagDto = this.converDAGToDto(dag);
+    const dagModel = new this.dagDtoModel(dagDto);
+
+    return await dagModel.save();
   }
 
   private convertTaskToDagNode(task: Task, nodeId: string): DagNode {
@@ -87,5 +134,6 @@ export class DagService {
 
     return node;
   }
+
 
 }

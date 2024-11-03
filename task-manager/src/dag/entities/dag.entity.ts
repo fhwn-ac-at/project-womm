@@ -1,8 +1,12 @@
-import { exec } from "child_process";
 import { DagNode } from "./dag-node.entity";
+import { WorkflowDefinition } from "src/workflows/entities/workflow-definition.entity";
 
 export class DAG {
   nodes: DagNode[];
+
+  workflowDefinitionId: string;
+
+  workflowDefinition?: WorkflowDefinition;
 
   public getExecutableNodes(): DagNode[] {
     const executableNodes: DagNode[] = []

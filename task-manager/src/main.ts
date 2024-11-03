@@ -19,7 +19,6 @@ async function bootstrap() {
     transform: true,
     transformOptions: {
       exposeDefaultValues: true,
-
     }
   }));
   app.listen(3000);

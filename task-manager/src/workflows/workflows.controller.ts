@@ -10,7 +10,7 @@ export class WorkflowsController {
 
   @Post()
   async createApi(@Body() workflow: WorkflowDefinitionDto) {
-    return this.workflowsService.create(workflow);
+    return await this.workflowsService.create(workflow);
   }
 
   // @MessagePattern('createWorkflow')
