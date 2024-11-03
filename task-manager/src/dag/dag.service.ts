@@ -9,12 +9,13 @@ import { DagEdge } from './entities/dag-edge.entity';
 import { DAGDto } from './dto/dag.dto';
 import { DagNodeDto } from './dto/dag-node.dto';
 import { DagEdgeDto } from './dto/dag-edge.dto';
+import { WorkflowDefinition } from 'src/workflows/entities/workflow-definition.entity';
 
 @Injectable()
 export class DagService {
 
 
-  public parse(definition: WorkflowDefinitionDto): DAG {
+  public parse(definition: WorkflowDefinition): DAG {
     const taskNodes: DagNode[] = definition.tasks.map((t, i) => this.convertTaskToDagNode(t, `w-${definition.name}-t-${i}`));
     const taskMap: Map<string, DagNode> = new Map(taskNodes.map(n => [n.task.name, n]));
     const artifactMap: Map<string, DagNode> = new Map(taskNodes.flatMap(n => n.task.results.map(a => [a, n])));

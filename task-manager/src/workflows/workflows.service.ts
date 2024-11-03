@@ -9,7 +9,7 @@ export class WorkflowsService {
   public constructor(public readonly dagService: DagService) { }
 
   create(createWorkflowDto: WorkflowDefinitionDto) {
-    const dag = this.dagService.parse(createWorkflowDto);
+    const dag = this.dagService.parse(createWorkflowDto.workflow);
     return this.dagService.converToDto(dag);
   }
 
