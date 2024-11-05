@@ -6,6 +6,7 @@ import { CreateWorkflowDefinition } from './entities/create-workflow-definition.
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { WorkflowDefinition } from './entities/workflow-definition.entity';
+import { SchedulerService } from 'src/scheduler/scheduler.service';
 
 @Injectable()
 export class WorkflowsService {
@@ -13,13 +14,15 @@ export class WorkflowsService {
   public constructor(
     public readonly dagService: DagService,
     @InjectModel(CreateWorkflowDefinition.name)
-    private readonly workflowDefinitionModel: Model<CreateWorkflowDefinition>
+    private readonly workflowDefinitionModel: Model<CreateWorkflowDefinition>,
+    private readonly schedulerService: SchedulerService
   ) { }
 
   async create(createWorkflowDto: WorkflowDefinitionDto) {
     const workflow = await this.save(createWorkflowDto.workflow);
     const dag = await this.dagService.parse(workflow);
     await this.dagService.save(dag);
+    await this.schedulerService.scheduleOutStandingTasks(dag);
     return this.dagService.converDAGToDto(dag);
   }
 

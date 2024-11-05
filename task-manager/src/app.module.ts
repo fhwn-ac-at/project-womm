@@ -6,6 +6,9 @@ import { DagModule } from './dag/dag.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { SchedulerModule } from './scheduler/scheduler.module';
+import { TaskEventListenerModule } from './task-event-listener/task-event-listener.module';
+import { ArtifactStoreModule } from './artifact-store/artifact-store.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { MongooseModule } from '@nestjs/mongoose';
       imports: [ConfigModule],
       inject: [ConfigService]
     }),
+    SchedulerModule,
+    TaskEventListenerModule,
+    ArtifactStoreModule,
   ],
   controllers: [AppController],
   providers: [AppService],

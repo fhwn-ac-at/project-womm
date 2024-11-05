@@ -4,6 +4,12 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
 export class DagEdge {
 
+  public constructor(partial?: Partial<DagEdge>) {
+    if (partial) {
+      Object.assign(this, partial);
+    }
+  }
+
   from: DagNode;
 
   to: DagNode;

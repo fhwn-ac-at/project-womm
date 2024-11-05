@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { WorkflowDefinitionDto } from 'src/workflows/dto/workflow-definition.dto';
 import { DAG } from './entities/dag.entity';
 import { Task } from 'src/workflows/entities/task.entity';
-import { DagNode } from './entities/dag-node.entity';
+import { DagNode, DagNodeId, DagNodeStatus } from './entities/dag-node.entity';
 import { DependencyType } from 'src/workflows/entities/dependency.entity';
 import { DagCreationError } from './errors/dag-creation.error';
 import { DagEdge } from './entities/dag-edge.entity';
@@ -11,7 +11,7 @@ import { DagNodeDto } from './dto/dag-node.dto';
 import { DagEdgeDto } from './dto/dag-edge.dto';
 import { CreateWorkflowDefinition } from 'src/workflows/entities/create-workflow-definition.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 import { workerData } from 'worker_threads';
 import { expand } from 'rxjs';
 import { WorkflowDefinition } from 'src/workflows/entities/workflow-definition.entity';
@@ -21,15 +21,16 @@ import { DagCycleError } from './errors/dag-cycle.error';
 @Injectable()
 export class DagService {
 
+  private readonly logger = new Logger(DagService.name);
+
   public constructor(
     @InjectModel(DAGDto.name)
     private readonly dagDtoModel: Model<DAGDto>,
     private readonly cycleDetector: CycleDetectorService
   ) { }
 
-
   public async parse(definition: WorkflowDefinition): Promise<DAG> {
-    const taskNodes: DagNode[] = definition.tasks.map((t, i) => this.convertTaskToDagNode(t, `w-${definition.name}-t-${i}`));
+    const taskNodes: DagNode[] = definition.tasks.map((t, i) => this.convertTaskToDagNode(t, `w-${definition.name}-t-${i}` as DagNodeId));
     const taskMap: Map<string, DagNode> = new Map(taskNodes.map(n => [n.task.name, n]));
     const artifactMap: Map<string, DagNode> = new Map(taskNodes.flatMap(n => n.task.results.map(a => [a, n])));
 
@@ -41,10 +42,12 @@ export class DagService {
           }
 
           const originatingNode = taskMap.get(condition.id);
-          const edge = new DagEdge();
-          edge.from = originatingNode;
-          edge.to = node;
-          edge.conditionType = DependencyType.task;
+          const edge = new DagEdge({
+            from: originatingNode,
+            to: node,
+            conditionType: DependencyType.task
+          });
+
           originatingNode.edges.push(edge);
           node.edges.push(edge);
         } else if (condition.type === DependencyType.artifact) {
@@ -53,11 +56,13 @@ export class DagService {
           }
 
           const originatingNode = artifactMap.get(condition.id);
-          const edge = new DagEdge();
-          edge.from = originatingNode;
-          edge.to = node;
-          edge.conditionType = DependencyType.artifact;
-          edge.artifactId = condition.id;
+          const edge = new DagEdge({
+            from: originatingNode,
+            to: node,
+            conditionType: DependencyType.artifact,
+            artifactId: condition.id
+          });
+
           originatingNode.edges.push(edge);
           node.edges.push(edge);
         } else {
@@ -66,9 +71,10 @@ export class DagService {
       }
     }
 
-    const dag = new DAG();
-    dag.nodes = taskNodes;
-    dag.workflowDefinitionId = definition.id;
+    const dag = new DAG({
+      nodes: taskNodes,
+      workflowDefinitionId: definition.id
+    });
 
     const cycleDetectorResponse = await this.cycleDetector.checkForCycle(dag);
     if (cycleDetectorResponse.hasCycle) {
@@ -102,7 +108,7 @@ export class DagService {
 
   public convertDtoToDAG(dto: DAGDto): DAG {
     const nodes: DagNode[] = dto.nodes.map(nd => {
-      const node = new DagNode;
+      const node = new DagNode();
       node.edges = []
       node.id = nd.id;
       node.task = nd.task
@@ -128,14 +134,69 @@ export class DagService {
     return dag;
   }
 
-  public async save(dag: DAG) {
+  public async save(dag: DAG, session?: ClientSession) {
     const dagDto = this.converDAGToDto(dag);
     const dagModel = new this.dagDtoModel(dagDto);
 
-    return await dagModel.save();
+    await dagModel.save({ session });
   }
 
-  private convertTaskToDagNode(task: Task, nodeId: string): DagNode {
+  public async loadWithNodeId(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+    // TODO: Error handling
+    const dagDto = await this.dagDtoModel.findOne({
+      nodes: {
+        $elemMatch: {
+          id: nodeId
+        }
+      },
+      session
+    });
+
+    return this.convertDtoToDAG(dagDto);
+  }
+
+  public async markNodeAsSucceeded(nodeId: DagNodeId): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Succeeded);
+  }
+
+  public async markNodeAsFailed(nodeId: DagNodeId): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Failed);
+  }
+
+  public async markNodeAsRunning(nodeId: DagNodeId): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Running);
+  }
+
+  public async markNodeAsScheduled(nodeId: DagNodeId): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Scheduled);
+  }
+
+  public async markNodeAsCanceled(nodeId: DagNodeId): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Canceled);
+  }
+
+  public async setNodeStatus(nodeId: DagNodeId, status: DagNodeStatus): Promise<DAG> {
+    const session = await this.dagDtoModel.startSession();
+    session.startTransaction();
+
+    try {
+      const dag = await this.loadWithNodeId(nodeId, session);
+      const node = dag.nodes.find(n => n.id === nodeId);
+      node.status = status;
+      
+      await this.save(dag, session);
+
+      return dag;
+    } catch (error) {
+      this.logger.error(`Failed to mark node as succeeded. NodeId: ${nodeId}`);
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  private convertTaskToDagNode(task: Task, nodeId: DagNodeId): DagNode {
     const node = new DagNode();
     node.id = nodeId;
     node.task = task;

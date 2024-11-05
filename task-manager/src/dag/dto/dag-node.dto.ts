@@ -1,11 +1,12 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { DagEdgeDto, DagEdgeDtoSchema } from "./dag-edge.dto";
 import { Task, TaskSchema } from "src/workflows/entities/task.entity";
+import { DagNodeId } from "../entities/dag-node.entity";
 
 @Schema()
 export class DagNodeDto {
   @Prop()
-  id: string;
+  id: DagNodeId;
 
   @Prop([DagEdgeDtoSchema])
   edges: DagEdgeDto[];

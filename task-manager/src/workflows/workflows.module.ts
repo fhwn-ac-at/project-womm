@@ -9,6 +9,7 @@ import { RetryPolicy, RetryPolicySchema } from './entities/retry-policy.entity';
 import { ErrorHandling, ErrorHandlingSchema } from './entities/error-handling.entity';
 import { Dependency, DependencySchema } from './entities/dependency.entity';
 import { CompletionCriteria, CompletionCriteriaSchema } from './entities/completion-criteria.entity';
+import { SchedulerModule } from 'src/scheduler/scheduler.module';
 
 @Module({
   controllers: [WorkflowsController],
@@ -17,7 +18,8 @@ import { CompletionCriteria, CompletionCriteriaSchema } from './entities/complet
     MongooseModule.forFeature([
       { name: CreateWorkflowDefinition.name, schema: WorkflowDefinitionSchema },
     ]),
-    DagModule
+    DagModule,
+    SchedulerModule
   ]
 })
 export class WorkflowsModule { }
