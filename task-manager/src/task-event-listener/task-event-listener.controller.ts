@@ -1,6 +1,7 @@
 import { Controller, Logger } from '@nestjs/common';
 import { EventPattern, MessagePattern } from '@nestjs/microservices';
-import { SchedulerService } from 'src/scheduler/scheduler.service';
+import { SchedulerService } from '../scheduler/scheduler.service';
+import { TaskUpdateEventDto } from './dto/task-update-event.dto';
 
 @Controller('task-event-listener')
 export class TaskEventListenerController {
@@ -17,8 +18,8 @@ export class TaskEventListenerController {
   }
 
   @EventPattern('task_processing_completed')
-  public taskProcessingCompleted() {
-    this.logger.log('Processing completed');
+  public taskProcessingCompleted(event: TaskUpdateEventDto) {
+    this.schedulerService.taskCompleted(event.taskId);
   }
 
   @EventPattern('task_processing_failed')

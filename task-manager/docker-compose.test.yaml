@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:5
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+    volumes:
+      - mongo-data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:4.0.3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: .
+      target: e2e-tests
+    container_name: nestjs-app
+    depends_on:
+      - mongodb
+      - rabbitmq
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./test:/usr/src/app/test
+    environment:
+      MONGO_CONNECTION: mongodb://mongodb:27017/mydb
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      NODE_ENV: test
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:

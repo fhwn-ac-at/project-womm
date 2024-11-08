@@ -17,12 +17,24 @@ async function bootstrap() {
     }
   });
 
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://localhost:5672'],
+      queue: 'artifact_events',
+      queueOptions: {
+        durable: true
+      }
+    }
+  });
+
   app.useGlobalPipes(new ValidationPipe({
     transform: true,
     transformOptions: {
       exposeDefaultValues: true,
     }
   }));
+  app.startAllMicroservices();
   app.listen(3000);
 }
 bootstrap();

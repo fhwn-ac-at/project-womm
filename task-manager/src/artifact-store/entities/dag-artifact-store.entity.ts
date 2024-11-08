@@ -1,16 +1,14 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose from "mongoose";
-import { DAGDto, DAGDtoSchema } from "src/dag/dto/dag.dto";
+import { DAGDto, DAGDtoSchema } from "../../dag/dto/dag.dto";
+import { DAGId } from "../../dag/entities/dag.entity";
 
 
 @Schema()
 export class DagArtifactStore {
 
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: DAGDto.name,
-  })
-  dagId: string;
+  @Prop(String)
+  dagId: DAGId;
 
   @Prop([String])
   publishedArtifacts: string[] = [];

@@ -1,4 +1,4 @@
-import { DAG } from "src/dag/entities/dag.entity";
+import { DAG } from "../dag/entities/dag.entity";
 import { CycleDetectorResponse } from "./cycle-detector-result";
 
 export interface CycleDetectorStrategy {

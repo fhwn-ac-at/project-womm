@@ -1,5 +1,7 @@
 import { DagNode, DagNodeStatus } from "./dag-node.entity";
-import { WorkflowDefinition } from "src/workflows/entities/workflow-definition.entity";
+import { WorkflowDefinition } from "../../workflows/entities/workflow-definition.entity";
+
+export type DAGId = string & { __brand: "dagId" };
 
 export class DAG {
 
@@ -8,6 +10,8 @@ export class DAG {
       Object.assign(this, partial);
     }
   }
+
+  id: DAGId;
 
   nodes: DagNode[];
 

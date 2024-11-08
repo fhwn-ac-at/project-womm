@@ -1,4 +1,4 @@
-import { DagNodeId } from "src/dag/entities/dag-node.entity";
+import { DagNodeId } from "../../dag/entities/dag-node.entity";
 
 
 export class ScheduledTaskDto {

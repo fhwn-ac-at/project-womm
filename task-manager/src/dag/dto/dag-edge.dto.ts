@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { DependencyType } from "src/workflows/entities/dependency.entity";
+import { DependencyType } from "../../workflows/entities/dependency.entity";
 
 @Schema()
 export class DagEdgeDto {

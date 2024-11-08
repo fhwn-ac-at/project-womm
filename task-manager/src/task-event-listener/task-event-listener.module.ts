@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TaskEventListenerController } from './task-event-listener.controller';
-import { SchedulerModule } from 'src/scheduler/scheduler.module';
+import { SchedulerModule } from '../scheduler/scheduler.module';
 
 @Module({
   providers: [],

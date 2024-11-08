@@ -1,8 +1,8 @@
-import { DAG } from "src/dag/entities/dag.entity";
+import { DAG } from "../../../dag/entities/dag.entity";
 import { EdgeRequirementsChecker } from "../edge-requirement-checker";
-import { DagEdge } from "src/dag/entities/dag-edge.entity";
-import { DagNodeStatus } from "src/dag/entities/dag-node.entity";
-import { DependencyType } from "src/workflows/entities/dependency.entity";
+import { DagEdge } from "../../../dag/entities/dag-edge.entity";
+import { DagNodeStatus } from "../../../dag/entities/dag-node.entity";
+import { DependencyType } from "../../../workflows/entities/dependency.entity";
 import { InternalServerErrorException } from "@nestjs/common";
 
 

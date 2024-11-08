@@ -9,6 +9,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { TaskEventListenerModule } from './task-event-listener/task-event-listener.module';
 import { ArtifactStoreModule } from './artifact-store/artifact-store.module';
+import { ArtifactEventListenerModule } from './artifact-event-listener/artifact-event-listener.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -24,9 +26,11 @@ import { ArtifactStoreModule } from './artifact-store/artifact-store.module';
       imports: [ConfigModule],
       inject: [ConfigService]
     }),
+    EventEmitterModule.forRoot(),
     SchedulerModule,
     TaskEventListenerModule,
     ArtifactStoreModule,
+    ArtifactEventListenerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

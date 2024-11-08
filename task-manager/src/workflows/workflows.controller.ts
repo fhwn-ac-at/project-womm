@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Post, UseInterceptors } from '@nestjs/common';
 import { WorkflowsService } from './workflows.service';
 import { WorkflowDefinitionDto } from './dto/workflow-definition.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
@@ -9,6 +9,7 @@ export class WorkflowsController {
 
 
   @Post()
+  @UseInterceptors(ClassSerializerInterceptor)
   async createApi(@Body() workflow: WorkflowDefinitionDto) {
     return await this.workflowsService.create(workflow);
   }

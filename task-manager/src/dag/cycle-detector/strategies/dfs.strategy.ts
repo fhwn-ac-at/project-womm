@@ -1,6 +1,6 @@
-import { DAG } from "src/dag/entities/dag.entity";
+import { DAG } from "../../../dag/entities/dag.entity";
 import { CycleDetectorStrategy } from "./cycle-detector-strategy.interface";
-import { DagNode } from "src/dag/entities/dag-node.entity";
+import { DagNode } from "../../../dag/entities/dag-node.entity";
 import { CycleDetectorResponse } from "./cycle-detector-result";
 
 export class DFSStrategy implements CycleDetectorStrategy {

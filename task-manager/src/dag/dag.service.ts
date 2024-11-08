@@ -1,22 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { WorkflowDefinitionDto } from 'src/workflows/dto/workflow-definition.dto';
-import { DAG } from './entities/dag.entity';
-import { Task } from 'src/workflows/entities/task.entity';
+import { DAG, DAGId } from './entities/dag.entity';
+import { Task } from '../workflows/entities/task.entity';
 import { DagNode, DagNodeId, DagNodeStatus } from './entities/dag-node.entity';
-import { DependencyType } from 'src/workflows/entities/dependency.entity';
+import { DependencyType } from '../workflows/entities/dependency.entity';
 import { DagCreationError } from './errors/dag-creation.error';
 import { DagEdge } from './entities/dag-edge.entity';
 import { DAGDto } from './dto/dag.dto';
 import { DagNodeDto } from './dto/dag-node.dto';
 import { DagEdgeDto } from './dto/dag-edge.dto';
-import { CreateWorkflowDefinition } from 'src/workflows/entities/create-workflow-definition.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
-import { workerData } from 'worker_threads';
-import { expand } from 'rxjs';
-import { WorkflowDefinition } from 'src/workflows/entities/workflow-definition.entity';
+import { WorkflowDefinition } from '../workflows/entities/workflow-definition.entity';
 import { CycleDetectorService } from './cycle-detector/cycle-detector.service';
 import { DagCycleError } from './errors/dag-cycle.error';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class DagService {
@@ -73,7 +70,8 @@ export class DagService {
 
     const dag = new DAG({
       nodes: taskNodes,
-      workflowDefinitionId: definition.id
+      workflowDefinitionId: definition.id,
+      id: uuidv4() as DAGId
     });
 
     const cycleDetectorResponse = await this.cycleDetector.checkForCycle(dag);
@@ -102,6 +100,7 @@ export class DagService {
 
     var dto = new DAGDto();
     dto.nodes = nodes;
+    dto.id = dag.id;
     dto.workflowDefinitionId = dag.workflowDefinitionId;
     return dto;
   }
@@ -130,6 +129,7 @@ export class DagService {
 
     const dag = new DAG();
     dag.nodes = nodes;
+    dag.id = dto.id;
     dag.workflowDefinitionId = dto.workflowDefinitionId;
     return dag;
   }
@@ -141,7 +141,7 @@ export class DagService {
     await dagModel.save({ session });
   }
 
-  public async loadWithNodeId(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+  public async getDagWithNodeId(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
     // TODO: Error handling
     const dagDto = await this.dagDtoModel.findOne({
       nodes: {
@@ -149,6 +149,15 @@ export class DagService {
           id: nodeId
         }
       },
+      session
+    });
+
+    return this.convertDtoToDAG(dagDto);
+  }
+
+  public async getDagById(dagId: DAGId, session?: ClientSession): Promise<DAG> {
+    const dagDto = await this.dagDtoModel.findOne({
+      id: dagId,
       session
     });
 
@@ -180,7 +189,7 @@ export class DagService {
     session.startTransaction();
 
     try {
-      const dag = await this.loadWithNodeId(nodeId, session);
+      const dag = await this.getDagWithNodeId(nodeId, session);
       const node = dag.nodes.find(n => n.id === nodeId);
       node.status = status;
       
