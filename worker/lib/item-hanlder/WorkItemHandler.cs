@@ -7,7 +7,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class WorkItemHandler : IWorkItemVisitor<IWorkItemResult>
+    public class WorkItemHandler : IWorkItemVisitor<IWorkItemResult>
     {
         public IWorkItemResult Visit(Split item)
         {

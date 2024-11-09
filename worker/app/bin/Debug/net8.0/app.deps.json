@@ -17,6 +17,25 @@
           "app.dll": {}
         }
       },
+      "AWSSDK.Core/3.7.400.47": {
+        "runtime": {
+          "lib/net8.0/AWSSDK.Core.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.7.400.47"
+          }
+        }
+      },
+      "AWSSDK.S3/3.7.405.11": {
+        "dependencies": {
+          "AWSSDK.Core": "3.7.400.47"
+        },
+        "runtime": {
+          "lib/net8.0/AWSSDK.S3.dll": {
+            "assemblyVersion": "3.3.0.0",
+            "fileVersion": "3.7.405.11"
+          }
+        }
+      },
       "JetBrains.Annotations/2022.3.1": {
         "runtime": {
           "lib/netstandard2.0/JetBrains.Annotations.dll": {
@@ -468,6 +487,7 @@
       "System.Threading.Channels/7.0.0": {},
       "lib/1.0.0": {
         "dependencies": {
+          "AWSSDK.S3": "3.7.405.11",
           "Metalama.Extensions.DependencyInjection": "2024.2.29",
           "Metalama.Framework": "2024.2.29",
           "Microsoft.Extensions.Logging.Abstractions": "8.0.2",
@@ -485,6 +505,20 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "AWSSDK.Core/3.7.400.47": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1Twrreb+XofwuK5RfFbhPmiXmzYGmyZSQLPnHErHPSWKjLjOf5hLNOYvSJFa4icK6bWjVSHQspLK2OmBukU6oQ==",
+      "path": "awssdk.core/3.7.400.47",
+      "hashPath": "awssdk.core.3.7.400.47.nupkg.sha512"
+    },
+    "AWSSDK.S3/3.7.405.11": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-iDllwqtRIPVDEBDtRM60/qxWID8srJYUQsg+4IVTBD6TFsj5tdHlf5Be8RgWQJnacxmGsyJEW/xcIXYGBSbUVg==",
+      "path": "awssdk.s3/3.7.405.11",
+      "hashPath": "awssdk.s3.3.7.405.11.nupkg.sha512"
     },
     "JetBrains.Annotations/2022.3.1": {
       "type": "package",

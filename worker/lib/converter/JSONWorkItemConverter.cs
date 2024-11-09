@@ -8,9 +8,16 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class JSONToWorkItemConverter : IConverter<string, IWorkItem>
+    public class JSONWorkItemConverter : 
+        IConverter<string, IWorkItem>,
+        IConverter<IWorkItemResult, string>
     {
         public IWorkItem Convert(string input)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Convert(IWorkItemResult input)
         {
             throw new NotImplementedException();
         }

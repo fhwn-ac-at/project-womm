@@ -123,6 +123,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "AWSSDK.S3": {
+              "target": "Package",
+              "version": "[3.7.405.11, )"
+            },
             "Metalama.Extensions.DependencyInjection": {
               "target": "Package",
               "version": "[2024.2.29, )"

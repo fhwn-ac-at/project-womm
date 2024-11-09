@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "p1MYPkR+kb8lpIai7RQ0lvEBFXSx+MqMn6xiyAT2KE5Eqe+WOtpjT9oqzRugSioI6rMJH5WeElXnD7EaqwfiLw==",
+  "dgSpecHash": "fC24ZOarV7bEq2r8pB7qsWZD1ln59tfJJQV4xZjZKsm4ess09nDOQyB0mvOWECXlYMDEd5skNYeG1Xq6Kk6ZiQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\app.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\micha\\.nuget\\packages\\awssdk.core\\3.7.400.47\\awssdk.core.3.7.400.47.nupkg.sha512",
+    "C:\\Users\\micha\\.nuget\\packages\\awssdk.s3\\3.7.405.11\\awssdk.s3.3.7.405.11.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\jetbrains.annotations\\2022.3.1\\jetbrains.annotations.2022.3.1.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\metalama.compiler\\2024.2.16\\metalama.compiler.2024.2.16.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\metalama.extensions.dependencyinjection\\2024.2.29\\metalama.extensions.dependencyinjection.2024.2.29.nupkg.sha512",

@@ -54,3 +54,5 @@ C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug
 C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\Metalama.Framework.RunTime.dll
 C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\JetBrains.Annotations.dll
 C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\Metalama.Extensions.DependencyInjection.dll
+C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\AWSSDK.Core.dll
+C:\Users\micha\FH\5_Semester\Verteilte Systeme\project-womm\worker\app\bin\Debug\net8.0\AWSSDK.S3.dll

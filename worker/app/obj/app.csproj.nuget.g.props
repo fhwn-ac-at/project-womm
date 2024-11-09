@@ -19,5 +19,7 @@
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <PkgMetalama_Framework Condition=" '$(PkgMetalama_Framework)' == '' ">C:\Users\micha\.nuget\packages\metalama.framework\2024.2.29</PkgMetalama_Framework>
+    <PkgAWSSDK_Core Condition=" '$(PkgAWSSDK_Core)' == '' ">C:\Users\micha\.nuget\packages\awssdk.core\3.7.400.47</PkgAWSSDK_Core>
+    <PkgAWSSDK_S3 Condition=" '$(PkgAWSSDK_S3)' == '' ">C:\Users\micha\.nuget\packages\awssdk.s3\3.7.405.11</PkgAWSSDK_S3>
   </PropertyGroup>
 </Project>
