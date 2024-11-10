@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class SuccessfulUpload : IWorkItemResult
+    public class SuccessfulUpload : IWorkItemResult
     {
         private string _fileKey;
 

@@ -31,10 +31,7 @@
 
         public IWorkItemResult Visit(Split item)
         {
-
-            string s = "C:\\Users\\micha\\Desktop\\sample-30s.mp4";
-
-            return null;
+            throw new NotImplementedException();
         }
 
         public IWorkItemResult Visit(ConvertFormat command)
@@ -45,7 +42,7 @@
             string fileName = Guid.NewGuid().ToString() + command.GoalFormat;
             var resultFile = Path.Combine(tempFolder, fileName);
 
-            FFmpegRunner.RunFFmpeg($"-i {downloadedFile} {resultFile}");
+            FFmpegRunner.RunFFmpeg($"-i \"{downloadedFile}\" \"{resultFile}\"");
 
             _storage.Upload(resultFile, fileName);
 
@@ -56,7 +53,6 @@
 
         private string RetriveFileIntoTempFolder()
         {
-            
             throw new NotImplementedException();
         }
 

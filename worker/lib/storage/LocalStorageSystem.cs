@@ -6,17 +6,15 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class LocalStorageSystem : IStorageSystem
+    public class LocalStorageSystem(string rootFolder) : IStorageSystem
     {
-        private readonly string _folder = "C:\\Users\\micha\\Desktop\\local-storage";
-
         public void Dispose()
         {
         }
 
         public void Download(string localPath, string keyName)
         {
-            string item = Path.Combine(_folder, keyName);
+            string item = Path.Combine(rootFolder, keyName);
 
             string newItem = Path.Combine(localPath, keyName);
             File.Copy(item, newItem);
@@ -24,8 +22,8 @@
 
         public void Upload(string localPath, string keyName)
         {
-            string newPath = Path.Combine(_folder, keyName);
-            //File.Create(newPath);
+            string newPath = Path.Combine(rootFolder, keyName);
+            
             File.Copy(localPath, newPath, true);
         }
     }

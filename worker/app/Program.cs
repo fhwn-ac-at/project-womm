@@ -30,8 +30,7 @@
                 services.AddTransient<Driver>();
                 services.AddTransient<IWorkItemConverter, JSONWorkItemConverter>();
                 services.AddTransient<IWorkItemVisitor<IWorkItemResult>, WorkItemHandler>();
-                //services.AddTransient<IStorageSystem, AmazonS3Storage>();
-                services.AddTransient<IStorageSystem, LocalStorageSystem>();
+                services.AddTransient<IStorageSystem, AmazonS3Storage>();
 
             }).Build();
 

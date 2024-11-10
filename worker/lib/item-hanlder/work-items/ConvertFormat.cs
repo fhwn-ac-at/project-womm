@@ -8,9 +8,25 @@
 
     public class ConvertFormat : IWorkItem
     {
-        public string KeyName { get; set; }
+        public ConvertFormat(string keyName, string goalFormat)
+        {
+            if (string.IsNullOrEmpty(keyName))
+            {
+                throw new ArgumentException($"'{nameof(keyName)}' cannot be null or empty.", nameof(keyName));
+            }
 
-        public string GoalFormat { get; set; }
+            if (string.IsNullOrEmpty(goalFormat))
+            {
+                throw new ArgumentException($"'{nameof(goalFormat)}' cannot be null or empty.", nameof(goalFormat));
+            }
+
+            this.KeyName = keyName;
+            this.GoalFormat = goalFormat;
+        }
+
+        public string KeyName { get; private set; }
+
+        public string GoalFormat { get; private set; }
 
         public T Accept<T>(IWorkItemVisitor<T> visitor)
         {

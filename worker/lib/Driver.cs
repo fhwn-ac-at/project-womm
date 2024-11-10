@@ -49,24 +49,15 @@
 
         public void Run()
         {
-            // testing
-            var testItem = new ConvertFormat();
-            testItem.KeyName = "sample-30s.mp4";
-            testItem.GoalFormat = ".avi";
-            
-            testItem.Accept(_workItemHandler);
+            _resultChannel = DeclareQueueChannel(_options.Results);
+            _taskChannel = DeclareQueueChannel(_options.Tasks);
 
+            var consumer = new EventingBasicConsumer(_taskChannel);
+            consumer.Received += NewTaskAddedCallback;
 
-
-            //_resultChannel = DeclareQueueChannel(_options.Results);
-            //_taskChannel = DeclareQueueChannel(_options.Tasks);
-
-            //var consumer = new EventingBasicConsumer(_taskChannel);
-            //consumer.Received += NewTaskAddedCallback;
-
-            //_taskChannel.BasicConsume(queue: _options.Tasks.QueueName,
-            //                     autoAck: true,
-            //                     consumer: consumer);
+            _taskChannel.BasicConsume(queue: _options.Tasks.QueueName,
+                                 autoAck: true,
+                                 consumer: consumer);
         }
 
         public void Dispose()
