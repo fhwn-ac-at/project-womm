@@ -9,21 +9,19 @@
     using Microsoft.Extensions.Options;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
 
     [LoggingClass]
-    public class AmazonS3Storage : IRemoteStorage, IDisposable
+    public class AmazonS3Storage : IStorageSystem
     {
         private readonly StorageOptions _options;
 
         private readonly IAmazonS3 _client;
 
-        // TODO: 
-        // -- Implement Disposeable
-        // -- proper exception handling on S3 operations
-        // -- make download and upload maybe async
+        private bool _disposed;
 
         public AmazonS3Storage(IOptions<StorageOptions> options)
         {
@@ -31,6 +29,8 @@
             _options = options.Value;
 
             AmazonS3Config config = new();
+            config.RegionEndpoint = Amazon.RegionEndpoint.EUCentral1;
+
             AWSCredentials credentials = new BasicAWSCredentials(
                 accessKey: _options.AccessKey,
                 secretKey: _options.SecreteKey);
@@ -53,7 +53,14 @@
                 FilePath = localPath
             };
 
-            transferUtility.Upload(request);
+            try
+            {
+                transferUtility.Upload(request);
+            }
+            catch (AmazonS3Exception e)
+            {
+                throw new InvalidOperationException(e.Message);
+            }
         }
 
         public void Upload(string localPath, string keyName)
@@ -71,12 +78,36 @@
                 FilePath = localPath
             };
 
-            transferUtility.Download(request);
+            try
+            {
+                transferUtility.Download(request);
+            }
+            catch (AmazonS3Exception e)
+            {
+                throw new InvalidOperationException(e.Message);
+            }
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        { 
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                _client.Dispose();
+                
+            }
+
+            _disposed = true;
         }
     }
 }

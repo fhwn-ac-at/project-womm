@@ -24,11 +24,14 @@
                 services.AddOptions<StorageOptions>()
                     .Bind(config.GetRequiredSection("Storage"));
                 
+                services.AddOptions<WorkItemHandlerOptions>()
+                    .Bind(config.GetRequiredSection("Operation"));
+                
                 services.AddTransient<Driver>();
-                services.AddSingleton<IConverter<string, IWorkItem>, JSONWorkItemConverter>();
-                services.AddSingleton<IConverter<IWorkItemResult, string>, JSONWorkItemConverter>();
+                services.AddTransient<IWorkItemConverter, JSONWorkItemConverter>();
                 services.AddTransient<IWorkItemVisitor<IWorkItemResult>, WorkItemHandler>();
-                services.AddTransient<IRemoteStorage, AmazonS3Storage>();
+                //services.AddTransient<IStorageSystem, AmazonS3Storage>();
+                services.AddTransient<IStorageSystem, LocalStorageSystem>();
 
             }).Build();
 

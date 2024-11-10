@@ -8,9 +8,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class JSONWorkItemConverter : 
-        IConverter<string, IWorkItem>,
-        IConverter<IWorkItemResult, string>
+    public class JSONWorkItemConverter : IWorkItemConverter
     {
         public IWorkItem Convert(string input)
         {

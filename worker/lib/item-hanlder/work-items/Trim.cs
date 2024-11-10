@@ -6,12 +6,8 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class Split : IWorkItem
+    public class Trim : IWorkItem
     {
-        public string InputPath { get; set; }
-
-        public int Pieces { get; set; }
-
         public T Accept<T>(IWorkItemVisitor<T> visitor)
         {
             return visitor.Visit(this);

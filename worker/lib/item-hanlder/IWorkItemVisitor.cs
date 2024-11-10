@@ -10,5 +10,9 @@
     public interface IWorkItemVisitor<T>
     {
         public T Visit(Split item);
+
+        public T Visit(ConvertFormat convertFormat);
+        
+        public T Visit(Trim trim);
     }
 }

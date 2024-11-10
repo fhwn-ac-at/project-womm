@@ -3,8 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\storage\\amazons3storage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\storage\\amazons3storage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\item-hanlder\\workitemhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\item-hanlder\\workitemhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\driver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\driver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|solutionrelative:app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\storage\\localstoragesystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\storage\\localstoragesystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,19 +26,58 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AmazonS3Storage.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\storage\\AmazonS3Storage.cs",
-              "RelativeDocumentMoniker": "lib\\storage\\AmazonS3Storage.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\storage\\AmazonS3Storage.cs",
-              "RelativeToolTip": "lib\\storage\\AmazonS3Storage.cs",
-              "ViewState": "AQIAACAAAAAAAAAAAAAewC0AAAANAAAA",
+              "DocumentIndex": 3,
+              "Title": "LocalStorageSystem.cs",
+              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\storage\\LocalStorageSystem.cs",
+              "RelativeDocumentMoniker": "lib\\storage\\LocalStorageSystem.cs",
+              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\storage\\LocalStorageSystem.cs",
+              "RelativeToolTip": "lib\\storage\\LocalStorageSystem.cs",
+              "ViewState": "AQIAAAoAAAAAAAAAAAAUwBsAAAAOAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-09T15:14:45.962Z",
+              "WhenOpened": "2024-11-10T13:47:11.446Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\Program.cs",
+              "RelativeDocumentMoniker": "app\\Program.cs",
+              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\Program.cs",
+              "RelativeToolTip": "app\\Program.cs",
+              "ViewState": "AQIAAAwAAAAAAAAAAAAAACEAAABIAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-10T13:45:31.537Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Driver.cs",
+              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\Driver.cs",
+              "RelativeDocumentMoniker": "lib\\Driver.cs",
+              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\Driver.cs",
+              "RelativeToolTip": "lib\\Driver.cs",
+              "ViewState": "AQIAACYAAAAAAAAAAAAQwDcAAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-10T13:34:22.822Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "WorkItemHandler.cs",
+              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\item-hanlder\\WorkItemHandler.cs",
+              "RelativeDocumentMoniker": "lib\\item-hanlder\\WorkItemHandler.cs",
+              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\item-hanlder\\WorkItemHandler.cs",
+              "RelativeToolTip": "lib\\item-hanlder\\WorkItemHandler.cs",
+              "ViewState": "AQIAACcAAAAAAAAAAAAIwDEAAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-10T11:39:50.45Z",
               "EditorCaption": ""
             }
           ]

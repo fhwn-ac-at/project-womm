@@ -14,5 +14,8 @@
 
         [Required]
         public QueueServerOptions Results { get; set; }
+
+        [Required]
+        public string OperationalPath { get; set; } 
     }
 }

@@ -1,13 +1,16 @@
 ﻿namespace lib.parser
 {
+    using lib.item_hanlder;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
 
-    public interface IConverter<Input, Output>
+    public interface IWorkItemConverter
     {
-        Output Convert(Input input);
+        IWorkItem Convert(string item);
+
+        string Convert(IWorkItemResult result);
     }
 }

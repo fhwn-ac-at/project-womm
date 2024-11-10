@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public interface IRemoteStorage
+    public interface IStorageSystem : IDisposable
     {
         public void Upload(string localPath, string keyName);
 

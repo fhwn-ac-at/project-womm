@@ -6,11 +6,11 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class Split : IWorkItem
+    public class ConvertFormat : IWorkItem
     {
-        public string InputPath { get; set; }
+        public string KeyName { get; set; }
 
-        public int Pieces { get; set; }
+        public string GoalFormat { get; set; }
 
         public T Accept<T>(IWorkItemVisitor<T> visitor)
         {

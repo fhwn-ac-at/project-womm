@@ -1,9 +1,12 @@
 ﻿namespace lib
 {
     using lib.aspects.logging;
+    using lib.commands;
     using lib.item_hanlder;
+    using lib.item_hanlder.work_items;
     using lib.parser;
     using lib.settings;
+    using lib.storage;
     using Microsoft.Extensions.Options;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
@@ -13,48 +16,78 @@
     using System.Threading.Tasks;
 
     [LoggingClass]
-    public class Driver
+    public class Driver : IDisposable
     {
         private readonly DriverOptions _options;
 
-        private readonly IConverter<string, IWorkItem> _workItemConverter;
-
-        private readonly IConverter<IWorkItemResult, string> _resultConverter;
+        private readonly IWorkItemConverter _converter;
 
         private readonly IWorkItemVisitor<IWorkItemResult> _workItemHandler;
 
         private IModel _taskChannel;
 
         private IModel _resultChannel;
+        private bool _disposed;
+        private readonly IStorageSystem _storage;
 
         public Driver(
             IOptions<DriverOptions> options,
-            IConverter<string, IWorkItem> workItemConverter,
-            IConverter<IWorkItemResult, string> resultConverter,
-            IWorkItemVisitor<IWorkItemResult> workItemHandler)
+            IWorkItemConverter converter,
+            IWorkItemVisitor<IWorkItemResult> workItemHandler,
+            IStorageSystem remoteStorage)
         {
-            ArgumentNullException.ThrowIfNull(resultConverter);
-            ArgumentNullException.ThrowIfNull(workItemConverter);
+            ArgumentNullException.ThrowIfNull(converter);
             ArgumentNullException.ThrowIfNull(workItemHandler);
             ArgumentNullException.ThrowIfNull(options.Value);
-            
+            ArgumentNullException.ThrowIfNull(remoteStorage);
+
             _options = options.Value;
-            _workItemConverter = workItemConverter;
-            _resultConverter = resultConverter;
+            _converter = converter;
             _workItemHandler = workItemHandler;
+            _storage = remoteStorage;
         }
 
         public void Run()
         {
-            _resultChannel = DeclareQueueChannel(_options.Results);
-            _taskChannel = DeclareQueueChannel(_options.Tasks);
+            // testing
+            var testItem = new ConvertFormat();
+            testItem.KeyName = "sample-30s.mp4";
+            testItem.GoalFormat = ".avi";
+            
+            testItem.Accept(_workItemHandler);
 
-            var consumer = new EventingBasicConsumer(_taskChannel);
-            consumer.Received += NewTaskAddedCallback;
 
-            _taskChannel.BasicConsume(queue: _options.Tasks.QueueName,
-                                 autoAck: true,
-                                 consumer: consumer);
+
+            //_resultChannel = DeclareQueueChannel(_options.Results);
+            //_taskChannel = DeclareQueueChannel(_options.Tasks);
+
+            //var consumer = new EventingBasicConsumer(_taskChannel);
+            //consumer.Received += NewTaskAddedCallback;
+
+            //_taskChannel.BasicConsume(queue: _options.Tasks.QueueName,
+            //                     autoAck: true,
+            //                     consumer: consumer);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                _storage.Dispose();
+            }
+
+            _disposed = true;
         }
 
         private void NewTaskAddedCallback(object? sender, BasicDeliverEventArgs e)
@@ -62,7 +95,7 @@
             var body = e.Body.ToArray();
             string parsedBody = Encoding.UTF8.GetString(body);
 
-            var newItem = _workItemConverter.Convert(parsedBody);
+            var newItem = _converter.Convert(parsedBody);
             var result = newItem.Accept(_workItemHandler);
             PublishResult(result);
         }
@@ -84,7 +117,7 @@
 
         private void PublishResult(IWorkItemResult result)
         {
-            var convertedResult = _resultConverter.Convert(result);
+            var convertedResult = _converter.Convert(result);
 
             var body = Encoding.UTF8.GetBytes(convertedResult);
 
