@@ -4,6 +4,11 @@ import { IsBoolean, IsNumber, Max, Min } from "class-validator";
 
 @Schema()
 export class RetryPolicy {
+
+  constructor(partial?: Partial<RetryPolicy>) {
+    Object.assign(this, partial);
+  }
+
   @IsNumber()
   @Min(0)
   @Max(100)

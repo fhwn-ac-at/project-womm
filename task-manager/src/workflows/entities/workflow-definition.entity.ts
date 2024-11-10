@@ -1,6 +1,5 @@
 import { CreateWorkflowDefinition } from "./create-workflow-definition.entity";
 
-
 export class WorkflowDefinition extends CreateWorkflowDefinition {
   id: string;
 

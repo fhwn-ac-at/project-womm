@@ -7,6 +7,10 @@ import { DAGId } from "../../dag/entities/dag.entity";
 @Schema()
 export class DagArtifactStore {
 
+  constructor(partial?: Partial<DagArtifactStore>) {
+    Object.assign(this, partial);
+  }
+
   @Prop(String)
   dagId: DAGId;
 

@@ -9,6 +9,11 @@ export enum CompletionCriteriaType {
 
 @Schema()
 export class CompletionCriteria {
+
+  constructor(partial?: Partial<CompletionCriteria>) {
+    Object.assign(this, partial);
+  }
+
   @IsString()
   @IsEnum(CompletionCriteriaType)
   @Prop({

@@ -11,6 +11,7 @@ import { TaskEventListenerModule } from './task-event-listener/task-event-listen
 import { ArtifactStoreModule } from './artifact-store/artifact-store.module';
 import { ArtifactEventListenerModule } from './artifact-event-listener/artifact-event-listener.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { FunctionExecutorModule } from './function-executor/function-executor.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     TaskEventListenerModule,
     ArtifactStoreModule,
     ArtifactEventListenerModule,
+    FunctionExecutorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

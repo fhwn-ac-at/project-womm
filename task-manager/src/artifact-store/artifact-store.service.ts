@@ -16,11 +16,13 @@ export class ArtifactStoreService {
     @InjectModel(DagArtifactStore.name)
     private readonly dagDtoModel: Model<DagArtifactStore>,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   public async save(artifactStore: DagArtifactStore, session?: ClientSession) {
     const artifactModel = new this.dagDtoModel(artifactStore);
-    await artifactModel.save();
+    await artifactModel.save({
+      session
+    });
     return artifactStore;
   }
 
@@ -39,7 +41,7 @@ export class ArtifactStoreService {
 
       await this.save(store, session);
 
-      await this.eventEmitter.emitAsync('artifact.added', new ArtifactAddedEvent({
+      this.eventEmitter.emit('artifact.added', new ArtifactAddedEvent({
         artifactId,
         dagId,
         store
@@ -55,7 +57,14 @@ export class ArtifactStoreService {
   }
 
   public async findForDag(dagId: DAGId, session?: ClientSession): Promise<DagArtifactStore> {
-    return this.dagDtoModel.findOne({ dagId });
+    const res = await this.dagDtoModel.findOne({ dagId }, null, { session });
+
+    if (res) return res;
+
+    return new DagArtifactStore({
+      dagId,
+      publishedArtifacts: []
+    });
   }
 
 }

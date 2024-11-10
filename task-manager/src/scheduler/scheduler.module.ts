@@ -4,6 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DagModule } from '../dag/dag.module';
 import { ArtifactStoreModule } from '../artifact-store/artifact-store.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { FunctionExecutorModule } from '../function-executor/function-executor.module';
 
 @Module({
   providers: [SchedulerService],
@@ -25,7 +26,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ]),
     DagModule,
     ArtifactStoreModule,
+    FunctionExecutorModule,
   ],
   exports: [SchedulerService],
 })
-export class SchedulerModule {}
+export class SchedulerModule { }

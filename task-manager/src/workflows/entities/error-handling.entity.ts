@@ -10,6 +10,11 @@ export enum ErrorHandlingAction {
 
 @Schema()
 export class ErrorHandling {
+
+  constructor(partial?: Partial<ErrorHandling>) {
+    Object.assign(this, partial);
+  }
+
   @IsEnum(ErrorHandlingAction)
   @Prop({
     type: String,

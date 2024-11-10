@@ -17,9 +17,7 @@ export type DagNodeId = string & { __brand: 'dag-node-id' };
 export class DagNode {
 
   public constructor(partial?: Partial<DagNode>) {
-    if (partial) {
-      Object.assign(this, partial);
-    }
+    Object.assign(this, partial);
   }
 
   id: DagNodeId;
@@ -29,6 +27,14 @@ export class DagNode {
   status: DagNodeStatus = DagNodeStatus.Pending;
 
   task: Task;
+
+  get incommingEdges(): DagEdge[] {
+    return this.edges.filter(edge => edge.to.id === this.id);
+  }
+
+  get outgoingEdges(): DagEdge[] {
+    return this.edges.filter(edge => edge.from.id === this.id);
+  }
 }
 
 export const DagNodeSchema = SchemaFactory.createForClass(DagNode);

@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DAG, DAGId } from './entities/dag.entity';
 import { Task } from '../workflows/entities/task.entity';
 import { DagNode, DagNodeId, DagNodeStatus } from './entities/dag-node.entity';
-import { DependencyType } from '../workflows/entities/dependency.entity';
+import { Dependency, DependencyType } from '../workflows/entities/dependency.entity';
 import { DagCreationError } from './errors/dag-creation.error';
 import { DagEdge } from './entities/dag-edge.entity';
 import { DAGDto } from './dto/dag.dto';
@@ -14,11 +14,23 @@ import { WorkflowDefinition } from '../workflows/entities/workflow-definition.en
 import { CycleDetectorService } from './cycle-detector/cycle-detector.service';
 import { DagCycleError } from './errors/dag-cycle.error';
 import { v4 as uuidv4 } from 'uuid';
+import { CompletionCriteria } from '../workflows/entities/completion-criteria.entity';
+import { ErrorHandling } from '../workflows/entities/error-handling.entity';
+import { RetryPolicy } from '../workflows/entities/retry-policy.entity';
+import { stat } from 'fs';
 
 @Injectable()
 export class DagService {
 
   private readonly logger = new Logger(DagService.name);
+
+  private readonly proceedingStatuses: Map<DagNodeStatus, DagNodeStatus[]> = new Map([
+    [DagNodeStatus.Scheduled, [DagNodeStatus.Pending]],
+    [DagNodeStatus.Running, [DagNodeStatus.Scheduled]],
+    [DagNodeStatus.Succeeded, [DagNodeStatus.Running]],
+    [DagNodeStatus.Failed, [DagNodeStatus.Running]],
+    [DagNodeStatus.Canceled, [DagNodeStatus.Pending]],
+  ]);
 
   public constructor(
     @InjectModel(DAGDto.name)
@@ -87,6 +99,7 @@ export class DagService {
       var dto = new DagNodeDto();
       dto.id = n.id;
       dto.task = n.task;
+      dto.status = n.status;
       dto.edges = n.edges.map(e => {
         const edto = new DagEdgeDto();
         edto.artifactId = e.artifactId;
@@ -110,7 +123,8 @@ export class DagService {
       const node = new DagNode();
       node.edges = []
       node.id = nd.id;
-      node.task = nd.task
+      node.task = this.convertTaskToTaskDto(nd.task);
+      node.status = nd.status;
       return node;
     });
     const nodeMap: Map<string, DagNode> = new Map(nodes.map(n => [n.id, n]));
@@ -134,11 +148,43 @@ export class DagService {
     return dag;
   }
 
+  public convertTaskToTaskDto(task: Task): Task {
+    return new Task({
+      name: task.name,
+      parameters: task.parameters,
+      results: task.results,
+      dependencies: task.dependencies.map(d => new Dependency({
+        id: d.id,
+        type: d.type
+      })),
+      completionCriteria: task.completionCriteria.map(c => new CompletionCriteria({
+        id: c.id,
+        type: c.type
+      })),
+      onError: new ErrorHandling({
+        action: task.onError.action,
+      }),
+      priority: task.priority,
+      retryPolicy: new RetryPolicy({
+        exponentialBackoff: task.retryPolicy.exponentialBackoff,
+        maxRetryCount: task.retryPolicy.maxRetryCount,
+        retryDelay: task.retryPolicy.retryDelay,
+      }),
+      timeout: task.timeout,
+    });
+  }
+
   public async save(dag: DAG, session?: ClientSession) {
     const dagDto = this.converDAGToDto(dag);
     const dagModel = new this.dagDtoModel(dagDto);
 
     await dagModel.save({ session });
+  }
+
+  public async startTransaction(): Promise<ClientSession> {
+    const session = await this.dagDtoModel.startSession();
+    session.startTransaction();
+    return session;
   }
 
   public async getDagWithNodeId(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
@@ -149,10 +195,19 @@ export class DagService {
           id: nodeId
         }
       },
-      session
-    });
+    }, undefined, { session });
+
+    if (!dagDto) {
+      throw new NotFoundException(`DAG containing a node of id ${nodeId} not found.`);
+    }
 
     return this.convertDtoToDAG(dagDto);
+  }
+
+  public async findAll(session?: ClientSession): Promise<DAG[]> {
+    const dagDtos = await this.dagDtoModel.find({}, undefined, { session });
+
+    return dagDtos.map(d => this.convertDtoToDAG(d));
   }
 
   public async getDagById(dagId: DAGId, session?: ClientSession): Promise<DAG> {
@@ -164,45 +219,59 @@ export class DagService {
     return this.convertDtoToDAG(dagDto);
   }
 
-  public async markNodeAsSucceeded(nodeId: DagNodeId): Promise<DAG> {
-    return this.setNodeStatus(nodeId, DagNodeStatus.Succeeded);
+  public async getDagOfWorkflow(workflow: WorkflowDefinition, session?: ClientSession): Promise<DAG> {
+    const dagDto = await this.dagDtoModel.findOne({
+      workflowDefinitionId: workflow.id,
+      session
+    });
+
+    return this.convertDtoToDAG(dagDto);
   }
 
-  public async markNodeAsFailed(nodeId: DagNodeId): Promise<DAG> {
-    return this.setNodeStatus(nodeId, DagNodeStatus.Failed);
+  public async markNodeAsSucceeded(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Succeeded, session);
   }
 
-  public async markNodeAsRunning(nodeId: DagNodeId): Promise<DAG> {
-    return this.setNodeStatus(nodeId, DagNodeStatus.Running);
+  public async markNodeAsFailed(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Failed, session);
   }
 
-  public async markNodeAsScheduled(nodeId: DagNodeId): Promise<DAG> {
-    return this.setNodeStatus(nodeId, DagNodeStatus.Scheduled);
+  public async markNodeAsRunning(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Running, session);
   }
 
-  public async markNodeAsCanceled(nodeId: DagNodeId): Promise<DAG> {
-    return this.setNodeStatus(nodeId, DagNodeStatus.Canceled);
+  public async markNodeAsCanceled(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Canceled, session);
   }
 
-  public async setNodeStatus(nodeId: DagNodeId, status: DagNodeStatus): Promise<DAG> {
-    const session = await this.dagDtoModel.startSession();
-    session.startTransaction();
+  public async markNodeAsScheduled(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.Scheduled, session);
+  }
 
-    try {
-      const dag = await this.getDagWithNodeId(nodeId, session);
-      const node = dag.nodes.find(n => n.id === nodeId);
-      node.status = status;
-      
-      await this.save(dag, session);
+  public async setNodeStatus(nodeId: DagNodeId, status: DagNodeStatus, session?: ClientSession): Promise<DAG> {
+    const proceedingStatuses = this.proceedingStatuses.get(status);
+    this.logger.verbose(`Marking node as ${status}. NodeId: ${nodeId} if in status: ${proceedingStatuses}`);
+    const dag = await this.dagDtoModel.findOneAndUpdate({
+      nodes: {
+        $elemMatch: {
+          id: nodeId,
+          status: {
+            $in: proceedingStatuses
+          }
+        }
+      },
+    }, {
+      $set: {
+        "nodes.$.status": status
+      }
+    }, { session, new: true });
 
-      return dag;
-    } catch (error) {
-      this.logger.error(`Failed to mark node as succeeded. NodeId: ${nodeId}`);
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      session.endSession();
+    if (!dag) {
+      throw new NotFoundException(`Node with id ${nodeId} not found or in an invalid state to be marked as ${status}`);
     }
+
+    this.logger.debug(`Marked node as ${status}. NodeId: ${nodeId}`);
+    return this.convertDtoToDAG(dag);
   }
 
   private convertTaskToDagNode(task: Task, nodeId: DagNodeId): DagNode {

@@ -8,6 +8,11 @@ export enum DependencyType {
 
 @Schema()
 export class Dependency {
+
+  constructor(partial?: Partial<Dependency>) {
+    Object.assign(this, partial);
+  }
+
   @IsEnum(DependencyType)
   @Prop({
     type: String,

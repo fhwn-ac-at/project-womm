@@ -9,6 +9,11 @@ import mongoose from "mongoose";
 
 @Schema()
 export class Task {
+
+  public constructor(partial?: Partial<Task>) {
+    Object.assign(this, partial);
+  }
+
   @IsString()
   @MaxLength(64)
   @MinLength(2)
