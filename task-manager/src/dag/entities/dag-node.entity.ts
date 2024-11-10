@@ -28,6 +28,8 @@ export class DagNode {
 
   task: Task;
 
+  retryCount: number = 0;
+
   get incommingEdges(): DagEdge[] {
     return this.edges.filter(edge => edge.to.id === this.id);
   }

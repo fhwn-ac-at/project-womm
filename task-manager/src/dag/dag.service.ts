@@ -25,10 +25,11 @@ export class DagService {
   private readonly logger = new Logger(DagService.name);
 
   private readonly proceedingStatuses: Map<DagNodeStatus, DagNodeStatus[]> = new Map([
-    [DagNodeStatus.Scheduled, [DagNodeStatus.Pending]],
+    [DagNodeStatus.Scheduled, [DagNodeStatus.Pending, DagNodeStatus.Failed]],
     [DagNodeStatus.Running, [DagNodeStatus.Scheduled]],
     [DagNodeStatus.Succeeded, [DagNodeStatus.Running]],
-    [DagNodeStatus.Failed, [DagNodeStatus.Running]],
+    // is allowed to go from canceled. since we first cancel all outstanding tassk on error and then set the error ont the right node
+    [DagNodeStatus.Failed, [DagNodeStatus.Running, DagNodeStatus.Canceled]],
     [DagNodeStatus.Canceled, [DagNodeStatus.Pending]],
   ]);
 
@@ -100,6 +101,7 @@ export class DagService {
       dto.id = n.id;
       dto.task = n.task;
       dto.status = n.status;
+      dto.retryCount = n.retryCount;
       dto.edges = n.edges.map(e => {
         const edto = new DagEdgeDto();
         edto.artifactId = e.artifactId;
@@ -125,6 +127,7 @@ export class DagService {
       node.id = nd.id;
       node.task = this.convertTaskToTaskDto(nd.task);
       node.status = nd.status;
+      node.retryCount = nd.retryCount;
       return node;
     });
     const nodeMap: Map<string, DagNode> = new Map(nodes.map(n => [n.id, n]));
@@ -188,7 +191,6 @@ export class DagService {
   }
 
   public async getDagWithNodeId(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
-    // TODO: Error handling
     const dagDto = await this.dagDtoModel.findOne({
       nodes: {
         $elemMatch: {
@@ -232,10 +234,6 @@ export class DagService {
     return this.setNodeStatus(nodeId, DagNodeStatus.Succeeded, session);
   }
 
-  public async markNodeAsFailed(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
-    return this.setNodeStatus(nodeId, DagNodeStatus.Failed, session);
-  }
-
   public async markNodeAsRunning(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
     return this.setNodeStatus(nodeId, DagNodeStatus.Running, session);
   }
@@ -271,6 +269,52 @@ export class DagService {
     }
 
     this.logger.debug(`Marked node as ${status}. NodeId: ${nodeId}`);
+    return this.convertDtoToDAG(dag);
+  }
+
+  public async cancelAllPendingTasksOf(dagId: DAGId, session?: ClientSession): Promise<DAG> {
+    const dag = await this.dagDtoModel.findOneAndUpdate({
+      id: dagId,
+      nodes: {
+        $elemMatch: {
+          status: DagNodeStatus.Pending
+        }
+      }
+    }, {
+      $set: {
+        "nodes.$.status": DagNodeStatus.Canceled
+      }
+    }, { session, new: true });
+
+    return this.convertDtoToDAG(dag);
+  }
+
+  public async increaseRetryCountOfNodeAndSetStatusFailed(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+    const preconditionStatuses = this.proceedingStatuses.get(DagNodeStatus.Failed);
+    this.logger.verbose(`Increasing retry count of node with id ${nodeId} if in status: ${preconditionStatuses}`);
+    const dag = await this.dagDtoModel.findOneAndUpdate({
+      nodes: {
+        $elemMatch: {
+          id: nodeId,
+          status: {
+            $in: preconditionStatuses
+          }
+        }
+      }
+    }, {
+      $inc: {
+        "nodes.$.retryCount": 1
+      },
+      $set: {
+        "nodes.$.status": DagNodeStatus.Failed
+      }
+    }, { session, new: true });
+
+    if (!dag) {
+      throw new NotFoundException(`Node with id ${nodeId} not found or in an invalid state to be marked as failed`);
+    }
+
+    this.logger.debug(`Marked node as failed and increased retry count. NodeId: w-test-workflow-t-1`);
     return this.convertDtoToDAG(dag);
   }
 

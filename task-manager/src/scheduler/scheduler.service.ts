@@ -6,7 +6,7 @@ import { DAG } from '../dag/entities/dag.entity';
 import { DagService } from '../dag/dag.service';
 import { RequirementsChecker } from './edge-requirement-chercker/requirements-checker';
 import { ArtifactAddedEvent } from '../artifact-store/events/artifact-added-event.dto';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { ArtifactStoreService } from '../artifact-store/artifact-store.service';
 import { DagArtifactStore } from '../artifact-store/entities/dag-artifact-store.entity';
 import { CompletionCriteriaType } from '../workflows/entities/completion-criteria.entity';
@@ -26,12 +26,13 @@ export class SchedulerService {
     private readonly client: ClientProxy,
     private readonly dagService: DagService,
     private readonly artifactStoreService: ArtifactStoreService,
-    private readonly functionExecutorService: FunctionExecutorService
+    private readonly functionExecutorService: FunctionExecutorService,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     this.executor = this.functionExecutorService.createBuilder()
       .withRandomBackoff(b =>
         b.withMaxTries(3)
-          .withBaseDelay(200)
+          .withBaseDelay(50)
           .withJitter(0.5)
       ).build();
   }
@@ -55,6 +56,8 @@ export class SchedulerService {
     const dag = await this.executor.execute(() => this.dagService.markNodeAsSucceeded(nodeId));
 
     this.scheduleOutStandingTasks(dag);
+
+    this.eventEmitter.emit('dag.node.completed', { dag, nodeId });
   }
 
   public async taskStarted(nodeId: DagNodeId) {
@@ -62,7 +65,19 @@ export class SchedulerService {
   }
 
   public async taskFailed(nodeId: DagNodeId) {
-    throw new NotImplementedException();
+    let dag = await this.executor.execute(() => this.dagService.increaseRetryCountOfNodeAndSetStatusFailed(nodeId));
+
+    const node = dag.nodes.find(n => n.id === nodeId);
+    if (node.retryCount > node.task.retryPolicy.maxRetryCount) {
+      this.logger.warn(`Task ${nodeId} reached maximum retry count. Cancelling all pending tasks of dag ${dag.id}.`);
+
+      const endDag = await this.dagService.cancelAllPendingTasksOf(dag.id);
+      this.eventEmitter.emit('dag.failed', endDag);
+      return endDag;
+    }
+
+    this.scheduleDagNode(node);
+    return dag;
   }
 
   @OnEvent('artifact.added')
@@ -89,7 +104,6 @@ export class SchedulerService {
     await this.executor.execute(() => this.dagService.markNodeAsScheduled(node.id));
     this.logger.log(`Scheduled task ${scheduledTask.name} with id ${scheduledTask.id}`);
   }
-
 
   private async updateDagNodeStati(dag: DAG, store: DagArtifactStore): Promise<DAG> {
     this.logger.log(`Checking completion criteria for DAG ${dag.id}`);
@@ -143,4 +157,5 @@ export class SchedulerService {
 
     return metRequirements !== node.incommingEdges.length;
   }
+
 }

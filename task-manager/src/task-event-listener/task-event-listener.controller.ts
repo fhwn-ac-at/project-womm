@@ -27,7 +27,7 @@ export class TaskEventListenerController {
   @EventPattern('task_processing_failed')
   public taskProcessingFailed(event: TaskUpdateEventDto) {
     this.logger.log(`Processing failed for task ${event.taskId} on worker ${event.worker}`);
-    this.logger.log('Processing failed');
+    this.schedulerService.taskFailed(event.taskId);
   }
 
   @MessagePattern('task_hold_request')

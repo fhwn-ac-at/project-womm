@@ -5,6 +5,12 @@ import { Type } from "class-transformer";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Mongoose } from "mongoose";
 
+export enum WorkflowStatus {
+  Running = 'running',
+  Failed = 'failed',
+  Succeeded = 'succeeded',
+}
+
 @Schema()
 export class CreateWorkflowDefinition {
 
@@ -48,6 +54,12 @@ export class CreateWorkflowDefinition {
   @IsString()
   @Prop()
   cleanupPolicy: string;
+
+  @Prop({
+    type: String,
+    enum: WorkflowStatus
+  })
+  status: WorkflowStatus = WorkflowStatus.Running;
 }
 
 export const WorkflowDefinitionSchema = SchemaFactory.createForClass(CreateWorkflowDefinition);

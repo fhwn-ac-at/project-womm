@@ -10,6 +10,7 @@ import { ErrorHandling, ErrorHandlingSchema } from './entities/error-handling.en
 import { Dependency, DependencySchema } from './entities/dependency.entity';
 import { CompletionCriteria, CompletionCriteriaSchema } from './entities/completion-criteria.entity';
 import { SchedulerModule } from '../scheduler/scheduler.module';
+import { ArtifactStoreModule } from '../artifact-store/artifact-store.module';
 
 @Module({
   controllers: [WorkflowsController],
@@ -19,7 +20,8 @@ import { SchedulerModule } from '../scheduler/scheduler.module';
       { name: CreateWorkflowDefinition.name, schema: WorkflowDefinitionSchema },
     ]),
     DagModule,
-    SchedulerModule
+    SchedulerModule,
+    ArtifactStoreModule
   ]
 })
 export class WorkflowsModule { }

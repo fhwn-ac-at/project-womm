@@ -22,6 +22,9 @@ export class DagNodeDto {
   })
   status: DagNodeStatus;
 
+  @Prop()
+  retryCount: number = 0;
+
 }
 
 export const DagNodeDtoSchema = SchemaFactory.createForClass(DagNodeDto);
