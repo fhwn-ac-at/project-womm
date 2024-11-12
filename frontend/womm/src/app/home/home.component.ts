@@ -1,42 +1,57 @@
 import { Component } from '@angular/core';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatButton} from '@angular/material/button';
-import {Router} from '@angular/router';
-import {S3} from 'aws-sdk';
+import {NgForOf} from '@angular/common';
+
+interface VideoFile {
+  file: File;
+  url: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
     MatToolbar,
-    MatButton
+    MatButton,
+    NgForOf
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 export class HomeComponent {
-  videoFile: File | null = null;
+  videos: VideoFile[] = [];
+  draggedIndex: number | null = null;
 
-  constructor(private router: Router) {}
+  onFileSelected(event: Event): void {
+    const files = (event.target as HTMLInputElement).files;
+    console.log('Files selected:', files); // Check if files are received
 
-  openFileExplorer() {
-    const fileInput = document.getElementById('fileUpload') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.click();
+    if (files) {
+      Array.from(files).forEach((file) => {
+        const url = URL.createObjectURL(file);
+        this.videos.push({ file, url, name: file.name });
+      });
     }
   }
 
-  // Handle file selection
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.videoFile = input.files![0];
-      this.uploadVideoClip(this.videoFile);
-    }
+  // Drag event methods
+  onDragStart(event: DragEvent, index: number): void {
+    this.draggedIndex = index;
   }
 
-  uploadVideoClip(file: File) {
-    // upload clips to s3 here
-    console.log("uploading");
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();  // Necessary to allow a drop
+  }
+
+  onDrop(event: DragEvent, index: number): void {
+    event.preventDefault();
+    if (this.draggedIndex !== null && this.draggedIndex !== index) {
+      const draggedVideo = this.videos[this.draggedIndex];
+      this.videos.splice(this.draggedIndex, 1);
+      this.videos.splice(index, 0, draggedVideo);
+    }
+    this.draggedIndex = null;
   }
 }

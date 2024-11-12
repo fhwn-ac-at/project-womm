@@ -6,15 +6,27 @@
   <button mat-button>Contact</button>
 </mat-toolbar>
 
+<div class="main-content">
+  <div class="upload-container">
+    <h2>Upload and Arrange Videos</h2>
+    <input type="file" multiple (change)="onFileSelected($event)" accept="video/*">
+  </div>
 
-<div class="content">
-  <input
-    type="file"
-    id="fileUpload"
-    (change)="onFileSelected($event)"
-    multiple
-    accept="video/*"
-    style="display: none;"
-  />
-  <button mat-raised-button color="accent" (click)="openFileExplorer()">Upload Video</button>
+  <div class="uploaded-videos-container">
+    <!-- Headline Div -->
+    <div class="uploaded-videos-heading">
+      <h3>Uploaded Videos</h3>
+    </div>
+
+    <!-- Video List Div -->
+    <div class="video-list">
+      <div *ngFor="let video of videos; let i = index" class="video-item" draggable="true" (dragstart)="onDragStart($event, i)" (drop)="onDrop($event, i)" (dragover)="onDragOver($event)">
+        <video controls [src]="video.url"></video>
+        <p>{{ video.name }}</p>
+      </div>
+    </div>
+  </div>
 </div>
+
+
+
