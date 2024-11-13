@@ -1,4 +1,4 @@
-﻿namespace lib.item_hanlder
+﻿namespace lib.item_handler
 {
     using System;
     using System.Collections.Generic;

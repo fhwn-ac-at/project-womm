@@ -11,5 +11,7 @@
         public void Upload(string localPath, string keyName);
 
         public void Download(string localPath, string keyName);
+
+        public void UploadMany (string localFolder, bool recursive);
     }
 }

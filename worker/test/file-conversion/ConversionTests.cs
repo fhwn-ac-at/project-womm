@@ -1,7 +1,7 @@
 ﻿namespace test.file_conversion
 {
-    using lib.item_hanlder.work_items;
-    using lib.item_hanlder;
+    using lib.item_handler.work_items;
+    using lib.item_handler;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -10,6 +10,7 @@
     using lib.storage;
     using lib.options;
     using Microsoft.Extensions.Options;
+    using lib.item_handler.results;
 
     internal class ConversionTests
     {
@@ -33,10 +34,8 @@
             var testItem = new ConvertFormat("sample-30s.mp4", ".avi");
 
             var result = testItem.Accept(itemHandler);
-
-            Assert.That(result is SuccessfulUpload);
-
-            string convertedFile = Path.Combine(_itemSource, ((SuccessfulUpload)result).FileKey);
+            string convertedFile = Path.Combine(_itemSource, result.Files[0]);
+            
             Assert.That(File.Exists(convertedFile));
 
             //Cleanup

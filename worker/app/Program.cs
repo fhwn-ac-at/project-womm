@@ -2,7 +2,8 @@
 {
     using lib;
     using lib.converter;
-    using lib.item_hanlder;
+    using lib.item_handler;
+    using lib.item_handler.results;
     using lib.options;
     using lib.parser;
     using lib.settings;
@@ -29,7 +30,7 @@
                 
                 services.AddTransient<Driver>();
                 services.AddTransient<IWorkItemConverter, JSONWorkItemConverter>();
-                services.AddTransient<IWorkItemVisitor<IWorkItemResult>, WorkItemHandler>();
+                services.AddTransient<IWorkItemVisitor<ItemProcessedResult>, WorkItemHandler>();
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
 
             }).Build();

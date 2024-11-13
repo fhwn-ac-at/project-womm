@@ -2,8 +2,9 @@
 {
     using lib.aspects.logging;
     using lib.commands;
-    using lib.item_hanlder;
-    using lib.item_hanlder.work_items;
+    using lib.item_handler;
+    using lib.item_handler.results;
+    using lib.item_handler.work_items;
     using lib.parser;
     using lib.settings;
     using lib.storage;
@@ -22,7 +23,7 @@
 
         private readonly IWorkItemConverter _converter;
 
-        private readonly IWorkItemVisitor<IWorkItemResult> _workItemHandler;
+        private readonly IWorkItemVisitor<ItemProcessedResult> _workItemHandler;
 
         private IModel _taskChannel;
 
@@ -33,7 +34,7 @@
         public Driver(
             IOptions<DriverOptions> options,
             IWorkItemConverter converter,
-            IWorkItemVisitor<IWorkItemResult> workItemHandler,
+            IWorkItemVisitor<ItemProcessedResult> workItemHandler,
             IStorageSystem remoteStorage)
         {
             ArgumentNullException.ThrowIfNull(converter);
@@ -106,7 +107,7 @@
             return channel;
         }
 
-        private void PublishResult(IWorkItemResult result)
+        private void PublishResult(ItemProcessedResult result)
         {
             var convertedResult = _converter.Convert(result);
 

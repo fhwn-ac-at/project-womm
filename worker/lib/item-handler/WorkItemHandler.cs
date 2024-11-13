@@ -1,7 +1,8 @@
-﻿namespace lib.item_hanlder
+﻿namespace lib.item_handler
 {
     using lib.commands;
-    using lib.item_hanlder.work_items;
+    using lib.item_handler.results;
+    using lib.item_handler.work_items;
     using lib.options;
     using lib.storage;
     using Microsoft.Extensions.Options;
@@ -10,7 +11,7 @@
     using System.Security.AccessControl;
     using System.Security.Principal;
 
-    public class WorkItemHandler : IWorkItemVisitor<IWorkItemResult>
+    public class WorkItemHandler : IWorkItemVisitor<ItemProcessedResult>
     {
         private readonly IStorageSystem _storage;
 
@@ -29,12 +30,29 @@
             }
         }
 
-        public IWorkItemResult Visit(Split item)
+        public ItemProcessedResult Visit(Split command)
         {
-            throw new NotImplementedException();
+            string tempFolder = DownloadFileIntoTempFolder(command.KeyName);
+            string downloadedFile = Path.Combine(tempFolder, command.KeyName);
+            
+            FFmpegRunner.RunFFmpeg($"-i \"{downloadedFile}\" -c copy -map 0 -segment_time  {command.SegmentTime} -f segment -reset_timestamps 1 \"{tempFolder}\"/output%03d.mp4");
+
+            File.Delete(downloadedFile);
+
+            _storage.UploadMany(tempFolder, false);
+
+            var uploadedFiles = Directory
+                .EnumerateFiles(tempFolder)
+                .Select(p => Path.GetFileName(p))
+                .ToList();
+
+            Directory.Delete(tempFolder, true);
+
+            return new ItemProcessedResult(uploadedFiles);
+
         }
 
-        public IWorkItemResult Visit(ConvertFormat command)
+        public ItemProcessedResult Visit(ConvertFormat command)
         {
             string tempFolder = DownloadFileIntoTempFolder(command.KeyName);
             string downloadedFile = Path.Combine(tempFolder, command.KeyName);
@@ -48,7 +66,7 @@
 
             Directory.Delete(tempFolder, true);
 
-            return new SuccessfulUpload(fileName);
+            return new ItemProcessedResult([fileName]);
         }
 
         private string RetriveFileIntoTempFolder()
@@ -56,7 +74,7 @@
             throw new NotImplementedException();
         }
 
-        public IWorkItemResult Visit(Trim trim)
+        public ItemProcessedResult Visit(Trim trim)
         {
             throw new NotImplementedException();
         }

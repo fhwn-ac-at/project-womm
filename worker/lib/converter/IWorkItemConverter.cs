@@ -1,6 +1,7 @@
 ﻿namespace lib.parser
 {
-    using lib.item_hanlder;
+    using lib.item_handler;
+    using lib.item_handler.results;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -11,6 +12,6 @@
     {
         IWorkItem Convert(string item);
 
-        string Convert(IWorkItemResult result);
+        string Convert(ItemProcessedResult result);
     }
 }

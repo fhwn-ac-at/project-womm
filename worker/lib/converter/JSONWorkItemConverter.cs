@@ -1,6 +1,7 @@
 ﻿namespace lib.converter
 {
-    using lib.item_hanlder;
+    using lib.item_handler;
+    using lib.item_handler.results;
     using lib.parser;
     using System;
     using System.Collections.Generic;
@@ -15,7 +16,7 @@
             throw new NotImplementedException();
         }
 
-        public string Convert(IWorkItemResult input)
+        public string Convert(ItemProcessedResult input)
         {
             throw new NotImplementedException();
         }

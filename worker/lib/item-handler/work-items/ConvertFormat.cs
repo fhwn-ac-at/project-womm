@@ -1,4 +1,4 @@
-﻿namespace lib.item_hanlder.work_items
+﻿namespace lib.item_handler.work_items
 {
     using System;
     using System.Collections.Generic;
@@ -10,16 +10,9 @@
     {
         public ConvertFormat(string keyName, string goalFormat)
         {
-            if (string.IsNullOrEmpty(keyName))
-            {
-                throw new ArgumentException($"'{nameof(keyName)}' cannot be null or empty.", nameof(keyName));
-            }
-
-            if (string.IsNullOrEmpty(goalFormat))
-            {
-                throw new ArgumentException($"'{nameof(goalFormat)}' cannot be null or empty.", nameof(goalFormat));
-            }
-
+            ArgumentException.ThrowIfNullOrEmpty(keyName, nameof(keyName));
+            ArgumentException.ThrowIfNullOrWhiteSpace(goalFormat, nameof(goalFormat));
+            
             this.KeyName = keyName;
             this.GoalFormat = goalFormat;
         }

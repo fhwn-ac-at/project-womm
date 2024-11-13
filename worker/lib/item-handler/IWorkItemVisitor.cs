@@ -1,6 +1,6 @@
-﻿namespace lib.item_hanlder
+﻿namespace lib.item_handler
 {
-    using lib.item_hanlder.work_items;
+    using lib.item_handler.work_items;
     using System;
     using System.Collections.Generic;
     using System.Linq;

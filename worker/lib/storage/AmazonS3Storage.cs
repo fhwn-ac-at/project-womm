@@ -109,5 +109,10 @@
 
             _disposed = true;
         }
+
+        public void UploadMany(string localFolder, bool recursive)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
