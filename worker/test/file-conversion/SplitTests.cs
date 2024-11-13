@@ -11,12 +11,39 @@
     using System.Text;
     using System.Threading.Tasks;
     using lib.item_handler.results;
+    using lib.exceptions;
+    using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
     internal class SplitTests
     {
         private readonly string _rootDir = "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\sample-dest\\";
 
         private readonly string _itemSource = "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\sample-source\\";
+
+        [TestCase("::::")]
+        [TestCase("abcd")]
+        [TestCase("100:00:00")]
+        [TestCase("00:100:00")]
+        [TestCase("00:00:100")]
+        [TestCase("12:a:4")]
+        [TestCase("12:4:b")]
+        [TestCase("a:3:4")]
+        public void SplitConstructorThrowsOnInvalidTimeData(string input)
+        {
+            Assert.Throws<InvalidTimeSegmentException>(
+                () => new Split("some-key", input));
+        }
+
+        [TestCase("0:0:0")]
+        [TestCase("1:0:0")]
+        [TestCase("0:2:0")]
+        [TestCase("0:0:3")]
+        [TestCase("51:70:90")]
+        [TestCase("00:10:50")]
+        public void SplitConstructorDoesNotThrowOnInvalidTimeData(string input)
+        {
+            Assert.DoesNotThrow(() => new Split("some-key", input));
+        }
 
         [TestCase("00:00:10", 3)]
         [TestCase("00:00:15", 2)]

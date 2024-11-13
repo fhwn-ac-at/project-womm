@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class InvalidTimeSegmentException : Exception
+    public class InvalidTimeSegmentException : Exception
     {
         public static void ThrowIfNullOrInvalid(string time)
         {
@@ -22,17 +22,17 @@
                 throw new InvalidTimeSegmentException();
             }
 
-            if (!IsIntegerInBounds(parts[0], 24)) 
+            if (!IsIntegerInBounds(parts[0], 99)) 
             {
                 throw new InvalidTimeSegmentException();
             }
 
-            if (!IsIntegerInBounds(parts[1], 60))
+            if (!IsIntegerInBounds(parts[1], 99))
             {
                 throw new InvalidTimeSegmentException();
             }
 
-            if (!IsIntegerInBounds(parts[2], 60))
+            if (!IsIntegerInBounds(parts[2], 99))
             {
                 throw new InvalidTimeSegmentException();
             }

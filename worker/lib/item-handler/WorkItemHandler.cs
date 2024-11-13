@@ -10,6 +10,7 @@
     using System.IO;
     using System.Security.AccessControl;
     using System.Security.Principal;
+    using System.Text;
 
     public class WorkItemHandler : IWorkItemVisitor<ItemProcessedResult>
     {
