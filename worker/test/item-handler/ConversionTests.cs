@@ -11,6 +11,7 @@
     using lib.options;
     using Microsoft.Extensions.Options;
     using lib.item_handler.results;
+    using System.IO.Abstractions;
 
     internal class ConversionTests
     {
@@ -21,21 +22,22 @@
         [Test]
         public void ConvertWorks()
         {
-            IOptions<WorkItemHandlerOptions> options = 
+            IOptions<WorkItemHandlerOptions> options =
                 Options.Create(new WorkItemHandlerOptions()
-            {
-                RootDirectory = _rootDir
+                {
+                    RootDirectory = _rootDir
                 });
 
             var itemHandler = new WorkItemHandler(
                 new LocalStorageSystem(_itemSource),
-                options);
+                options,
+                new FileSystem());
 
             var testItem = new ConvertFormat("sample-30s.mp4", ".avi");
 
             var result = testItem.Accept(itemHandler);
-            string convertedFile = Path.Combine(_itemSource, result.Files[0]);
-            
+            string convertedFile = Path.Combine(_itemSource, result.Files.ToArray()[0]);
+
             Assert.That(File.Exists(convertedFile));
 
             //Cleanup

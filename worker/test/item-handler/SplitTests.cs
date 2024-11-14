@@ -13,6 +13,7 @@
     using lib.item_handler.results;
     using lib.exceptions;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+    using System.IO.Abstractions;
 
     internal class SplitTests
     {
@@ -58,7 +59,8 @@
 
             var itemHandler = new WorkItemHandler(
                 new LocalStorageSystem(_itemSource),
-                options);
+                options,
+                new FileSystem());
 
             var testItem = new Split("sample-30s.mp4", time);
 
