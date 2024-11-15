@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, Query, UseInterceptors } from '@nestjs/common';
 import { WorkflowsService } from './workflows.service';
 import { WorkflowDefinitionDto } from './dto/workflow-definition.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
+import { GetWorkflowOptions } from './dto/get-workflow-options.dto';
 
 @Controller('/workflows')
 export class WorkflowsController {
@@ -10,7 +11,13 @@ export class WorkflowsController {
 
   @Post()
   async createApi(@Body() workflow: WorkflowDefinitionDto) {
-    return this.workflowsService.create(workflow);
+    return await this.workflowsService.create(workflow);
+  }
+
+  @Get(':id')
+  // @UseInterceptors(ClassSerializerInterceptor)
+  async findOne(@Param('id') id: string, @Query() query: GetWorkflowOptions) {
+    return await this.workflowsService.findOne(id, query);
   }
 
   // @MessagePattern('createWorkflow')

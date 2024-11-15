@@ -1,28 +1,21 @@
-import { exec } from "child_process";
-import { DagNode } from "./dag-node.entity";
+import { DagNode, DagNodeStatus } from "./dag-node.entity";
+import { WorkflowDefinition } from "../../workflows/entities/workflow-definition.entity";
+
+export type DAGId = string & { __brand: "dagId" };
 
 export class DAG {
+
+  public constructor(partial?: Partial<DAG>) {
+    if (partial) {
+      Object.assign(this, partial);
+    }
+  }
+
+  id: DAGId;
+
   nodes: DagNode[];
 
-  public getExecutableNodes(): DagNode[] {
-    const executableNodes: DagNode[] = []
-    for (const node of this.nodes) {
-      if (!this.hasOpenDependencies(node)) {
-        executableNodes.push(node);
-      }
-    }
-    return executableNodes;
-  }
+  workflowDefinitionId: string;
 
-  public hasOpenDependencies(node: DagNode): boolean {
-    for (const node of this.nodes) {
-      for (const edge of node.edges) {
-        if (edge.to === node) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
+  workflowDefinition?: WorkflowDefinition;
 }
