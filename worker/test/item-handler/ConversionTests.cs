@@ -12,6 +12,9 @@
     using Microsoft.Extensions.Options;
     using lib.item_handler.results;
     using System.IO.Abstractions;
+    using lib.exceptions;
+    using test.item_handler.mock;
+    using test.item_handler;
 
     internal class ConversionTests
     {
@@ -44,6 +47,60 @@
             Directory.Delete(_rootDir, true);
             Directory.CreateDirectory(_rootDir);
             File.Delete(convertedFile);
+        }
+
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        [TestCase(6)]
+        [TestCase(7)]
+        public void ConvertThrowsOnFileSystemFailure(int throwErrorOnCall)
+        {
+            IOptions<WorkItemHandlerOptions> options =
+                Options.Create(new WorkItemHandlerOptions()
+                {
+                    RootDirectory = _rootDir
+                });
+
+            var faultyFileSystem = new FaultyFileSystem(new FileSystem(), throwErrorOnCall, new IOException());
+
+            var itemHandler = new WorkItemHandler(
+                new LocalStorageSystem(_itemSource),
+                options,
+                faultyFileSystem);
+
+            var convert = new ConvertFormat("sample-30s.mp4", ".avi");
+
+            Assert.Throws<WorkItemProcessingFailedException>(() =>
+            {
+                _ = convert.Accept(itemHandler);
+            });
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        public void ConvertThrowsOnStorageFailure(int failOnNthCall)
+        {
+            IOptions<WorkItemHandlerOptions> options =
+                Options.Create(new WorkItemHandlerOptions()
+                {
+                    RootDirectory = _rootDir
+                });
+
+            var faultyStorageSystem = new FaultyStorageSystem(new LocalStorageSystem(_itemSource), failOnNthCall);
+
+            var itemHandler = new WorkItemHandler(
+                faultyStorageSystem,
+                options,
+                new FileSystem());
+
+            var convert = new ConvertFormat("sample-30s.mp4", ".avi");
+
+            Assert.Throws<StorageException>(() =>
+            {
+                _ = convert.Accept(itemHandler);
+            });
         }
     }
 }
