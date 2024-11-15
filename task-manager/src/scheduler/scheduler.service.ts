@@ -89,6 +89,7 @@ export class SchedulerService {
 
     await this.queueDagNode(node);
     await this.workersService.clearWorkOfWorkerWorkingOn(nodeId);
+    // we schedule the tasks for all free workers to give the failed task a chance to be picked up by another worker
     await this.scheduleTasksForAllFreeWorkers();
     return dag;
   }
