@@ -26,7 +26,7 @@ export function internalBootstrap(app: INestApplication<any>) {
   });
 
   app.connectMicroservice({
-    Transport: Transport.RMQ,
+    transport: Transport.RMQ,
     options: {
       urls: [process.env.RABBITMQ_URL],
       queue: 'worker_events',

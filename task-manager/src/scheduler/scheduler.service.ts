@@ -1,4 +1,4 @@
-import { Inject, Injectable, InternalServerErrorException, Logger, NotFoundException, NotImplementedException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException, NotImplementedException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { DagNode, DagNodeId, DagNodeStatus } from '../dag/entities/dag-node.entity';
 import { ScheduledTaskDto } from './dto/scheduled-task.dto';
@@ -19,6 +19,7 @@ import { TaskWorker, TaskWorkerStatus } from '../workers/entities/worker.entity'
 import { NotFoundError } from 'rxjs';
 import { QueuedTask } from '../task-queue/entities/queued-task.entity';
 import { Task } from '../workflows/entities/task.entity';
+import { QueueService } from '../queue/queue.service';
 
 @Injectable()
 export class SchedulerService {
@@ -28,14 +29,13 @@ export class SchedulerService {
   private readonly executor: ExecutionStrategy;
 
   public constructor(
-    @Inject('TasksService')
-    private readonly client: ClientProxy,
     private readonly dagService: DagService,
     private readonly artifactStoreService: ArtifactStoreService,
     private readonly functionExecutorService: FunctionExecutorService,
     private readonly eventEmitter: EventEmitter2,
     private readonly taskQueueService: TaskQueueService,
-    private readonly workersService: WorkersService
+    private readonly workersService: WorkersService,
+    private readonly queueService: QueueService,
   ) {
     this.executor = this.functionExecutorService.createBuilder()
       .withRandomBackoff(b =>
@@ -46,7 +46,7 @@ export class SchedulerService {
   }
 
   public async queueOutStandingTasks(dag: DAG, store?: DagArtifactStore) {
-    this.logger.log(`Scheduling outstanding tasks for DAG ${dag.id}`);
+    this.logger.log(`Queuing outstanding tasks for DAG ${dag.id}`);
     if (!store) {
       this.logger.debug(`No artifact store provided. Fetching store for DAG ${dag.id}`);
       store = await this.artifactStoreService.findForDag(dag.id);
@@ -63,7 +63,7 @@ export class SchedulerService {
 
     const dag = await this.executor.execute(() => this.dagService.markNodeAsSucceeded(nodeId));
 
-    this.queueOutStandingTasks(dag);
+    await this.queueOutStandingTasks(dag);
 
     this.eventEmitter.emit('dag.node.completed', { dag, nodeId });
 
@@ -87,16 +87,21 @@ export class SchedulerService {
       return endDag;
     }
 
-    this.queueDagNode(node);
+    await this.queueDagNode(node);
+    await this.workersService.clearWorkOfWorkerWorkingOn(nodeId);
+    await this.scheduleTasksForAllFreeWorkers();
     return dag;
   }
 
   @OnEvent('artifact.added')
   public async onArtifactUploaded(event: ArtifactAddedEvent) {
-    let dag = await this.dagService.getDagById(event.dagId);
-    dag = await this.updateDagNodeStati(dag, event.store);
+    let originDag = await this.dagService.getDagById(event.dagId);
+    const { dag, completedNodes } = await this.updateDagNodeStati(originDag, event.store);
 
-    this.queueOutStandingTasks(dag, event.store);
+    await this.queueOutStandingTasks(dag, event.store);
+    for (const node of completedNodes) {
+      this.scheduleTaskForWorkerWorkingOnNode(node.id);
+    }
   }
 
   @OnEvent('worker.stale')
@@ -114,15 +119,28 @@ export class SchedulerService {
     }));
   }
 
-  @OnEvent('worker.registered')
-  public async onWorkerRegistered(worker: TaskWorker) {
+  @OnEvent('worker.noWork')
+  public async scheduleTaskForFreeWorker(worker: TaskWorker) {
+    this.logger.log(`Worker ${worker.name} has no work, scheduling tasks`);
     const nextNodeToSchedule = await this.getNextQueuedTaskToScheduleFor(worker);
     if (!nextNodeToSchedule) {
       this.logger.debug(`No tasks to schedule for worker ${worker.name}`);
       return;
     }
 
-    await this.scheduleTaskForWorker(worker, nextNodeToSchedule);
+    if (!await this.scheduleTaskForWorker(worker, nextNodeToSchedule)) {
+      this.logger.warn(`Could not schedule task for worker ${worker.name}. Requeueing task.`);
+      const dag = await this.dagService.getDagWithNodeId(nextNodeToSchedule.nodeId);
+      this.taskQueueService.enqueueNode(dag.nodes.find(n => n.id === nextNodeToSchedule.nodeId)); // requeue task
+    }
+  }
+
+  public async scheduleTasksForAllFreeWorkers() {
+    this.logger.log('Scheduling tasks for all free workers');
+    const workers = await this.workersService.findFreeWorkers();
+    for (const worker of workers) {
+      this.scheduleTaskForFreeWorker(worker);
+    }
   }
 
   private async queueDagNode(node: DagNode) {
@@ -130,14 +148,14 @@ export class SchedulerService {
       throw new InternalServerErrorException('Given node does not have a task.');
     }
 
-    await this.taskQueueService.enqueueNode(node);
-
     await this.executor.execute(() => this.dagService.markNodeAsQueued(node.id));
-    this.logger.log(`Queued task ${node.task.name} with id ${node.id}`);
+
+    await this.taskQueueService.enqueueNode(node);
   }
 
-  private async updateDagNodeStati(dag: DAG, store: DagArtifactStore): Promise<DAG> {
+  private async updateDagNodeStati(dag: DAG, store: DagArtifactStore): Promise<{ dag: DAG, completedNodes: DagNode[] }> {
     this.logger.log(`Checking completion criteria for DAG ${dag.id}`);
+    const completedNodes = [];
     for (const node of dag.nodes.filter(n => n.status === DagNodeStatus.Running)) {
 
       if (node.task.completionCriteria.length === 0) continue;
@@ -156,12 +174,18 @@ export class SchedulerService {
 
       if (metCriteria === node.task.completionCriteria.length) {
         this.logger.log(`All completion criteria met for node ${node.id}`);
-        await this.executor.execute(() => this.dagService.markNodeAsSucceeded(node.id));
+        try {
+          await this.executor.execute(() => this.dagService.markNodeAsSucceeded(node.id));
+          completedNodes.push(node);
+        } catch (e) {
+          this.logger.warn(`Could not mark node ${node.id} as succeeded`, e);
+          continue;
+        }
         node.status = DagNodeStatus.Succeeded;
       }
     }
 
-    return dag;
+    return { dag, completedNodes };
   }
 
   private getOutstandingTasksOfDag(dag: DAG, store: DagArtifactStore): DagNode[] {
@@ -186,15 +210,24 @@ export class SchedulerService {
     const nextTask = await this.getNextQueuedTaskToScheduleFor(worker);
     if (!nextTask) {
       this.logger.debug(`No tasks to schedule for worker ${worker.name}`);
+      await this.workersService.clearWorkOfWorker(worker.name);
       return;
     }
 
-    await this.scheduleTaskForWorker(worker, nextTask);
+    await this.scheduleTaskForWorker(worker, nextTask, true);
   }
 
-  private async scheduleTaskForWorker(worker: TaskWorker, task: QueuedTask) {
-    worker.workingOn = task.nodeId;
-    await this.workersService.updateWorkOfWorker(worker.name, task.nodeId);
+  private async scheduleTaskForWorker(worker: TaskWorker, task: QueuedTask, force: boolean = false): Promise<boolean> {
+    try {
+      await this.workersService.updateWorkOfWorker(worker.name, task.nodeId, force);
+    } catch (e) {
+      if (e instanceof ConflictException) {
+        this.logger.warn(`Worker ${worker.name} is already working on a task`);
+        return false;
+      }
+      this.logger.error(`Error scheduling work for worker ${worker.name}`, e);
+      return false;
+    }
 
     const scheduledTask = new ScheduledTaskDto({
       id: task.nodeId,
@@ -203,9 +236,9 @@ export class SchedulerService {
       results: task.task.results
     });
 
-    this.client.emit(scheduledTask.name, scheduledTask);
-    this.executor.execute(() => this.dagService.markNodeAsQueued(task.nodeId));
+    await this.queueService.emit(worker.listensOn, scheduledTask.name, scheduledTask);
     this.logger.log(`Scheduled task ${scheduledTask.name} with id ${scheduledTask.id} on worker ${worker.name}`);
+    return true;
   }
 
   private async getNextQueuedTaskToScheduleFor(worker: TaskWorker): Promise<QueuedTask> {
@@ -218,7 +251,6 @@ export class SchedulerService {
       return await this.taskQueueService.dequeue();
     } catch (e) {
       if (e instanceof NotFoundException) {
-        this.logger.debug(`No tasks to schedule for worker ${worker.name}`);
         return;
       }
       this.logger.error('Error dequeuing task', e);

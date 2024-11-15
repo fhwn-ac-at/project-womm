@@ -15,6 +15,7 @@ import { FunctionExecutorModule } from './function-executor/function-executor.mo
 import { WorkersModule } from './workers/workers.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskQueueModule } from './task-queue/task-queue.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { TaskQueueModule } from './task-queue/task-queue.module';
     FunctionExecutorModule,
     WorkersModule,
     TaskQueueModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,30 +7,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FunctionExecutorModule } from '../function-executor/function-executor.module';
 import { WorkersModule } from '../workers/workers.module';
 import { TaskQueueModule } from '../task-queue/task-queue.module';
+import { QueueModule } from '../queue/queue.module';
 
 @Module({
   providers: [SchedulerService],
   imports: [
-    ClientsModule.registerAsync([
-      {
-        imports: [ConfigModule],
-        name: 'TasksService',
-        useFactory: (config: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: {
-            urls: [config.getOrThrow<string>('RABBITMQ_URL')],
-            queue: 'tasks',
-            queueOptions: { durable: true },
-          },
-        }),
-        inject: [ConfigService],
-      },
-    ]),
     DagModule,
     ArtifactStoreModule,
     FunctionExecutorModule,
     WorkersModule,
     TaskQueueModule,
+    QueueModule,
   ],
   exports: [SchedulerService],
 })

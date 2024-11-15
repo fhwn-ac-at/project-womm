@@ -11,8 +11,8 @@ async function bootstrap() {
 
   internalBootstrap(app);
 
-  app.startAllMicroservices();
-  app.listen(3000);
+  await app.startAllMicroservices();
+  await app.listen(3000);
 }
 
 bootstrap();

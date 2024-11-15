@@ -36,6 +36,7 @@ export class WorkflowsService {
     const dag = await this.dagService.parse(workflow);
     await this.dagService.save(dag);
     await this.schedulerService.queueOutStandingTasks(dag);
+    this.schedulerService.scheduleTasksForAllFreeWorkers();
 
     return this.findOne(workflow.id, { includeDAG: true });
   }

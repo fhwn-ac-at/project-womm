@@ -15,4 +15,6 @@ export class ArtifactAddedEvent {
 
   store: DagArtifactStore;
 
+  worker: string;
+
 }

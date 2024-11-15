@@ -16,6 +16,7 @@ export class WorkersController {
   @EventPattern('worker_heartbeat')
   public heartbeat(event: WorkerHeartbeatDto) {
     this.logger.log(`Heartbeat received from worker ${event.name} listening on ${event.listensOn}`);
+    this.workerService.processWorkerHeartbeat(event);
   }
 
 }

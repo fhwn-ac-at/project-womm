@@ -7,5 +7,4 @@ export class ArtifactEventDto {
   artifactId: string;
 
   taskId: DagNodeId;
-
 }
