@@ -82,16 +82,6 @@
             _disposed = true;
         }
 
-        private void NewTaskAddedCallback(object? sender, BasicDeliverEventArgs e)
-        {
-            var body = e.Body.ToArray();
-            string parsedBody = Encoding.UTF8.GetString(body);
-
-            var newItem = _converter.Convert(parsedBody);
-            var result = newItem.Accept(_workItemHandler);
-            PublishResult(result);
-        }
-
         private IModel DeclareQueueChannel(QueueServerOptions options)
         {
             var factory = new ConnectionFactory
@@ -105,6 +95,18 @@
             channel.QueueDeclare(queue: options.QueueName);
 
             return channel;
+        }
+
+        private void NewTaskAddedCallback(object? sender, BasicDeliverEventArgs e)
+        {
+            var body = e.Body.ToArray();
+            string parsedBody = Encoding.UTF8.GetString(body);
+
+            var newItem = _converter.Convert(parsedBody);
+
+            var result = newItem.Accept(_workItemHandler);
+            
+            PublishResult(result);
         }
 
         private void PublishResult(ItemProcessedResult result)

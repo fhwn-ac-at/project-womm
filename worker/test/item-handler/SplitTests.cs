@@ -14,6 +14,9 @@
     using lib.exceptions;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel;
     using System.IO.Abstractions;
+    using test.item_handler;
+    using NuGet.ContentModel;
+    using test.item_handler.mock;
 
     internal class SplitTests
     {
@@ -73,6 +76,61 @@
                 var path = Path.Combine(_itemSource, file);
                 Assert.That(File.Exists(path));
             }
+        }
+
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        [TestCase(6)]
+        [TestCase(7)]
+        public void SplitThrowsOnFileSystemFailure(int throwErrorOnCall)
+        {
+            IOptions<WorkItemHandlerOptions> options =
+                Options.Create(new WorkItemHandlerOptions()
+                {
+                    RootDirectory = _rootDir
+                });
+
+            var faultyFileSystem = new FaultyFileSystem(new FileSystem(), throwErrorOnCall, new IOException());
+
+            var itemHandler = new WorkItemHandler(
+                new LocalStorageSystem(_itemSource),
+                options,
+                faultyFileSystem);
+
+            var split = new Split("sample-30s.mp4", "00:00:10");
+
+            Assert.Throws<WorkItemProcessingFailedException>(() =>
+            {
+                _ = split.Accept(itemHandler);
+            });
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void SplitThrowsOnStorageFailure(int failOnNthCall)
+        {
+            IOptions<WorkItemHandlerOptions> options =
+                Options.Create(new WorkItemHandlerOptions()
+                {
+                    RootDirectory = _rootDir
+                });
+
+            var faultyStorageSystem = new FaultyStorageSystem(new LocalStorageSystem(_itemSource), failOnNthCall);
+
+            var itemHandler = new WorkItemHandler(
+                faultyStorageSystem,
+                options,
+                new FileSystem());
+
+            var split = new Split("sample-30s.mp4", "00:00:10");
+
+            Assert.Throws<StorageException>(() =>
+            {
+                _ = split.Accept(itemHandler);
+            });
         }
 
         [TearDown]

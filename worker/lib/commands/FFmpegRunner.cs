@@ -11,7 +11,7 @@
         {
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                FileName = "ffmpeg",  // Ensure ffmpeg is in the system PATH or provide full path to ffmpeg executable
+                FileName = "ffmpeg",
                 Arguments = arguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -24,21 +24,6 @@
                 using (Process process = new Process())
                 {
                     process.StartInfo = startInfo;
-                    //process.OutputDataReceived += (sender, data) =>
-                    //{
-                    //    if (data.Data != null)
-                    //    {
-                    //        Debug.WriteLine(data.Data);  // You can log it or process the standard output
-                    //    }
-                    //};
-                    //process.ErrorDataReceived += (sender, data) =>
-                    //{
-                    //    if (data.Data != null)
-                    //    {
-                    //        Debug.WriteLine(data.Data);
-                    //    }
-                    //};
-
                     process.Start();
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();

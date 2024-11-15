@@ -60,6 +60,10 @@
             "RabbitMQ.cLient": {
               "target": "Package",
               "version": "[6.8.1, )"
+            },
+            "System.IO.Abstractions": {
+              "target": "Package",
+              "version": "[13.2.47, )"
             }
           },
           "imports": [
@@ -143,9 +147,17 @@
               "target": "Package",
               "version": "[8.0.2, )"
             },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Core": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "RabbitMQ.Client": {
               "target": "Package",
               "version": "[6.8.1, )"
+            },
+            "System.IO.Abstractions": {
+              "target": "Package",
+              "version": "[13.2.47, )"
             }
           },
           "imports": [
