@@ -37,6 +37,8 @@ describe('AppController (e2e)', () => {
     channel.assertQueue('tasks');
     channel.assertQueue('task_events');
     channel.assertQueue('artifact_events');
+    channel.assertQueue('worker_events');
+    channel.assertQueue('worker');
 
     app = moduleFixture.createNestApplication();
 
@@ -63,6 +65,8 @@ describe('AppController (e2e)', () => {
     await channel.deleteQueue('tasks');
     await channel.deleteQueue('task_events');
     await channel.deleteQueue('artifact_events');
+    await channel.deleteQueue('worker_events');
+    await channel.deleteQueue('worker');
     await channel.close();
 
     await app.close();

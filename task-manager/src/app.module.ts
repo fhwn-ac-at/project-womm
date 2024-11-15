@@ -12,6 +12,9 @@ import { ArtifactStoreModule } from './artifact-store/artifact-store.module';
 import { ArtifactEventListenerModule } from './artifact-event-listener/artifact-event-listener.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { FunctionExecutorModule } from './function-executor/function-executor.module';
+import { WorkersModule } from './workers/workers.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TaskQueueModule } from './task-queue/task-queue.module';
 
 @Module({
   imports: [
@@ -27,12 +30,15 @@ import { FunctionExecutorModule } from './function-executor/function-executor.mo
       imports: [ConfigModule],
       inject: [ConfigService]
     }),
+    ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
     SchedulerModule,
     TaskEventListenerModule,
     ArtifactStoreModule,
     ArtifactEventListenerModule,
     FunctionExecutorModule,
+    WorkersModule,
+    TaskQueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],

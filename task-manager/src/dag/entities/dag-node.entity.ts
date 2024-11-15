@@ -5,7 +5,7 @@ import { StringExpressionOperatorReturningBoolean } from "mongoose";
 
 export enum DagNodeStatus {
   Pending = 'pending',
-  Scheduled = 'scheduled',
+  Queued = 'queued',
   Running = 'running',
   Failed = 'failed',
   Succeeded = 'succeeded',
