@@ -1,10 +1,30 @@
-import { DagEdgeDto } from "./dag-edge.dto";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { DagEdgeDto, DagEdgeDtoSchema } from "./dag-edge.dto";
+import { Task, TaskSchema } from "../../workflows/entities/task.entity";
+import { DagNodeId, DagNodeStatus } from "../entities/dag-node.entity";
 
-
+@Schema()
 export class DagNodeDto {
-  id: string;
+  @Prop()
+  id: DagNodeId;
 
+  @Prop([DagEdgeDtoSchema])
   edges: DagEdgeDto[];
 
-  taskId?: string;
+  @Prop({
+    type: TaskSchema
+  })
+  task?: Task;
+
+  @Prop({
+    type: String,
+    enum: DagNodeStatus
+  })
+  status: DagNodeStatus;
+
+  @Prop()
+  retryCount: number = 0;
+
 }
+
+export const DagNodeDtoSchema = SchemaFactory.createForClass(DagNodeDto);

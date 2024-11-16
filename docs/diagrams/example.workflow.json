@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "workflow": {
+    "name": "example-workflow",
+    "description": "Description of the workflow and its purpose",
+    "tasks": [
+      {
+        "name": "split",
+        "dependencies": [],
+        "parameters": {},
+        "results": [
+          "part-1",
+          "part-2"
+        ],
+        "completionCriteria": [
+          {
+            "type": "artifact",
+            "id": "part-1"
+          },
+          {
+            "type": "artifact",
+            "id": "part-2"
+          }
+        ]
+      },
+      
+      {
+        "name": "overlap",
+        "dependencies": [
+          {
+            "type": "artifact",
+            "id": "part-1"
+          },
+          {
+            "type": "artifact",
+            "id": "part-2"
+          }
+        ],
+        "parameters": {},
+        "results": [
+          "part-3"
+        ],
+        "completionCriteria": [
+          {
+            "type": "artifact",
+            "id": "part-3"
+          }
+        ]
+      },
+      
+      {
+        "name": "splice",
+        "dependencies": [
+          {
+            "type": "artifact",
+            "id": "part-1"
+          },
+          {
+            "type": "artifact",
+            "id": "part-2"
+          },
+          {
+            "type": "artifact",
+            "id": "part-3"
+          }
+        ],
+        "parameters": {},
+        "results": [
+          "video"
+        ],
+        "completionCriteria": [
+          {
+            "type": "artifact",
+            "id": "video"
+          }
+        ]
+      }
+    ],
+    "completionCriteria": [
+      {
+        "type": "artifact",
+        "id": "video"
+      }
+    ],
+    "cleanupPolicy": "immediate"
+  }
+}
