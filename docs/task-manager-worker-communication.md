@@ -67,11 +67,7 @@ All messages sent to the queues are JSON objects with the following structure:
 **Data**:
 
 - `taskId`: The ID of the task.
--
-
-worker
-
-: The name of the worker.
+- `worker`: The name of the worker.
 
 **Example**:
 
@@ -94,11 +90,7 @@ worker
 **Data**:
 
 - `taskId`: The ID of the task.
--
-
-worker
-
-: The name of the worker.
+- `worker`: The name of the worker.
 
 **Example**:
 
@@ -121,11 +113,7 @@ worker
 **Data**:
 
 - `taskId`: The ID of the task.
--
-
-worker
-
-: The name of the worker.
+- `worker`: The name of the worker.
 
 **Example**:
 
