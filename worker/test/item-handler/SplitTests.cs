@@ -134,16 +134,22 @@
         }
 
         [TearDown]
-        public void CleanUp()
+        public void Cleanup()
         {
-            Directory.Delete(_rootDir, true);
-            Directory.CreateDirectory(_rootDir);
+            var uploads = Directory.EnumerateFiles(_itemSource)
+                .Where(f => Path.GetFileName(f) != "sample-30s.mp4");
 
-            var files = Directory.EnumerateFiles(_itemSource, "output*.*");
 
-            foreach (var file in files)
+            foreach (var upload in uploads)
             {
-                File.Delete(file);
+                File.Delete(upload);
+            }
+
+            var downloads = Directory.EnumerateFiles(_rootDir);
+
+            foreach (var donwload in downloads)
+            {
+                File.Delete(donwload);
             }
         }
     }

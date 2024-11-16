@@ -102,5 +102,25 @@
                 _ = convert.Accept(itemHandler);
             });
         }
+
+        [TearDown]
+        public void Cleanup()
+        {
+            var uploads = Directory.EnumerateFiles(_itemSource)
+                .Where(f => Path.GetFileName(f) != "sample-30s.mp4");
+
+
+            foreach (var upload in uploads)
+            {
+                File.Delete(upload);
+            }
+
+            var downloads = Directory.EnumerateFiles(_rootDir);
+
+            foreach (var donwload in downloads)
+            {
+                File.Delete(donwload);
+            }
+        }
     }
 }

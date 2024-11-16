@@ -16,10 +16,10 @@
         private int _throwErrorOn;
         private readonly Exception _exceptionToTest;
 
-        public FaultyFileSystem(IFileSystem realFileSystem, int throwErrorOn, Exception exceptionToTest)
+        public FaultyFileSystem(IFileSystem realFileSystem, int throwErrorOnNthCall, Exception exceptionToTest)
         {
             _realFileSystem = realFileSystem;
-            _throwErrorOn = throwErrorOn;
+            _throwErrorOn = throwErrorOnNthCall;
             _exceptionToTest = exceptionToTest;
         }
 
