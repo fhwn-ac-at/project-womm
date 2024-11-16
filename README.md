@@ -2,11 +2,16 @@
 
 # The WOMM Project
 
-The WHOMM Project aims to provide a performant distributed rendering engine. 
+The WHOMM Project aims to provide a performant distributed rendering engine.
 
 # System Context
 
 ![System Context Diagramm](docs/diagrams/SystemContext.png)
 
-# Containers 
+# Containers
+
 ![Containers](docs/diagrams/Containers.png)
+
+# Task Manager Woker documentation
+
+The documentation about the documentation between workers and the task manager can be found [here](./docs/task-manager-worker-communication.md)
