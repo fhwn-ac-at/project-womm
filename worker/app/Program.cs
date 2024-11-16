@@ -4,8 +4,10 @@
     using lib.converter;
     using lib.item_handler;
     using lib.item_handler.results;
+    using lib.messaging;
     using lib.options;
     using lib.parser;
+    using lib.queue;
     using lib.settings;
     using lib.storage;
     using Microsoft.Extensions.Configuration;
@@ -21,25 +23,31 @@
             IHost host = Host.CreateDefaultBuilder(args).ConfigureServices((hostContext, services) =>
             {
                 IConfiguration config = hostContext.Configuration;
-                services.AddOptions<DriverOptions>()
-                    .Bind(config.GetRequiredSection("Driver"));
+                services.AddOptions<WorkerOptions>()
+                    .Bind(config.GetRequiredSection("Worker"));
                 
                 services.AddOptions<StorageOptions>()
                     .Bind(config.GetRequiredSection("Storage"));
                 
                 services.AddOptions<WorkItemHandlerOptions>()
                     .Bind(config.GetRequiredSection("Operation"));
-                
-                services.AddTransient<Driver>();
+
+                services.AddOptions<MessagingOptions>()
+                    .Bind(config.GetRequiredSection("Messaging"));
+
+                services.AddTransient<Worker>();
                 services.AddTransient<IWorkItemConverter, JSONWorkItemConverter>();
                 services.AddTransient<IWorkItemVisitor<ItemProcessedResult>, WorkItemHandler>();
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
                 services.AddTransient<IFileSystem, System.IO.Abstractions.FileSystem>();
+                services.AddTransient<IMultiQueueSystem<string>, RabbitMQSystem>();
+                services.AddTransient<IMessageService, MessageService>();
+
 
             }).Build();
 
             host.Services
-                .GetRequiredService<Driver>().Run();
+                .GetRequiredService<Worker>().Run();
         }
     }
 }
