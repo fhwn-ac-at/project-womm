@@ -6,9 +6,9 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class Trim : IWorkItem
+    public class Trim : ITask
     {
-        public T Accept<T>(IWorkItemVisitor<T> visitor)
+        public T Accept<T>(ITaskVisitor<T> visitor)
         {
             return visitor.Visit(this);
         }

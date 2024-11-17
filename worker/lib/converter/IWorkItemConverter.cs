@@ -10,8 +10,8 @@
 
     public interface IWorkItemConverter
     {
-        IWorkItem Convert(string item);
+        ITask Convert(string item);
 
-        string Convert(ItemProcessedResult result);
+        string Convert(TaskProcessedResult result);
     }
 }

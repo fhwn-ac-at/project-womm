@@ -9,13 +9,13 @@
 
     public class WorkItemProcessingFailedException : Exception
     {
-        public WorkItemProcessingFailedException(string message, Exception innerException, IWorkItem item) : base(message, innerException)
+        public WorkItemProcessingFailedException(string message, Exception innerException, ITask item) : base(message, innerException)
         {
             ArgumentNullException.ThrowIfNull(item);
 
             this.Item = item;
         }
 
-        public IWorkItem Item { get; }
+        public ITask Item { get; }
     }
 }

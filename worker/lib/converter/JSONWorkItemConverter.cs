@@ -11,12 +11,12 @@
 
     public class JSONWorkItemConverter : IWorkItemConverter
     {
-        public IWorkItem Convert(string input)
+        public ITask Convert(string input)
         {
             throw new NotImplementedException();
         }
 
-        public string Convert(ItemProcessedResult input)
+        public string Convert(TaskProcessedResult input)
         {
             throw new NotImplementedException();
         }

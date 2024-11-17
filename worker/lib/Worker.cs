@@ -27,7 +27,7 @@
         
         private readonly IWorkItemConverter _converter;
 
-        private readonly IWorkItemVisitor<ItemProcessedResult> _workItemHandler;
+        private readonly ITaskVisitor<TaskProcessedResult> _workItemHandler;
 
         private readonly IStorageSystem _storage;
 
@@ -40,7 +40,7 @@
         public Worker(
             IOptions<WorkerOptions> options,
             IWorkItemConverter converter,
-            IWorkItemVisitor<ItemProcessedResult> workItemHandler,
+            ITaskVisitor<TaskProcessedResult> workItemHandler,
             IStorageSystem remoteStorage,
             IMultiQueueSystem<string> queuingSystem,
             IMessageService messageService)
@@ -103,8 +103,8 @@
         {
             try
             {
-                IWorkItem item = _converter.Convert(eventArgs.Message);
-                ItemProcessedResult result = item.Accept(_workItemHandler);
+                ITask item = _converter.Convert(eventArgs.Message);
+                TaskProcessedResult result = item.Accept(_workItemHandler);
                 ReportProcessingStarted(item);
                 string convertedResult = _converter.Convert(result);
                 ReportTaskCompletion(convertedResult);
@@ -145,9 +145,9 @@
             throw new NotImplementedException();
         }
 
-        private void ReportProcessingStarted(IWorkItem item)
+        private void ReportProcessingStarted(ITask item)
         {
-            throw new NotImplementedException();
+            string message = _messageService.GetProcessingStarted(item.)
         }
 
         private void ReportTaskCompletion(string convertedResult)

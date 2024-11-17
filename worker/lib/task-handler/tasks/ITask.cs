@@ -6,8 +6,10 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public interface IWorkItem
+    public interface ITask
     {
-        public T Accept<T>(IWorkItemVisitor<T> visitor);
+        public T Accept<T>(ITaskVisitor<T> visitor);
+
+        public string ID { get; }
     }
 }

@@ -7,7 +7,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public interface IWorkItemVisitor<T>
+    public interface ITaskVisitor<T>
     {
         public T Visit(Split item);
 

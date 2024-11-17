@@ -30,7 +30,7 @@
                     RootDirectory = _rootDir
                 });
 
-            var itemHandler = new WorkItemHandler(
+            var itemHandler = new TaskHandler(
                 new LocalStorageSystem(_itemSource),
                 options,
                 new FileSystem());
@@ -64,7 +64,7 @@
 
             var faultyFileSystem = new FaultyFileSystem(new FileSystem(), throwErrorOnCall, new IOException());
 
-            var itemHandler = new WorkItemHandler(
+            var itemHandler = new TaskHandler(
                 new LocalStorageSystem(_itemSource),
                 options,
                 faultyFileSystem);
@@ -89,7 +89,7 @@
 
             var faultyStorageSystem = new FaultyStorageSystem(new LocalStorageSystem(_itemSource), failOnNthCall);
 
-            var itemHandler = new WorkItemHandler(
+            var itemHandler = new TaskHandler(
                 faultyStorageSystem,
                 options,
                 new FileSystem());

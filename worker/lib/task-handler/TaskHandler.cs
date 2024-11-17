@@ -10,7 +10,7 @@
     using Microsoft.Extensions.Options;
     using System;
     
-    public class WorkItemHandler : IWorkItemVisitor<ItemProcessedResult>
+    public class TaskHandler : ITaskVisitor<TaskProcessedResult>
     {
         private readonly IStorageSystem _storage;
 
@@ -18,7 +18,7 @@
         
         private readonly string _rootPath;
 
-        public WorkItemHandler(
+        public TaskHandler(
             IStorageSystem storage,
             IOptions<WorkItemHandlerOptions> options, 
             IFileSystem fileSystem)
@@ -37,7 +37,7 @@
             }
         }
 
-        public ItemProcessedResult Visit(Split split)
+        public TaskProcessedResult Visit(Split split)
         {
             string tempFolder;
             string downloadedFile;
@@ -86,10 +86,10 @@
                 throw;
             }
 
-            return new ItemProcessedResult(uploadedFiles);
+            return new TaskProcessedResult(uploadedFiles);
         }
 
-        public ItemProcessedResult Visit(ConvertFormat convert)
+        public TaskProcessedResult Visit(ConvertFormat convert)
         {
             string tempFolder;
             string downloadedFile;
@@ -134,10 +134,10 @@
                 throw;
             }
 
-            return new ItemProcessedResult(uploadedFiles);
+            return new TaskProcessedResult(uploadedFiles);
         }
 
-        public ItemProcessedResult Visit(Trim trim)
+        public TaskProcessedResult Visit(Trim trim)
         {
             throw new NotImplementedException();
         }

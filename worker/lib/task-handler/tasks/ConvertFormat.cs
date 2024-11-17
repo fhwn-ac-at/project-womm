@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class ConvertFormat : IWorkItem
+    public class ConvertFormat : ITask
     {
         public ConvertFormat(string keyName, string goalFormat)
         {
@@ -21,7 +21,7 @@
 
         public string GoalFormat { get; private set; }
 
-        public T Accept<T>(IWorkItemVisitor<T> visitor)
+        public T Accept<T>(ITaskVisitor<T> visitor)
         {
             return visitor.Visit(this);
         }

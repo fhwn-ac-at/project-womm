@@ -7,9 +7,9 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class ItemProcessedResult
+    public class TaskProcessedResult
     {
-        public ItemProcessedResult(IEnumerable<string> files)
+        public TaskProcessedResult(IEnumerable<string> files)
         {
             ArgumentNullException.ThrowIfNull(files);
 

@@ -39,7 +39,7 @@
             }) ;
 
             var converterMock = new Mock<IWorkItemConverter>();
-            var workItemHandlerMock = new Mock<IWorkItemVisitor<ItemProcessedResult>>();
+            var workItemHandlerMock = new Mock<ITaskVisitor<TaskProcessedResult>>();
             var remoteStorageMock = new Mock<IStorageSystem>();
             var messageServiceMock = new Mock<IMessageService>();
             messageServiceMock

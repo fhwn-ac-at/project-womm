@@ -37,7 +37,7 @@
 
                 services.AddTransient<Worker>();
                 services.AddTransient<IWorkItemConverter, JSONWorkItemConverter>();
-                services.AddTransient<IWorkItemVisitor<ItemProcessedResult>, WorkItemHandler>();
+                services.AddTransient<ITaskVisitor<TaskProcessedResult>, TaskHandler>();
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
                 services.AddTransient<IFileSystem, System.IO.Abstractions.FileSystem>();
                 services.AddTransient<IMultiQueueSystem<string>, RabbitMQSystem>();
