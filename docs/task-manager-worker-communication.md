@@ -76,7 +76,8 @@ All messages sent to the queues are JSON objects with the following structure:
   "pattern": "task_processing_started",
   "data": {
     "taskId": "12345",
-    "worker": "worker1"
+    "worker": "worker1",
+    "error": "Cannot find file: test.mp4"
   }
 }
 ```
