@@ -12,26 +12,29 @@
     using lib.storage;
     using lib;
     using lib.parser;
+    using lib.options;
+    using System.Text.Json;
+    using System.Xml.Linq;
 
     internal class WorkerTests
     {
         [Test]
         public void WorkerWritesHeartbeatIntoQueueInInterval()
         {
-            var optionsMock = new Mock<IOptions<WorkerOptions>>();
-            optionsMock.Setup(o => o.Value).Returns(new WorkerOptions
+            var workerOptionsMock = new Mock<IOptions<WorkerOptions>>();
+            workerOptionsMock.Setup(o => o.Value).Returns(new WorkerOptions
             {
                 HeartbeatSecondsDelay = 1,
                 SendHeartbeat = true,
                 WorkerName = "my-worker",
                 Queues = new QueueOptions
                 {
-                    ArtifactQueueName = "foo",
+                    ArtifactQueueName = "artifact-queue",
                     HostName = "foo",
                     Port = 0,
                     RoutingKey = "foo",
-                    TaskQueueName = "foo",
-                    WorkerQueueName = "foo",
+                    TaskQueueName = "task-queue",
+                    WorkerQueueName = "worker-queue",
                 }
             }) ;
 
@@ -39,6 +42,12 @@
             var workItemHandlerMock = new Mock<IWorkItemVisitor<ItemProcessedResult>>();
             var remoteStorageMock = new Mock<IStorageSystem>();
             var messageServiceMock = new Mock<IMessageService>();
+            messageServiceMock
+                .Setup(m => m.GetHeartbeat(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string name, string listens) =>
+                {
+                    return "worker_heartbeat " + name + " " + listens; 
+                });
 
             List<string> queueItems = [];
 
@@ -51,7 +60,7 @@
                 });
 
             var worker = new Worker(
-                optionsMock.Object,
+                workerOptionsMock.Object,
                 converterMock.Object,
                 workItemHandlerMock.Object,
                 remoteStorageMock.Object,
@@ -63,6 +72,29 @@
             worker.Dispose();
 
             Assert.That(queueItems.Count, Is.EqualTo(3));
+            string expectedMessage = "worker_heartbeat " + workerOptionsMock.Object.Value.WorkerName + " task-queue";
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(queueItems[0], Is.EqualTo(expectedMessage));
+                Assert.That(queueItems[1], Is.EqualTo(expectedMessage));
+                Assert.That(queueItems[2], Is.EqualTo(expectedMessage));
+            });
+        }
+
+        private static string GetHeartbeatMessage(string heartbeatPattern, string workerName, string listensOn)
+        {
+            var message = new
+            {
+                pattern = heartbeatPattern,
+                data = new
+                {
+                    name = workerName,
+                    listensOn = listensOn
+                }
+            };
+
+            return JsonSerializer.Serialize(message);
         }
     }
 }
