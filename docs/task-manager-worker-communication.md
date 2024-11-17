@@ -68,6 +68,7 @@ All messages sent to the queues are JSON objects with the following structure:
 
 - `taskId`: The ID of the task.
 - `worker`: The name of the worker.
+- `error`: The occuring error
 
 **Example**:
 
