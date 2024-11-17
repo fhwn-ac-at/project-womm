@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { DagNodeId } from "../../dag/entities/dag-node.entity";
-import { QueuedTask } from "../../task-queue/entities/queued-task.entity";
+import { QueuedTask, QueuedTaskSchema } from "../../task-queue/entities/queued-task.entity";
 import { SchemaTypes } from "mongoose";
 
 export enum TaskWorkerStatus {
@@ -29,7 +29,7 @@ export class TaskWorker {
   @Prop()
   workingOn: DagNodeId;
 
-  @Prop({ type: [SchemaTypes.ObjectId], ref: QueuedTask.name })
+  @Prop([QueuedTaskSchema])
   nodesOnHold: QueuedTask[];
 }
 

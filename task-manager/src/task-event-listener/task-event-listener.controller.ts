@@ -2,6 +2,7 @@ import { Controller, Logger } from '@nestjs/common';
 import { EventPattern, MessagePattern } from '@nestjs/microservices';
 import { SchedulerService } from '../scheduler/scheduler.service';
 import { TaskUpdateEventDto } from './dto/task-update-event.dto';
+import { TaskHoldRequestDto } from './dto/task-hold-request.dto';
 
 @Controller('task-event-listener')
 export class TaskEventListenerController {
@@ -30,9 +31,10 @@ export class TaskEventListenerController {
     this.schedulerService.taskFailed(event.taskId);
   }
 
-  @MessagePattern('task_hold_request')
-  public taskHoldRequest() {
-    this.logger.log('Task hold requested');
+  @EventPattern('task_hold_request')
+  public async taskHoldRequest(request: TaskHoldRequestDto) {
+    this.logger.log(`Hold requested for worker ${request.worker}`);
+    await this.schedulerService.taskHoldRequested(request.worker);
   }
 
 

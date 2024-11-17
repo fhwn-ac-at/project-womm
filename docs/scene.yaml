@@ -1,0 +1,28 @@
+scene:
+  # The name of the video that will be created
+  videoName: "video.mp4"
+
+  # A list of clips that will be used to create the video
+  clips:
+    # The name of the clip. This is only for the user
+    - name: "clip1"
+      # The id of the clip. This will be used to reference the clip in the scene
+      id: "clip1"
+
+  # A list of layers. Each layer will be rendered on top of the previous layer
+  layers:
+    - clips:
+        - id: "clip1"
+          # From what second within the result video the clip will start
+          from: 0
+          # To what second within the result video the clip will end
+          to: 5
+          # The position of the clip within the result video
+          # Needs to have the same length as the clip
+          cut:
+            # From what second within the clip the clip will start
+            # Defaults to 0
+            from: 3
+            # To what second within the clip the clip will end
+            # Defaults to the length given by ..to - ..from
+            to: 8

@@ -26,11 +26,12 @@ export class DagService {
 
   private readonly proceedingStatuses: Map<DagNodeStatus, DagNodeStatus[]> = new Map([
     [DagNodeStatus.Queued, [DagNodeStatus.Pending, DagNodeStatus.Failed]],
-    [DagNodeStatus.Running, [DagNodeStatus.Queued]],
+    [DagNodeStatus.Running, [DagNodeStatus.Queued, DagNodeStatus.OnHold]],
     [DagNodeStatus.Succeeded, [DagNodeStatus.Running]],
     // is allowed to go from canceled. since we first cancel all outstanding tassk on error and then set the error ont the right node
     [DagNodeStatus.Failed, [DagNodeStatus.Running, DagNodeStatus.Canceled]],
     [DagNodeStatus.Canceled, [DagNodeStatus.Pending]],
+    [DagNodeStatus.OnHold, [DagNodeStatus.Pending, DagNodeStatus.Queued]],
   ]);
 
   public constructor(
@@ -244,6 +245,10 @@ export class DagService {
 
   public async markNodeAsQueued(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
     return this.setNodeStatus(nodeId, DagNodeStatus.Queued, session);
+  }
+
+  public async markNodeAsOnHold(nodeId: DagNodeId, session?: ClientSession): Promise<DAG> {
+    return this.setNodeStatus(nodeId, DagNodeStatus.OnHold, session);
   }
 
   public async setNodeStatus(nodeId: DagNodeId, status: DagNodeStatus, session?: ClientSession): Promise<DAG> {

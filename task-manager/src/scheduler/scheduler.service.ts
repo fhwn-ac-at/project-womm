@@ -20,6 +20,8 @@ import { NotFoundError } from 'rxjs';
 import { QueuedTask } from '../task-queue/entities/queued-task.entity';
 import { Task } from '../workflows/entities/task.entity';
 import { QueueService } from '../queue/queue.service';
+import { DependencyType } from '../workflows/entities/dependency.entity';
+import { PrefetchCommandDto } from './dto/prefetch-command.dto';
 
 @Injectable()
 export class SchedulerService {
@@ -72,6 +74,42 @@ export class SchedulerService {
 
   public async taskStarted(nodeId: DagNodeId) {
     return await this.executor.execute(() => this.dagService.markNodeAsRunning(nodeId));
+  }
+
+  public async taskHoldRequested(workerName: string): Promise<void> {
+    const worker = await this.workersService.getWorker(workerName);
+    if (!worker) {
+      throw new NotFoundException(`Worker ${workerName} not found`);
+    }
+    if (worker.status !== TaskWorkerStatus.Online) {
+      throw new ConflictException(`Worker ${workerName} is not online`);
+    }
+    if (worker.nodesOnHold.length > 0) {
+      throw new ConflictException(`Worker ${workerName} already has a task on hold`);
+    }
+
+    // get dag of the node that the worker is currently working on 
+    const dag = await this.dagService.getDagWithNodeId(worker.workingOn);
+    const workingOnNode = dag.nodes.find(n => n.id === worker.workingOn);
+
+    let nextNode: QueuedTask;
+    try {
+      nextNode = await this.executor.execute<QueuedTask>(() => this.putTaskOnHoldFor(worker, dag));
+
+    } catch (e) {
+      this.logger.warn(`Could not put task on hold for worker ${workerName}`, e);
+      return;
+    }
+
+    // return the artifact IDs that need to be prefetched by the worker
+    const allArtifacts = nextNode.task.dependencies.filter(dep => dep.type === DependencyType.artifact).map(dep => dep.id);
+    const command = new PrefetchCommandDto({
+      immediateArtifacts: allArtifacts.filter(a => !workingOnNode.task.results.includes(a)),
+      persistentArtifacts: allArtifacts.filter(a => workingOnNode.task.results.includes(a))
+    });
+
+    this.logger.log(`Sending prefetch command to worker ${workerName}`);
+    await this.queueService.emit(worker.listensOn, 'prefetch', command);
   }
 
 
@@ -271,6 +309,41 @@ export class SchedulerService {
     this.logger.verbose(`Node ${node.id} has ${metRequirements} of ${node.incommingEdges.length} requirements met`);
 
     return metRequirements !== node.incommingEdges.length;
+  }
+
+  private async putTaskOnHoldFor(worker: TaskWorker, dag: DAG): Promise<QueuedTask> {
+    const workerName = worker.name;
+    const workingOnNode = dag.nodes.find(n => n.id === worker.workingOn);
+    const preferedNodes = await this.getTasksThatWouldGetScheduledIfNodeGetsCompleted(dag, workingOnNode);
+
+    let nextNode: QueuedTask;
+    if (preferedNodes.length === 0) {
+      this.logger.warn(`No optimal task found to put on hold for ${workerName}. Putting next node in line on hold.`);
+      nextNode = await this.taskQueueService.dequeue();
+    } else {
+      nextNode = new QueuedTask({
+        addedAt: new Date(),
+        nodeId: preferedNodes[0].id,
+        task: preferedNodes[0].task
+      });
+    }
+
+    // if this fails the task has been asigned to another worker in the meantime so we dont need to requeue it
+    await this.dagService.markNodeAsOnHold(nextNode.nodeId);
+    // this part cannot fail. If two task managers add a task to the queue the worker will just have two
+    await this.workersService.addTaskToWorkerHold(workerName, nextNode);
+
+    return nextNode;
+  }
+
+  private async getTasksThatWouldGetScheduledIfNodeGetsCompleted(dag: DAG, node: DagNode): Promise<DagNode[]> {
+    const artifactStore = await this.artifactStoreService.findForDag(dag.id);
+    for (const result of node.task.results) {
+      artifactStore.publishedArtifacts.push(result);
+    }
+    node.status = DagNodeStatus.Succeeded;
+
+    return this.getOutstandingTasksOfDag(dag, artifactStore);
   }
 
 }

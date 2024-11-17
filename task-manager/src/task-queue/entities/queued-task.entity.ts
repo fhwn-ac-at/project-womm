@@ -5,6 +5,10 @@ import { Task, TaskSchema } from "../../workflows/entities/task.entity";
 @Schema()
 export class QueuedTask {
 
+  constructor(partial?: Partial<QueuedTask>) {
+    Object.assign(this, partial);
+  }
+
   @Prop()
   nodeId: DagNodeId;
 

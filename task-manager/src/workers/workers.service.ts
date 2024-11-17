@@ -114,6 +114,16 @@ export class WorkersService implements OnModuleInit {
     }, { new: true });
   }
 
+  public async addTaskToWorkerHold(workerName: string, task: QueuedTask): Promise<TaskWorker> {
+    return this.workerModel.findOneAndUpdate({
+      name: workerName
+    }, {
+      $push: {
+        nodesOnHold: task
+      }
+    }, { new: true });
+  }
+
   public async clearWorkOfWorkerWorkingOn(nodeId: DagNodeId): Promise<TaskWorker> {
     return this.workerModel.findOneAndUpdate({
       workingOn: nodeId

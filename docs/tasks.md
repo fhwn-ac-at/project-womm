@@ -1,30 +1,38 @@
 # Tasks
 
 ## Analyse
+
 video analysieren und render path gengerieren.
 
 ## Split
-video aufteilen an 1s 3s 4s 
 
-c# native ffmpeg 
+video aufteilen an 1s 3s 4s
+
+c# native ffmpeg
 cli
-ffmpeg -ss 3.3 -t 6 -c copy -i file 
+ffmpeg -ss 3.3 -t 6 -c copy -i file
 
 ## Splice
+
 videos zusammenführen
 
 ## overlap
+
 videos übereinander
+
+## Convert
+
+converts a video into a nother code / format
 
 # Queues
 
 # Task queue
+
 tasks
 
 # Control flow queue
+
 events
-  - Artifcat uploaded
-  - Task finished
-  
 
-
+- Artifcat uploaded
+- Task finished

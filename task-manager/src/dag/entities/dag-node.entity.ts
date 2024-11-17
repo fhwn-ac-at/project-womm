@@ -10,6 +10,7 @@ export enum DagNodeStatus {
   Failed = 'failed',
   Succeeded = 'succeeded',
   Canceled = 'canceled',
+  OnHold = 'on-hold',
 }
 
 export type DagNodeId = string & { __brand: 'dag-node-id' };

@@ -1,0 +1,27 @@
+version: 1
+workflow:
+  # the name of the workflow
+  name: "workflow_name"
+  description: "worklfow_description"
+  tasks:
+    # the name of the task
+    - name: "task name"
+      description: "task description"
+      # Arbitrary data that will be passed to the task
+      parameters: ""
+      results:
+        - "video_parart.mp4"
+      dependencies:
+        - type: "task"
+          name: "task name"
+        - type: "artifact"
+          name: "artifact name"
+      completionCriteria:
+        - type: "artifact"
+          name: "artifact name"
+  completionCriteria:
+    - type: "task"
+      name: "task name"
+    - type: "artifact"
+      name: "artifact name"
+  cleanupPolicy: "after 1 day"

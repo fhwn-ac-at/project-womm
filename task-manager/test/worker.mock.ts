@@ -3,6 +3,7 @@ import * as amqp from 'amqplib';
 import { getOneMessageFrom } from './helpers';
 import { ReadPacket } from '@nestjs/microservices';
 import { ScheduledTaskDto } from '../src/scheduler/dto/scheduled-task.dto';
+import { PrefetchCommandDto } from '../src/scheduler/dto/prefetch-command.dto';
 
 export class WorkerMock {
 
@@ -67,6 +68,19 @@ export class WorkerMock {
 
   public async receiveTask(): Promise<ReadPacket<ScheduledTaskDto>> {
     return await getOneMessageFrom<ReadPacket<ScheduledTaskDto>>(this.connection, this.listensOn);
+  }
+
+  public async receiveTaskHoldRequest(): Promise<ReadPacket<PrefetchCommandDto>> {
+    return await getOneMessageFrom<ReadPacket<PrefetchCommandDto>>(this.connection, this.listensOn);
+  }
+
+  public async sendTaskHoldRequest(worker: string) {
+    await this.channel.sendToQueue('task_events', Buffer.from(JSON.stringify({
+      pattern: 'task_hold_request',
+      data: {
+        worker,
+      }
+    }), 'utf-8'));
   }
 
 
