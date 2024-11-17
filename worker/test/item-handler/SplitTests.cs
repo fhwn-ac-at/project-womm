@@ -14,6 +14,9 @@
     using lib.exceptions;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel;
     using System.IO.Abstractions;
+    using test.item_handler;
+    using NuGet.ContentModel;
+    using test.item_handler.mock;
 
     internal class SplitTests
     {
@@ -75,17 +78,78 @@
             }
         }
 
-        [TearDown]
-        public void CleanUp()
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        [TestCase(6)]
+        [TestCase(7)]
+        public void SplitThrowsOnFileSystemFailure(int throwErrorOnCall)
         {
-            Directory.Delete(_rootDir, true);
-            Directory.CreateDirectory(_rootDir);
+            IOptions<WorkItemHandlerOptions> options =
+                Options.Create(new WorkItemHandlerOptions()
+                {
+                    RootDirectory = _rootDir
+                });
 
-            var files = Directory.EnumerateFiles(_itemSource, "output*.*");
+            var faultyFileSystem = new FaultyFileSystem(new FileSystem(), throwErrorOnCall, new IOException());
 
-            foreach (var file in files)
+            var itemHandler = new WorkItemHandler(
+                new LocalStorageSystem(_itemSource),
+                options,
+                faultyFileSystem);
+
+            var split = new Split("sample-30s.mp4", "00:00:10");
+
+            Assert.Throws<WorkItemProcessingFailedException>(() =>
             {
-                File.Delete(file);
+                _ = split.Accept(itemHandler);
+            });
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void SplitThrowsOnStorageFailure(int failOnNthCall)
+        {
+            IOptions<WorkItemHandlerOptions> options =
+                Options.Create(new WorkItemHandlerOptions()
+                {
+                    RootDirectory = _rootDir
+                });
+
+            var faultyStorageSystem = new FaultyStorageSystem(new LocalStorageSystem(_itemSource), failOnNthCall);
+
+            var itemHandler = new WorkItemHandler(
+                faultyStorageSystem,
+                options,
+                new FileSystem());
+
+            var split = new Split("sample-30s.mp4", "00:00:10");
+
+            Assert.Throws<StorageException>(() =>
+            {
+                _ = split.Accept(itemHandler);
+            });
+        }
+
+        [TearDown]
+        public void Cleanup()
+        {
+            var uploads = Directory.EnumerateFiles(_itemSource)
+                .Where(f => Path.GetFileName(f) != "sample-30s.mp4");
+
+
+            foreach (var upload in uploads)
+            {
+                File.Delete(upload);
+            }
+
+            var downloads = Directory.EnumerateFiles(_rootDir);
+
+            foreach (var donwload in downloads)
+            {
+                File.Delete(donwload);
             }
         }
     }

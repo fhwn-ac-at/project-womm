@@ -9,13 +9,13 @@
 
     public class ItemProcessedResult
     {
-        public ItemProcessedResult(List<string> files)
+        public ItemProcessedResult(IEnumerable<string> files)
         {
             ArgumentNullException.ThrowIfNull(files);
 
             this.Files = files;
         }
 
-        public List<string> Files { get; }
+        public IEnumerable<string> Files { get; }
     }
 }

@@ -1,78 +1,140 @@
 ﻿namespace lib.item_handler
 {
     using lib.commands;
+    using lib.exceptions;
     using lib.item_handler.results;
     using lib.item_handler.work_items;
     using lib.options;
     using lib.storage;
+    using System.IO.Abstractions;
     using Microsoft.Extensions.Options;
     using System;
-    using System.IO;
-    using System.Security.AccessControl;
-    using System.Security.Principal;
-    using System.Text;
-
+    
     public class WorkItemHandler : IWorkItemVisitor<ItemProcessedResult>
     {
         private readonly IStorageSystem _storage;
 
+        private readonly IFileSystem _fileSystem;
+        
         private readonly string _rootPath;
 
-        public WorkItemHandler(IStorageSystem storage, IOptions<WorkItemHandlerOptions> options)
+        public WorkItemHandler(
+            IStorageSystem storage,
+            IOptions<WorkItemHandlerOptions> options, 
+            IFileSystem fileSystem)
         {
             ArgumentNullException.ThrowIfNull(storage);
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(fileSystem);
 
             _storage = storage;
+            _fileSystem = fileSystem;
             _rootPath = options.Value.RootDirectory;
 
-            if (!Directory.Exists(options.Value.RootDirectory))
+            if (!_fileSystem.Directory.Exists(options.Value.RootDirectory))
             {
                 throw new ArgumentException("Cannot find directory: " + options.Value.RootDirectory);
             }
         }
 
-        public ItemProcessedResult Visit(Split command)
+        public ItemProcessedResult Visit(Split split)
         {
-            string tempFolder = DownloadFileIntoTempFolder(command.KeyName);
-            string downloadedFile = Path.Combine(tempFolder, command.KeyName);
-            
-            FFmpegRunner.RunFFmpeg($"-i \"{downloadedFile}\" -c copy -map 0 -segment_time  {command.SegmentTime} -f segment -reset_timestamps 1 \"{tempFolder}\"/output%03d.mp4");
+            string tempFolder;
+            string downloadedFile;
+            try
+            {
+                tempFolder = DownloadFileIntoTempFolder(split.KeyName);
+                downloadedFile = _fileSystem.Path.Combine(tempFolder, split.KeyName);
+            }
+            catch (IOException e)
+            {
+                throw new WorkItemProcessingFailedException("Unable to download File locally: " + e.Message, e, split);
+            }
 
-            File.Delete(downloadedFile);
+            FFmpegCommand command = new(
+                source: $"\"{downloadedFile}\"", 
+                destination: $"\"{tempFolder}\"/output%03d.mp4");
 
-            _storage.UploadMany(tempFolder, false);
+            command.AddArgument("-c", "copy");
+            command.AddArgument("-map", "0");
+            command.AddArgument("-segment_time", split.SegmentTime);
+            command.AddArgument("-f", "segment");
+            command.AddArgument("-reset_timestamps", "1");
 
-            var uploadedFiles = Directory
-                .EnumerateFiles(tempFolder)
-                .Select(p => Path.GetFileName(p))
-                .ToList();
+            try
+            {
+                command.Execute();
+            }
+            catch (CommandExecutionException)
+            {
+                throw;
+            }
 
-            Directory.Delete(tempFolder, true);
+            List<string> uploadedFiles;
+            try
+            {
+                _fileSystem.File.Delete(downloadedFile);
+                uploadedFiles = UploadContents(tempFolder);
+                _fileSystem.Directory.Delete(tempFolder, true);
+            }
+            catch (IOException e)
+            {
+                throw new WorkItemProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, split);
+            }
+            catch (StorageException)
+            {
+                throw;
+            }
 
             return new ItemProcessedResult(uploadedFiles);
-
         }
 
-        public ItemProcessedResult Visit(ConvertFormat command)
+        public ItemProcessedResult Visit(ConvertFormat convert)
         {
-            string tempFolder = DownloadFileIntoTempFolder(command.KeyName);
-            string downloadedFile = Path.Combine(tempFolder, command.KeyName);
+            string tempFolder;
+            string downloadedFile;
+            string resultFile;
+            try
+            {
+                tempFolder = DownloadFileIntoTempFolder(convert.KeyName);
+                downloadedFile = _fileSystem.Path.Combine(tempFolder, convert.KeyName);
+                resultFile = _fileSystem.Path.Combine(tempFolder, GenerateId() + convert.GoalFormat);
+            }
+            catch (IOException e)
+            {
+                throw new WorkItemProcessingFailedException("Unable to download File locally: " + e.Message, e, convert);
+            }
 
-            string fileName = Guid.NewGuid().ToString() + command.GoalFormat;
-            var resultFile = Path.Combine(tempFolder, fileName);
+            FFmpegCommand command = new(
+                source: $"\"{downloadedFile}\"",
+                destination: $"\"{resultFile}\"");
 
-            FFmpegRunner.RunFFmpeg($"-i \"{downloadedFile}\" \"{resultFile}\"");
+            try
+            {
+                command.Execute();
+            }
+            catch (CommandExecutionException)
+            {
+                throw;
+            }
 
-            _storage.Upload(resultFile, fileName);
 
-            Directory.Delete(tempFolder, true);
+            List<string> uploadedFiles;
+            try
+            {
+                uploadedFiles = UploadContents(tempFolder).ToList();
+                _fileSystem.Directory.Delete(tempFolder, true);
+            }
+            catch (IOException e)
+            {
+                throw new WorkItemProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, convert);
+            }
+            catch (StorageException)
+            {
+                throw;
+            }
 
-            return new ItemProcessedResult([fileName]);
-        }
-
-        private string RetriveFileIntoTempFolder()
-        {
-            throw new NotImplementedException();
+            return new ItemProcessedResult(uploadedFiles);
         }
 
         public ItemProcessedResult Visit(Trim trim)
@@ -82,13 +144,41 @@
 
         private string DownloadFileIntoTempFolder(string fileKey)
         {
-            string localPath = Path.Combine(_rootPath, Guid.NewGuid().ToString());
+            string localPath = _fileSystem.Path.Combine(_rootPath, GenerateId());
 
-            Directory.CreateDirectory(localPath);
+            _fileSystem.Directory.CreateDirectory(localPath);
 
             _storage.Download(localPath, fileKey);
 
             return localPath;
+        }
+
+        private List<string> UploadContents(string folder)
+        {
+            var contents = _fileSystem.Directory.EnumerateFiles(folder,
+                                                    string.Empty,
+                                                    SearchOption.AllDirectories);
+
+            foreach (var file in contents)
+            {
+                string key = _fileSystem.Path.GetFileName(file);
+                
+                try
+                {
+                    _storage.Upload(file, key);
+                }
+                catch (StorageException)
+                {
+                    throw;
+                }
+            }
+
+            return contents.Select(f => _fileSystem.Path.GetFileName(f)).ToList();
+        }
+
+        private static string GenerateId()
+        {
+            return Guid.NewGuid().ToString()[..8];
         }
     }
 }

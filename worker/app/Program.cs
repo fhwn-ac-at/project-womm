@@ -11,6 +11,8 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.VisualBasic;
+    using System.IO.Abstractions;
 
     public class Program
     {
@@ -32,6 +34,7 @@
                 services.AddTransient<IWorkItemConverter, JSONWorkItemConverter>();
                 services.AddTransient<IWorkItemVisitor<ItemProcessedResult>, WorkItemHandler>();
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
+                services.AddTransient<IFileSystem, System.IO.Abstractions.FileSystem>();
 
             }).Build();
 

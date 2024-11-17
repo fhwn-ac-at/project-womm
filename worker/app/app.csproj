@@ -11,6 +11,7 @@
     <PackageReference Include="Metalama.Framework" Version="2024.2.29" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="RabbitMQ.cLient" Version="6.8.1" />
+    <PackageReference Include="System.IO.Abstractions" Version="13.2.47" />
   </ItemGroup>
 
   <ItemGroup>

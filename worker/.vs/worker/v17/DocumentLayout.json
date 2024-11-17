@@ -3,16 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{84A43909-63E9-4D7E-944F-D2C0BB473E9B}|test\\test.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\test\\file-conversion\\splittests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{84A43909-63E9-4D7E-944F-D2C0BB473E9B}|test\\test.csproj|solutionrelative:test\\file-conversion\\splittests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{84A43909-63E9-4D7E-944F-D2C0BB473E9B}|test\\test.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\test\\item-handler\\splittests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{84A43909-63E9-4D7E-944F-D2C0BB473E9B}|test\\test.csproj|solutionrelative:test\\item-handler\\splittests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\exceptions\\invalidtimesegmentexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\exceptions\\invalidtimesegmentexception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{84A43909-63E9-4D7E-944F-D2C0BB473E9B}|test\\test.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\test\\item-handler\\conversiontests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{84A43909-63E9-4D7E-944F-D2C0BB473E9B}|test\\test.csproj|solutionrelative:test\\item-handler\\conversiontests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\item-handler\\workitemhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\item-handler\\workitemhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\app\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|solutionrelative:app\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,31 +26,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "InvalidTimeSegmentException.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\exceptions\\InvalidTimeSegmentException.cs",
-              "RelativeDocumentMoniker": "lib\\exceptions\\InvalidTimeSegmentException.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\exceptions\\InvalidTimeSegmentException.cs",
-              "RelativeToolTip": "lib\\exceptions\\InvalidTimeSegmentException.cs",
-              "ViewState": "AQIAAAkAAAAAAAAAAAAuwBUAAAAQAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T19:44:45.4Z"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "SplitTests.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\file-conversion\\SplitTests.cs",
-              "RelativeDocumentMoniker": "test\\file-conversion\\SplitTests.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\file-conversion\\SplitTests.cs",
-              "RelativeToolTip": "test\\file-conversion\\SplitTests.cs",
-              "ViewState": "AQIAAB0AAAAAAAAAAAD4vywAAAAmAAAA",
+              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\item-handler\\SplitTests.cs",
+              "RelativeDocumentMoniker": "test\\item-handler\\SplitTests.cs",
+              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\item-handler\\SplitTests.cs",
+              "RelativeToolTip": "test\\item-handler\\SplitTests.cs",
+              "ViewState": "AQIAAIIAAAAAAAAAAAAcwJIAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T19:40:51.536Z",
+              "WhenOpened": "2024-11-16T11:11:29.31Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ConversionTests.cs",
+              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\item-handler\\ConversionTests.cs",
+              "RelativeDocumentMoniker": "test\\item-handler\\ConversionTests.cs",
+              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\item-handler\\ConversionTests.cs",
+              "RelativeToolTip": "test\\item-handler\\ConversionTests.cs",
+              "ViewState": "AQIAAGAAAAAAAAAAAAAiwGkAAAAIAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-16T11:00:24.245Z",
               "EditorCaption": ""
             },
             {
@@ -57,9 +62,23 @@
               "RelativeDocumentMoniker": "lib\\item-handler\\WorkItemHandler.cs",
               "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\item-handler\\WorkItemHandler.cs",
               "RelativeToolTip": "lib\\item-handler\\WorkItemHandler.cs",
-              "ViewState": "AQIAABkAAAAAAAAAAAAEwC4AAAAxAAAA",
+              "ViewState": "AQIAAHMAAAAAAAAAAAAkwIMAAAAMAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-13T19:10:10.573Z"
+              "WhenOpened": "2024-11-16T10:56:57.784Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\appsettings.json",
+              "RelativeDocumentMoniker": "app\\appsettings.json",
+              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\appsettings.json",
+              "RelativeToolTip": "app\\appsettings.json",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAdAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-11-16T10:52:14.588Z",
+              "EditorCaption": ""
             }
           ]
         }

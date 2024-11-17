@@ -114,6 +114,7 @@ All messages sent to the queues are JSON objects with the following structure:
 
 - `taskId`: The ID of the task.
 - `worker`: The name of the worker.
+- `error`: The error that ocurred.
 
 **Example**:
 
@@ -122,7 +123,8 @@ All messages sent to the queues are JSON objects with the following structure:
   "pattern": "task_processing_failed",
   "data": {
     "taskId": "12345",
-    "worker": "worker1"
+    "worker": "worker1",
+    "error": "Cannot find file: test.mp4"
   }
 }
 ```
