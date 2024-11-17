@@ -147,7 +147,8 @@
 
         private void ReportProcessingStarted(ITask item)
         {
-            string message = _messageService.GetProcessingStarted(item.)
+            string message = _messageService.GetProcessingStarted(item.ID, _options.WorkerName);
+            _queuingSystem.Enqueue(_queue.TaskQueueName, message);
         }
 
         private void ReportTaskCompletion(string convertedResult)
