@@ -14,9 +14,9 @@
     using lib.exceptions;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel;
     using System.IO.Abstractions;
-    using test.item_handler;
+    using test;
     using NuGet.ContentModel;
-    using test.item_handler.mock;
+    using test.mock;
 
     internal class SplitTests
     {

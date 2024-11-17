@@ -32,7 +32,9 @@
         private readonly IStorageSystem _storage;
 
         private readonly IMultiQueueSystem<string> _queuingSystem;
+
         private readonly IMessageService _messageService;
+        
         private bool _disposed;
 
         public Worker(
@@ -44,7 +46,6 @@
             IMessageService messageService)
         {
             ArgumentNullException.ThrowIfNull(messageService);
-
             ArgumentNullException.ThrowIfNull(queuingSystem);
             ArgumentNullException.ThrowIfNull(converter);
             ArgumentNullException.ThrowIfNull(workItemHandler);
@@ -63,10 +64,11 @@
         public void Run()
 {
             SubscribeQueue();
-            SetupHeartBeat();
 
-            Console.WriteLine("Press q to quit...");
-            var key = Console.ReadKey().KeyChar;
+            if (_options.SendHeartbeat)
+            {
+                SetupHeartBeat();
+            }
         }
 
         public void Dispose()

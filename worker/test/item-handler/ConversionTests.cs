@@ -13,8 +13,7 @@
     using lib.item_handler.results;
     using System.IO.Abstractions;
     using lib.exceptions;
-    using test.item_handler.mock;
-    using test.item_handler;
+    using test.mock;
 
     internal class ConversionTests
     {

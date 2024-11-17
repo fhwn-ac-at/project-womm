@@ -12,7 +12,8 @@
     {
         public override void AmendProject(IProjectAmender amender)
         {
-            AddLogging(amender);
+            //Remove namespace testing
+            //AddLogging(amender);
         }
 
         private static void AddLogging(IProjectAmender amender)
