@@ -69,8 +69,9 @@
         }
 
         [Test]
-        public void WorkerWritesProcessingStartedIntoQueue()
+        public void WorkerNotifiesQueueWhenProcessingTasks()
         {
+
             var workerOptionsMock = GetTestingWorkerOptions();
             var converterMock = new Mock<IWorkItemConverter>();
             converterMock
@@ -85,16 +86,24 @@
             var workItemHandlerMock = new Mock<ITaskVisitor<TaskProcessedResult>>();
             workItemHandlerMock
                 .Setup(m => m.Visit(It.IsAny<Split>()))
-                .Returns((Split s) => new TaskProcessedResult(["some.mp4"]));
+                .Returns((Split s) => new TaskProcessedResult("1", ["some.mp4"]));
 
             var remoteStorageMock = new Mock<IStorageSystem>();
             var messageServiceMock = new Mock<IMessageService>();
+            
             messageServiceMock
                 .Setup(m => m.GetProcessingStarted(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns((string taskId, string workerName) =>
                 {
                     return "processing_started " + taskId + " " + workerName;
                 });
+            messageServiceMock
+                .Setup(m => m.GetProcessingCompleted(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string taskId, string workerName) =>
+                {
+                    return "processing_completed " + taskId + " " + workerName;
+                });
+
 
 
             List<string> queueItems = [];
@@ -116,14 +125,15 @@
                 messageServiceMock.Object);
 
             worker.Run();
-            //Assert.Throws<InvalidOperationException>(() => ); 
 
             // Simulate a new task upload into the queue
-            string task = "processing_started 1 my-worker";
-            queuingSystemMock.Raise(qs => qs.OnMessageReceived += null, new MessageReceivedEventArgs<string>(task));
+            string startedMessage = "processing_started 1 my-worker";
+            string completedMessage = "processing_completed 1 my-worker";
+            queuingSystemMock.Raise(qs => qs.OnMessageReceived += null, new MessageReceivedEventArgs<string>(startedMessage));
 
-            Assert.That(queueItems.Count, Is.EqualTo(1));
-            Assert.That(queueItems[0], Is.EqualTo(task));
+            Assert.That(queueItems.Count, Is.EqualTo(2));
+            Assert.That(queueItems[0], Is.EqualTo(startedMessage));
+            Assert.That(queueItems[1], Is.EqualTo(completedMessage));
         }
 
         private Mock<IOptions<WorkerOptions>> GetTestingWorkerOptions()

@@ -105,18 +105,17 @@
             {
                 ITask item = _converter.Convert(eventArgs.Message);
                 TaskProcessedResult result = item.Accept(_workItemHandler);
-                ReportProcessingStarted(item);
-                string convertedResult = _converter.Convert(result);
-                ReportTaskCompletion(convertedResult);
+                ReportTaskProcessingStarted(item);
+                ReportTaskCompletion(result);
             }
             catch (WorkItemConversionException e)
             {
-                ReportError(e);
+                ReportTaskProcessingFailure(e);
                 throw;
             }
             catch (WorkItemProcessingFailedException e)
             {
-                ReportError(e);
+                ReportTaskProcessingFailure(e);
                 throw;
             }
         }
@@ -140,19 +139,25 @@
             _queuingSystem.Enqueue(_queue.WorkerQueueName, message);
         }
 
-        private void ReportError(Exception e)
+        private void ReportTaskProcessingFailure(Exception e)
         {
             throw new NotImplementedException();
         }
 
-        private void ReportProcessingStarted(ITask item)
+        private void ReportTaskProcessingStarted(ITask item)
         {
-            string message = _messageService.GetProcessingStarted(item.ID, _options.WorkerName);
+            string message = _messageService
+                .GetProcessingStarted(item.ID, _options.WorkerName);
+
             _queuingSystem.Enqueue(_queue.TaskQueueName, message);
         }
 
-        private void ReportTaskCompletion(string convertedResult)
+        private void ReportTaskCompletion(TaskProcessedResult result)
         {
+            string message = _messageService
+                .GetProcessingCompleted(result.TaskId, _options.WorkerName);
+
+            _queuingSystem.Enqueue(_queue.TaskQueueName, message);
         }
     }
 }

@@ -18,21 +18,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Worker.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\Worker.cs",
-              "RelativeDocumentMoniker": "lib\\Worker.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\Worker.cs",
-              "RelativeToolTip": "lib\\Worker.cs",
-              "ViewState": "AQIAAHwAAAAAAAAAAAAwwIsAAAAaAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T12:35:15.145Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -41,9 +28,22 @@
               "RelativeDocumentMoniker": "test\\worker\\WorkerTests.cs",
               "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\worker\\WorkerTests.cs",
               "RelativeToolTip": "test\\worker\\WorkerTests.cs",
-              "ViewState": "AQIAAGQAAAAAAAAAAAAYwH0AAAA5AAAA",
+              "ViewState": "AQIAAGwAAAAAAAAAAAAYwIQAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-17T16:27:01.079Z",
+              "WhenOpened": "2024-11-19T12:53:47.597Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Worker.cs",
+              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\Worker.cs",
+              "RelativeDocumentMoniker": "lib\\Worker.cs",
+              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\Worker.cs",
+              "RelativeToolTip": "lib\\Worker.cs",
+              "ViewState": "AQIAAI4AAAAAAAAAAAAhwHAAAAAvAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-19T12:35:15.145Z",
               "EditorCaption": ""
             }
           ]

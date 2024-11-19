@@ -86,7 +86,7 @@
                 throw;
             }
 
-            return new TaskProcessedResult(uploadedFiles);
+            return new TaskProcessedResult(split.ID, uploadedFiles);
         }
 
         public TaskProcessedResult Visit(ConvertFormat convert)
@@ -134,7 +134,7 @@
                 throw;
             }
 
-            return new TaskProcessedResult(uploadedFiles);
+            return new TaskProcessedResult(convert.ID, uploadedFiles);
         }
 
         public TaskProcessedResult Visit(Trim trim)

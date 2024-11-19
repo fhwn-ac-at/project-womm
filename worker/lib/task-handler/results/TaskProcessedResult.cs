@@ -9,12 +9,16 @@
 
     public class TaskProcessedResult
     {
-        public TaskProcessedResult(IEnumerable<string> files)
+        public TaskProcessedResult(string taskId, IEnumerable<string> files)
         {
+            ArgumentException.ThrowIfNullOrEmpty(taskId);
             ArgumentNullException.ThrowIfNull(files);
 
+            this.TaskId = taskId;
             this.Files = files;
         }
+
+        public string TaskId { get; }
 
         public IEnumerable<string> Files { get; }
     }
