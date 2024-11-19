@@ -8,6 +8,14 @@
 
     public class Trim : ITask
     {
+        public Trim(string id)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(id, nameof(id));
+            ID = id;
+        }
+
+        public string ID { get; private set; }
+
         public T Accept<T>(ITaskVisitor<T> visitor)
         {
             return visitor.Visit(this);

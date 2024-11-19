@@ -15,29 +15,15 @@
     using lib.options;
     using System.Text.Json;
     using System.Xml.Linq;
+    using lib.item_handler.work_items;
+    using NuGet.Protocol.Plugins;
 
     internal class WorkerTests
     {
         [Test]
-        public void WorkerWritesHeartbeatIntoQueueInInterval()
+        public void WorkerSendsHeartbeatIntoQueueInInterval()
         {
-            var workerOptionsMock = new Mock<IOptions<WorkerOptions>>();
-            workerOptionsMock.Setup(o => o.Value).Returns(new WorkerOptions
-            {
-                HeartbeatSecondsDelay = 1,
-                SendHeartbeat = true,
-                WorkerName = "my-worker",
-                Queues = new QueueOptions
-                {
-                    ArtifactQueueName = "artifact-queue",
-                    HostName = "foo",
-                    Port = 0,
-                    RoutingKey = "foo",
-                    TaskQueueName = "task-queue",
-                    WorkerQueueName = "worker-queue",
-                }
-            }) ;
-
+            var workerOptionsMock = GetTestingWorkerOptions();
             var converterMock = new Mock<IWorkItemConverter>();
             var workItemHandlerMock = new Mock<ITaskVisitor<TaskProcessedResult>>();
             var remoteStorageMock = new Mock<IStorageSystem>();
@@ -82,19 +68,84 @@
             });
         }
 
-        private static string GetHeartbeatMessage(string heartbeatPattern, string workerName, string listensOn)
+        [Test]
+        public void WorkerWritesProcessingStartedIntoQueue()
         {
-            var message = new
-            {
-                pattern = heartbeatPattern,
-                data = new
-                {
-                    name = workerName,
-                    listensOn = listensOn
-                }
-            };
+            var workerOptionsMock = GetTestingWorkerOptions();
+            var converterMock = new Mock<IWorkItemConverter>();
+            converterMock
+                .Setup(m => m.Convert(It.IsAny<string>()))
+                .Returns((string value) => new Split("some-key", "00:00:01", "1"));
 
-            return JsonSerializer.Serialize(message);
+            // Set this up to stop after actually processing the task
+            converterMock
+                .Setup(m => m.Convert(It.IsAny<TaskProcessedResult>()))
+                .Returns((TaskProcessedResult value) => "parsed-task");
+
+            var workItemHandlerMock = new Mock<ITaskVisitor<TaskProcessedResult>>();
+            workItemHandlerMock
+                .Setup(m => m.Visit(It.IsAny<Split>()))
+                .Returns((Split s) => new TaskProcessedResult(["some.mp4"]));
+
+            var remoteStorageMock = new Mock<IStorageSystem>();
+            var messageServiceMock = new Mock<IMessageService>();
+            messageServiceMock
+                .Setup(m => m.GetProcessingStarted(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string taskId, string workerName) =>
+                {
+                    return "processing_started " + taskId + " " + workerName;
+                });
+
+
+            List<string> queueItems = [];
+
+            var queuingSystemMock = new Mock<IMultiQueueSystem<string>>();
+            queuingSystemMock
+                .Setup(q => q.Enqueue(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((queueName, item) =>
+                {
+                    queueItems.Add(item);
+                });
+
+            var worker = new Worker(
+                workerOptionsMock.Object,
+                converterMock.Object,
+                workItemHandlerMock.Object,
+                remoteStorageMock.Object,
+                queuingSystemMock.Object,
+                messageServiceMock.Object);
+
+            worker.Run();
+            //Assert.Throws<InvalidOperationException>(() => ); 
+
+            // Simulate a new task upload into the queue
+            string task = "processing_started 1 my-worker";
+            queuingSystemMock.Raise(qs => qs.OnMessageReceived += null, new MessageReceivedEventArgs<string>(task));
+
+            Assert.That(queueItems.Count, Is.EqualTo(1));
+            Assert.That(queueItems[0], Is.EqualTo(task));
+        }
+
+        private Mock<IOptions<WorkerOptions>> GetTestingWorkerOptions()
+        {
+            var workerOptionsMock = new Mock<IOptions<WorkerOptions>>();
+            workerOptionsMock.Setup(o => o.Value).Returns(new WorkerOptions
+            {
+                HeartbeatSecondsDelay = 1,
+                SendHeartbeat = true,
+                WorkerName = "my-worker",
+                Queues = new QueueOptions
+                {
+                    ArtifactQueueName = "artifact-queue",
+                    HostName = "foo",
+                    Port = 0,
+                    RoutingKey = "foo",
+                    TaskQueueName = "task-queue",
+                    WorkerQueueName = "worker-queue",
+                }
+            });
+
+            return workerOptionsMock;
         }
     }
 }

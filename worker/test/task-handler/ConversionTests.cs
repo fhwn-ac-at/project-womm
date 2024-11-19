@@ -35,7 +35,7 @@
                 options,
                 new FileSystem());
 
-            var testItem = new ConvertFormat("sample-30s.mp4", ".avi");
+            var testItem = new ConvertFormat("sample-30s.mp4", ".avi", "1");
 
             var result = testItem.Accept(itemHandler);
             string convertedFile = Path.Combine(_itemSource, result.Files.ToArray()[0]);
@@ -69,7 +69,7 @@
                 options,
                 faultyFileSystem);
 
-            var convert = new ConvertFormat("sample-30s.mp4", ".avi");
+            var convert = new ConvertFormat("sample-30s.mp4", ".avi", "1");
 
             Assert.Throws<WorkItemProcessingFailedException>(() =>
             {
@@ -94,7 +94,7 @@
                 options,
                 new FileSystem());
 
-            var convert = new ConvertFormat("sample-30s.mp4", ".avi");
+            var convert = new ConvertFormat("sample-30s.mp4", ".avi", "1");
 
             Assert.Throws<StorageException>(() =>
             {

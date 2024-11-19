@@ -8,14 +8,18 @@
 
     public class ConvertFormat : ITask
     {
-        public ConvertFormat(string keyName, string goalFormat)
+        public ConvertFormat(string keyName, string goalFormat, string id)
         {
             ArgumentException.ThrowIfNullOrEmpty(keyName, nameof(keyName));
+            ArgumentException.ThrowIfNullOrEmpty(id, nameof(id));
             ArgumentException.ThrowIfNullOrWhiteSpace(goalFormat, nameof(goalFormat));
             
-            this.KeyName = keyName;
-            this.GoalFormat = goalFormat;
+            KeyName = keyName;
+            GoalFormat = goalFormat;
+            ID = id;
         }
+
+        public string ID { get; private set; }
 
         public string KeyName { get; private set; }
 

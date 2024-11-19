@@ -35,7 +35,7 @@
         public void SplitConstructorThrowsOnInvalidTimeData(string input)
         {
             Assert.Throws<InvalidTimeSegmentException>(
-                () => new Split("some-key", input));
+                () => new Split("some-key", input, "1"));
         }
 
         [TestCase("0:0:0")]
@@ -46,7 +46,7 @@
         [TestCase("00:10:50")]
         public void SplitConstructorDoesNotThrowOnInvalidTimeData(string input)
         {
-            Assert.DoesNotThrow(() => new Split("some-key", input));
+            Assert.DoesNotThrow(() => new Split("some-key", input, "1"));
         }
 
         [TestCase("00:00:10", 3)]
@@ -65,7 +65,7 @@
                 options,
                 new FileSystem());
 
-            var testItem = new Split("sample-30s.mp4", time);
+            var testItem = new Split("sample-30s.mp4", time, "1");
 
             var uploadedFiles = testItem.Accept(itemHandler);
 
@@ -99,7 +99,7 @@
                 options,
                 faultyFileSystem);
 
-            var split = new Split("sample-30s.mp4", "00:00:10");
+            var split = new Split("sample-30s.mp4", "00:00:10", "1");
 
             Assert.Throws<WorkItemProcessingFailedException>(() =>
             {
@@ -125,7 +125,7 @@
                 options,
                 new FileSystem());
 
-            var split = new Split("sample-30s.mp4", "00:00:10");
+            var split = new Split("sample-30s.mp4", "00:00:10", "1");
 
             Assert.Throws<StorageException>(() =>
             {

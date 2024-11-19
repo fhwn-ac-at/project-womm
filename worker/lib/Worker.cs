@@ -153,7 +153,6 @@
 
         private void ReportTaskCompletion(string convertedResult)
         {
-            throw new NotImplementedException();
         }
     }
 }

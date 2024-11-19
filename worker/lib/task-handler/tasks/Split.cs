@@ -10,34 +10,22 @@
 
     public class Split : ITask
     {
-        private string _id;
-
-        public Split(string keyName, string segmentTime)
+        public Split(string keyName, string segmentTime, string id)
         {
             ArgumentException.ThrowIfNullOrEmpty(keyName);
+            ArgumentException.ThrowIfNullOrEmpty(id);
             InvalidTimeSegmentException.ThrowIfNullOrInvalid(segmentTime);
             
-            this.SegmentTime = segmentTime;
-            this.KeyName = keyName;
+            SegmentTime = segmentTime;
+            KeyName = keyName;
+            ID = id;
         }
 
         public string SegmentTime { get; private set; }
 
         public string KeyName { get; private set; }
 
-        public string ID
-        {
-            get
-            {
-                return _id;
-            }
-
-            private set
-            {
-                ArgumentException.ThrowIfNullOrEmpty(value, nameof(ID));
-                _id = value;
-            }
-        }
+        public string ID { get; private set; }
 
         public T Accept<T>(ITaskVisitor<T> visitor)
         {
