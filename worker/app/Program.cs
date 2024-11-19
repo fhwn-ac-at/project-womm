@@ -20,7 +20,7 @@
     public class Program
     {
         internal static void Main(string[] args)
-        {
+        { 
             IHost host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(logging =>
                 {
@@ -47,7 +47,8 @@
                 services.AddTransient<Worker>();
                 services.AddTransient<ITaskConverter, JSONTaskConverter>();
                 services.AddTransient<ITaskVisitor<TaskProcessedResult>, TaskHandler>();
-                //services.AddTransient<IStorageSystem, AmazonS3Storage>();
+                
+                services.AddTransient<IStorageSystem, AmazonS3Storage>();
                 var ls = new LocalStorageSystem("C:\\Users\\micha\\Desktop\\local-storage");
                 services.AddTransient<IStorageSystem, LocalStorageSystem>(s =>
                 {

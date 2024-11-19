@@ -137,11 +137,6 @@
             return new TaskProcessedResult(convert.ID, uploadedFiles);
         }
 
-        public TaskProcessedResult Visit(Trim trim)
-        {
-            throw new NotImplementedException();
-        }
-
         private string DownloadFileIntoTempFolder(string fileKey)
         {
             string localPath = _fileSystem.Path.Combine(_rootPath, GenerateId());
