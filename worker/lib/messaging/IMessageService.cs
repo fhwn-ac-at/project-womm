@@ -32,7 +32,7 @@
         /// <param name="taskId">ID of the task that failed.</param>
         /// <param name="workerName">Name of the worker that attempted the task.</param>
         /// <returns>Serialized JSON processing failed message.</returns>
-        string GetProcessingFailed(string taskId, string workerName);
+        string GetProcessingFailed(string taskId, string workerName, string error);
 
         /// <summary>
         /// Generates a message indicating that an artifact has been uploaded.

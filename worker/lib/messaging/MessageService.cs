@@ -63,7 +63,7 @@
             return JsonSerializer.Serialize(message);
         }
 
-        public string GetProcessingFailed(string taskId, string workerName)
+        public string GetProcessingFailed(string taskId, string workerName, string error)
         {
             var message = new
             {
@@ -71,7 +71,8 @@
                 data = new
                 {
                     taskId = taskId,
-                    worker = workerName
+                    worker = workerName,
+                    error = error
                 }
             };
 

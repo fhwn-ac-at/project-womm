@@ -17,6 +17,7 @@
     using System.Xml.Linq;
     using lib.item_handler.work_items;
     using NuGet.Protocol.Plugins;
+    using lib.exceptions;
 
     internal class WorkerTests
     {
@@ -73,6 +74,8 @@
         {
 
             var workerOptionsMock = GetTestingWorkerOptions();
+            workerOptionsMock.Object.Value.SendHeartbeat = false;
+
             var converterMock = new Mock<IWorkItemConverter>();
             converterMock
                 .Setup(m => m.Convert(It.IsAny<string>()))
@@ -134,6 +137,111 @@
             Assert.That(queueItems.Count, Is.EqualTo(2));
             Assert.That(queueItems[0], Is.EqualTo(startedMessage));
             Assert.That(queueItems[1], Is.EqualTo(completedMessage));
+        }
+
+        [Test]
+        public void WorkerReportsParsingError()
+        {
+            var workerOptionsMock = GetTestingWorkerOptions();
+            workerOptionsMock.Object.Value.SendHeartbeat = false;
+
+            var converterMock = new Mock<IWorkItemConverter>();
+            converterMock
+                .Setup(m => m.Convert(It.IsAny<string>()))
+                .Returns((string value) => throw new WorkItemConversionException());
+
+            var workItemHandlerMock = new Mock<ITaskVisitor<TaskProcessedResult>>();
+            var remoteStorageMock = new Mock<IStorageSystem>();
+            var messageServiceMock = new Mock<IMessageService>();
+
+            string expectedError = string.Empty;
+            messageServiceMock
+                .Setup(m => m.GetProcessingFailed(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string taskid, string workerName, string error) =>
+                {
+                    expectedError = taskid + " " + workerName + " " + error;
+                    return expectedError;
+                });
+
+            List<string> queueItems = [];
+
+            var queuingSystemMock = new Mock<IMultiQueueSystem<string>>();
+            queuingSystemMock
+                .Setup(q => q.Enqueue(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((queueName, item) =>
+                {
+                    queueItems.Add(item);
+                });
+
+            var worker = new Worker(
+                workerOptionsMock.Object,
+                converterMock.Object,
+                workItemHandlerMock.Object,
+                remoteStorageMock.Object,
+                queuingSystemMock.Object,
+                messageServiceMock.Object);
+
+            worker.Run();
+
+            queuingSystemMock.Raise(qs => qs.OnMessageReceived += null, new MessageReceivedEventArgs<string>(string.Empty));
+
+            Assert.That(queueItems.Count, Is.EqualTo(1));
+            Assert.That(queueItems[0], Is.EqualTo(expectedError));
+        }
+
+        [Test]
+        public void WorkerReportsExecutionError()
+        {
+            var workerOptionsMock = GetTestingWorkerOptions();
+            workerOptionsMock.Object.Value.SendHeartbeat = false;
+
+            var converterMock = new Mock<IWorkItemConverter>();
+            var failingTask = new Split("some-key", "00:00:05", "1");
+            converterMock
+                .Setup(m => m.Convert(It.IsAny<string>()))
+                .Returns((string value) => failingTask);
+
+            var workItemHandlerMock = new Mock<ITaskVisitor<TaskProcessedResult>>();
+            workItemHandlerMock
+                .Setup(m => m.Visit(It.IsAny<Split>()))
+                .Throws(new WorkItemProcessingFailedException("Oops something went wrong...", new Exception(), failingTask)) ;
+
+            var remoteStorageMock = new Mock<IStorageSystem>();
+            var messageServiceMock = new Mock<IMessageService>();
+
+            string expectedError = string.Empty;
+            messageServiceMock
+                .Setup(m => m.GetProcessingFailed(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string taskid, string workerName, string error) =>
+                {
+                    expectedError = taskid + " " + workerName + " " + error;
+                    return expectedError;
+                });
+
+            List<string> queueItems = [];
+
+            var queuingSystemMock = new Mock<IMultiQueueSystem<string>>();
+            queuingSystemMock
+                .Setup(q => q.Enqueue(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((queueName, item) =>
+                {
+                    queueItems.Add(item);
+                });
+
+            var worker = new Worker(
+                workerOptionsMock.Object,
+                converterMock.Object,
+                workItemHandlerMock.Object,
+                remoteStorageMock.Object,
+                queuingSystemMock.Object,
+                messageServiceMock.Object);
+
+            worker.Run();
+
+            queuingSystemMock.Raise(qs => qs.OnMessageReceived += null, new MessageReceivedEventArgs<string>(string.Empty));
+
+            Assert.That(queueItems.Count, Is.EqualTo(1));
+            Assert.That(queueItems[0], Is.EqualTo(expectedError));
         }
 
         private Mock<IOptions<WorkerOptions>> GetTestingWorkerOptions()

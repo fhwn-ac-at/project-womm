@@ -101,22 +101,27 @@
 
         private void MessageReceivedCallback(object? sender, MessageReceivedEventArgs<string> eventArgs)
         {
+            ITask task;
+
             try
             {
-                ITask item = _converter.Convert(eventArgs.Message);
-                TaskProcessedResult result = item.Accept(_workItemHandler);
-                ReportTaskProcessingStarted(item);
-                ReportTaskCompletion(result);
+                task = _converter.Convert(eventArgs.Message);
             }
             catch (WorkItemConversionException e)
             {
                 ReportTaskProcessingFailure(e);
-                throw;
+                return;
+            }
+
+            try
+            {
+                TaskProcessedResult result = task.Accept(_workItemHandler);
+                ReportTaskProcessingStarted(task);
+                ReportTaskCompletion(result);
             }
             catch (WorkItemProcessingFailedException e)
             {
-                ReportTaskProcessingFailure(e);
-                throw;
+                ReportTaskProcessingFailure(task, e);
             }
         }
 
@@ -141,7 +146,18 @@
 
         private void ReportTaskProcessingFailure(Exception e)
         {
-            throw new NotImplementedException();
+            string message = _messageService
+                .GetProcessingFailed("-1", _options.WorkerName, e.Message);
+
+            _queuingSystem.Enqueue(_queue.TaskQueueName, message);
+        }
+
+        private void ReportTaskProcessingFailure(ITask task, Exception e)
+        {
+            string message = _messageService
+                .GetProcessingFailed(task.ID, _options.WorkerName, e.Message);
+
+            _queuingSystem.Enqueue(_queue.TaskQueueName, message);
         }
 
         private void ReportTaskProcessingStarted(ITask item)
