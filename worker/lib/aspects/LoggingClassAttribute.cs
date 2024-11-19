@@ -1,6 +1,5 @@
-﻿namespace lib.aspects.logging
+﻿namespace lib.aspects
 {
-    using Metalama.Framework.Code;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -12,7 +11,7 @@
     {
         public LoggingClassAttribute()
         {
-            
+
         }
     }
 }

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
+    using System.Security;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -26,5 +27,15 @@
 
         [Required]
         public string RoutingKey { get; set; }
+
+        [Required]
+        public string Exchange{ get; set; }
+
+        [Required]
+        public string Username{ get; set; }
+
+        [Required]
+
+        public string Password { get; set; }
     }
 }

@@ -1,6 +1,5 @@
-﻿namespace lib.aspects.logging
+﻿namespace lib.aspects
 {
-    using Metalama.Framework.Code;
     using Metalama.Framework.Fabrics;
     using System;
     using System.Collections.Generic;
@@ -12,8 +11,7 @@
     {
         public override void AmendProject(IProjectAmender amender)
         {
-            //Remove namespace testing
-            //AddLogging(amender);
+            AddLogging(amender);
         }
 
         private static void AddLogging(IProjectAmender amender)

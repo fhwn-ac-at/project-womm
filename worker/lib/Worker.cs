@@ -1,6 +1,6 @@
 ﻿namespace lib
 {
-    using lib.aspects.logging;
+    using lib.aspects;
     using lib.exceptions;
     using lib.item_handler;
     using lib.item_handler.results;
@@ -91,7 +91,7 @@
         private void SubscribeQueue()
         {
             _queuingSystem.OnMessageReceived += MessageReceivedCallback;
-            _queuingSystem.Startup(_queue.WorkerQueueName);
+            _queuingSystem.Init();
         }
 
         private void MessageReceivedCallback(object? sender, MessageReceivedEventArgs<string> eventArgs)

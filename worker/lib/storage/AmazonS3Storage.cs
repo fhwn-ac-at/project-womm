@@ -4,7 +4,7 @@
     using Amazon.S3;
     using Amazon.S3.Model;
     using Amazon.S3.Transfer;
-    using lib.aspects.logging;
+    using lib.aspects;
     using lib.exceptions;
     using lib.options;
     using Microsoft.Extensions.Options;

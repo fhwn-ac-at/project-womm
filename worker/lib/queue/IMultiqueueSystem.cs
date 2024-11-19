@@ -8,11 +8,9 @@
 
     public interface IMultiQueueSystem<TMessage> : IDisposable
     {
-        public bool IsExistent(string queueId);
+        public void Init();
 
         public void Enqueue(string queueId, TMessage message);
-
-        public void Startup(string listeningQueueId);
 
         public event EventHandler<MessageReceivedEventArgs<TMessage>> OnMessageReceived;
     }

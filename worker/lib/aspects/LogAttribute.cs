@@ -1,4 +1,4 @@
-﻿namespace lib.aspects.logging
+﻿namespace lib.aspects
 {
     using Metalama.Extensions.DependencyInjection;
     using Metalama.Framework.Aspects;
@@ -6,9 +6,10 @@
     using Metalama.Framework.Code.SyntaxBuilders;
     using Metalama.Framework.Eligibility;
     using Microsoft.Extensions.Logging;
+
     public class LogAttribute : OverrideMethodAspect
     {
-        [IntroduceDependency] 
+        [IntroduceDependency]
         private readonly ILogger _logger;
 
         public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
@@ -20,6 +21,12 @@
                 .MustSatisfy(
                 t => t.Attributes.FirstOrDefault(a => a.Type.Name == nameof(LoggingClassAttribute)) != null,
                 t => $"{t} must have the {nameof(LoggingClassAttribute)}");
+
+            builder.MustSatisfy(
+               m => m.Accessibility == Accessibility.Private 
+            || m.Accessibility == Accessibility.Protected
+            || m.Accessibility == Accessibility.Public,
+               m => $"{m} must be private or public.");
         }
 
         public override dynamic? OverrideMethod()
@@ -28,7 +35,7 @@
             entryMessage.AddText(" started.");
             string em = entryMessage.ToValue();
             this._logger.LogInformation(em);
-            
+
             try
             {
                 var result = meta.Proceed();
@@ -51,7 +58,7 @@
 
                 return result;
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 var failureMessage = BuildInterpolatedString(false);
                 failureMessage.AddText(" failed: ");
