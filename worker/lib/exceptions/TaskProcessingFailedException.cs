@@ -7,9 +7,9 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class WorkItemProcessingFailedException : Exception
+    public class TaskProcessingFailedException : Exception
     {
-        public WorkItemProcessingFailedException(string message, Exception innerException, ITask item) : base(message, innerException)
+        public TaskProcessingFailedException(string message, Exception innerException, ITask item) : base(message, innerException)
         {
             ArgumentNullException.ThrowIfNull(item);
 

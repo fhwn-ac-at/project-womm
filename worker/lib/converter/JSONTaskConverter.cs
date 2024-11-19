@@ -9,7 +9,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class JSONWorkItemConverter : IWorkItemConverter
+    public class JSONTaskConverter : ITaskConverter
     {
         public ITask Convert(string input)
         {

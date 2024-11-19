@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public  class WorkItemConversionException : Exception
+    public  class TaskConversionException : Exception
     {
     }
 }

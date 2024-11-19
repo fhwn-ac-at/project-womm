@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{84A43909-63E9-4D7E-944F-D2C0BB473E9B}|test\\test.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\test\\worker\\workertests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{84A43909-63E9-4D7E-944F-D2C0BB473E9B}|test\\test.csproj|solutionrelative:test\\worker\\workertests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,30 +18,30 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "WorkerTests.cs",
               "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\worker\\WorkerTests.cs",
               "RelativeDocumentMoniker": "test\\worker\\WorkerTests.cs",
               "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\worker\\WorkerTests.cs",
               "RelativeToolTip": "test\\worker\\WorkerTests.cs",
-              "ViewState": "AQIAAMMAAAAAAAAAAAApwM4AAAA9AAAA",
+              "ViewState": "AQIAAIgAAAAAAAAAAAAtwKEAAABTAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T13:42:58.348Z",
+              "WhenOpened": "2024-11-19T14:33:58.66Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Worker.cs",
               "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\Worker.cs",
               "RelativeDocumentMoniker": "lib\\Worker.cs",
               "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\Worker.cs",
               "RelativeToolTip": "lib\\Worker.cs",
-              "ViewState": "AQIAAGUAAAAAAAAAAIA1wHQAAAAMAAAA",
+              "ViewState": "AQIAAJsAAAAAAAAAAAAiwKYAAAAMAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-11-19T12:35:15.145Z",
               "EditorCaption": ""

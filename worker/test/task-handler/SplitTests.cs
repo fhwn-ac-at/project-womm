@@ -101,7 +101,7 @@
 
             var split = new Split("sample-30s.mp4", "00:00:10", "1");
 
-            Assert.Throws<WorkItemProcessingFailedException>(() =>
+            Assert.Throws<TaskProcessingFailedException>(() =>
             {
                 _ = split.Accept(itemHandler);
             });

@@ -8,7 +8,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public interface IWorkItemConverter
+    public interface ITaskConverter
     {
         ITask Convert(string item);
 

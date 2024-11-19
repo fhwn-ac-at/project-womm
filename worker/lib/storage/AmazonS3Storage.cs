@@ -5,6 +5,7 @@
     using Amazon.S3.Model;
     using Amazon.S3.Transfer;
     using lib.aspects.logging;
+    using lib.exceptions;
     using lib.options;
     using Microsoft.Extensions.Options;
     using System;
@@ -71,20 +72,51 @@
             }
 
             TransferUtility transferUtility = new TransferUtility(_client);
-            TransferUtilityDownloadRequest request = new()
-            {
-                BucketName = _options.BucketName,
-                Key = keyName,
-                FilePath = localPath
-            };
-
             try
             {
-                transferUtility.Download(request);
+                if (File.Exists(localPath))
+                {
+                    string fileKey = keyName + Path.GetFileName(localPath);
+                    TransferUtilityUploadRequest fileRequest = new()
+                    {
+                        BucketName = _options.BucketName,
+                        Key = fileKey,
+                        FilePath = localPath
+                    };
+
+                    transferUtility.Upload(fileRequest);
+                }
+                else if (Directory.Exists(localPath))
+                {
+
+                    var files = Directory.GetFiles(localPath, "*", SearchOption.AllDirectories);
+                    if (files.Length == 0)
+                    {
+                        throw new StorageException("No files were found in "  + localPath);
+                    }
+
+                    foreach (var file in files)
+                    {
+                        string fileKey = keyName + file;
+
+                        TransferUtilityUploadRequest dirFileRequest = new()
+                        {
+                            BucketName = _options.BucketName,
+                            Key = fileKey,
+                            FilePath = file
+                        };
+
+                        transferUtility.Upload(dirFileRequest);
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException($"The given path is neither a file nor a directory: {localPath}");
+                }
             }
             catch (AmazonS3Exception e)
             {
-                throw new InvalidOperationException(e.Message);
+                throw new InvalidOperationException($"Failed to upload to S3: {e.Message}", e);
             }
         }
 

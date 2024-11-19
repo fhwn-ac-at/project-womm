@@ -36,7 +36,7 @@
                     .Bind(config.GetRequiredSection("Messaging"));
 
                 services.AddTransient<Worker>();
-                services.AddTransient<IWorkItemConverter, JSONWorkItemConverter>();
+                services.AddTransient<ITaskConverter, JSONTaskConverter>();
                 services.AddTransient<ITaskVisitor<TaskProcessedResult>, TaskHandler>();
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
                 services.AddTransient<IFileSystem, System.IO.Abstractions.FileSystem>();

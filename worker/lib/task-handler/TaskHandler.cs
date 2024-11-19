@@ -48,7 +48,7 @@
             }
             catch (IOException e)
             {
-                throw new WorkItemProcessingFailedException("Unable to download File locally: " + e.Message, e, split);
+                throw new TaskProcessingFailedException("Unable to download File locally: " + e.Message, e, split);
             }
 
             FFmpegCommand command = new(
@@ -79,7 +79,7 @@
             }
             catch (IOException e)
             {
-                throw new WorkItemProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, split);
+                throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, split);
             }
             catch (StorageException)
             {
@@ -102,7 +102,7 @@
             }
             catch (IOException e)
             {
-                throw new WorkItemProcessingFailedException("Unable to download File locally: " + e.Message, e, convert);
+                throw new TaskProcessingFailedException("Unable to download File locally: " + e.Message, e, convert);
             }
 
             FFmpegCommand command = new(
@@ -127,7 +127,7 @@
             }
             catch (IOException e)
             {
-                throw new WorkItemProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, convert);
+                throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, convert);
             }
             catch (StorageException)
             {

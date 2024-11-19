@@ -1,6 +1,5 @@
 ﻿namespace lib
 {
-    using Amazon.S3.Model;
     using lib.aspects.logging;
     using lib.exceptions;
     using lib.item_handler;
@@ -11,11 +10,7 @@
     using lib.settings;
     using lib.storage;
     using Microsoft.Extensions.Options;
-    using RabbitMQ.Client;
-    using RabbitMQ.Client.Events;
-    using RabbitMQ.Client.Exceptions;
     using System;
-    using System.Threading.Channels;
     using System.Timers;
 
     [LoggingClass]
@@ -25,7 +20,7 @@
 
         private QueueOptions _queue;
         
-        private readonly IWorkItemConverter _converter;
+        private readonly ITaskConverter _converter;
 
         private readonly ITaskVisitor<TaskProcessedResult> _workItemHandler;
 
@@ -39,8 +34,8 @@
 
         public Worker(
             IOptions<WorkerOptions> options,
-            IWorkItemConverter converter,
-            ITaskVisitor<TaskProcessedResult> workItemHandler,
+            ITaskConverter converter,
+            ITaskVisitor<TaskProcessedResult> taskHandler,
             IStorageSystem remoteStorage,
             IMultiQueueSystem<string> queuingSystem,
             IMessageService messageService)
@@ -48,14 +43,14 @@
             ArgumentNullException.ThrowIfNull(messageService);
             ArgumentNullException.ThrowIfNull(queuingSystem);
             ArgumentNullException.ThrowIfNull(converter);
-            ArgumentNullException.ThrowIfNull(workItemHandler);
+            ArgumentNullException.ThrowIfNull(taskHandler);
             ArgumentNullException.ThrowIfNull(options.Value);
             ArgumentNullException.ThrowIfNull(remoteStorage);
 
             _options = options.Value;
             _queue = _options.Queues;
             _converter = converter;
-            _workItemHandler = workItemHandler;
+            _workItemHandler = taskHandler;
             _storage = remoteStorage;
             _queuingSystem = queuingSystem;
             _messageService = messageService;
@@ -107,19 +102,31 @@
             {
                 task = _converter.Convert(eventArgs.Message);
             }
-            catch (WorkItemConversionException e)
+            catch (TaskConversionException e)
             {
                 ReportTaskProcessingFailure(e);
                 return;
             }
 
+            TaskProcessedResult result;
             try
             {
-                TaskProcessedResult result = task.Accept(_workItemHandler);
+                result = task.Accept(_workItemHandler);
                 ReportTaskProcessingStarted(task);
                 ReportTaskCompletion(result);
             }
-            catch (WorkItemProcessingFailedException e)
+            catch (TaskProcessingFailedException e)
+            {
+                ReportTaskProcessingFailure(task, e);
+                return;
+            }
+
+            try
+            {
+                string artifactId = UploadResult(result);
+                ReportArtifactUploaded(task, artifactId);
+            }
+            catch (StorageException e)
             {
                 ReportTaskProcessingFailure(task, e);
             }
@@ -174,6 +181,26 @@
                 .GetProcessingCompleted(result.TaskId, _options.WorkerName);
 
             _queuingSystem.Enqueue(_queue.TaskQueueName, message);
+        }
+
+        private void ReportArtifactUploaded(ITask task, string artifactId)
+        {
+            string message = _messageService
+                .GetArtifactUploaded(task.ID, artifactId);
+
+            _queuingSystem.Enqueue(_queue.ArtifactQueueName, message);
+        }
+
+        private string UploadResult(TaskProcessedResult result)
+        {
+            string artifactID = Guid.NewGuid().ToString() ;
+
+            foreach (var file in result.Files)
+            {
+                _storage.Upload(file, artifactID);
+            }
+
+            return artifactID;
         }
     }
 }

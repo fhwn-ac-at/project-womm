@@ -71,7 +71,7 @@
 
             var convert = new ConvertFormat("sample-30s.mp4", ".avi", "1");
 
-            Assert.Throws<WorkItemProcessingFailedException>(() =>
+            Assert.Throws<TaskProcessingFailedException>(() =>
             {
                 _ = convert.Accept(itemHandler);
             });
