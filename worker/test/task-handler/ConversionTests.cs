@@ -114,11 +114,11 @@
                 File.Delete(upload);
             }
 
-            var downloads = Directory.EnumerateFiles(_rootDir);
+            var downloads = Directory.EnumerateDirectories(_rootDir);
 
             foreach (var donwload in downloads)
             {
-                File.Delete(donwload);
+                Directory.Delete(donwload, true);
             }
         }
     }
