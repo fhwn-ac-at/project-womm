@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { DagModule } from './dag/dag.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -42,7 +40,7 @@ import { QueueModule } from './queue/queue.module';
     TaskQueueModule,
     QueueModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule { }

@@ -6,7 +6,7 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-ARG NODE_VERSION=16.16.0
+ARG NODE_VERSION=18.18.0
 
 ################################################################################
 # Use node image for base image for all stages.
@@ -80,6 +80,7 @@ EXPOSE 3000
 # Run the application in development mode.
 CMD ["npm", "run", "start:dev"]
 
+
 ################################################################################
 # Create a new stage to run the application with minimal runtime dependencies
 # where the necessary files are copied from the build stage.
@@ -104,4 +105,4 @@ COPY --from=build /usr/src/app/dist ./dist
 EXPOSE 3000
 
 # Run the application.
-CMD npm run start:prod
+CMD npm start:prod

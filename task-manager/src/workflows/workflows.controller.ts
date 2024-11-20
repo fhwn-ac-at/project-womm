@@ -3,6 +3,7 @@ import { WorkflowsService } from './workflows.service';
 import { WorkflowDefinitionDto } from './dto/workflow-definition.dto';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { GetWorkflowOptions } from './dto/get-workflow-options.dto';
+import { MessagePattern } from '@nestjs/microservices';
 
 @Controller('/workflows')
 export class WorkflowsController {
@@ -18,6 +19,16 @@ export class WorkflowsController {
   // @UseInterceptors(ClassSerializerInterceptor)
   async findOne(@Param('id') id: string, @Query() query: GetWorkflowOptions) {
     return await this.workflowsService.findOne(id, query);
+  }
+
+  @MessagePattern('createWorkflow')
+  async createByMicroservice(createWorkflowDto: WorkflowDefinitionDto) {
+    return await this.workflowsService.create(createWorkflowDto);
+  }
+
+  @MessagePattern('findOneWorkflow')
+  async findOneByMicroservice(data: { id: string, query: GetWorkflowOptions }) {
+    return await this.workflowsService.findOne(data.id, data.query);
   }
 
   // @MessagePattern('createWorkflow')

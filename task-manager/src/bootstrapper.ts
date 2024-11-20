@@ -18,6 +18,17 @@ export function internalBootstrap(app: INestApplication<any>) {
     transport: Transport.RMQ,
     options: {
       urls: [process.env.RABBITMQ_URL],
+      queue: 'workflow_control',
+      queueOptions: {
+        durable: true
+      }
+    }
+  });
+
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RABBITMQ_URL],
       queue: 'artifact_events',
       queueOptions: {
         durable: true
