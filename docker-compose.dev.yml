@@ -55,17 +55,17 @@ services:
       - app-network
 
   minio:
-    image: docker.io/bitnami/minio:2022
+    image: docker.io/bitnami/minio:2024
     ports:
       - '9000:9000'
       - '9001:9001'
     networks:
       - app-network
     volumes:
-      - 'minio_data:/data'
+      - 'minio_data:/bitnami/minio/data'
     environment:
-      - MINIO_ROOT_USER=minio
-      - MINIO_ROOT_PASSWORD=minio
+      - MINIO_ROOT_USER=minioRootUser
+      - MINIO_ROOT_PASSWORD=miniominioRootUser$
       - MINIO_DEFAULT_BUCKETS=womm
 
   task-manager:
@@ -104,13 +104,15 @@ services:
       - app-network
     
     volumes:
-      - ./task-manager/src:/usr/src/app/src
-      - ./task-manager/test:/usr/src/app/test
+      - ./api/src:/usr/src/app/src
+      - ./api/test:/usr/src/app/test
     environment:
       MONGO_CONNECTION: mongodb://mongo1:27017,mongo2:27018,mongo3:27019/mydb?replicaSet=rs0
       RABBITMQ_URL: amqp://rabbitmq:5672
       NODE_ENV: dev
       S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY_ID: minioRootUser
+      S3_SECRET_ACCESS_KEY: miniominioRootUser$
 
 networks:
   app-network:

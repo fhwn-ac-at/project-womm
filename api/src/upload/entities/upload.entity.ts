@@ -12,10 +12,10 @@ export class RegisteredUpload {
   @Prop({
     default: uuidv4
   })
-  id: RegisteredUploadId;
+  uploadId: RegisteredUploadId;
 
   @Prop()
-  s3Path: S3Path;
+  _s3Path: S3Path;
 
   /**
    * The expected size of the file in bytes.
@@ -23,6 +23,7 @@ export class RegisteredUpload {
   @Prop()
   expectedSize: number;
 
+  maxPartSize: number;
 }
 
 export const RegisteredUploadSchema = SchemaFactory.createForClass(RegisteredUpload);

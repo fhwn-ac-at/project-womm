@@ -14,11 +14,10 @@ export class Workspace {
   })
   id: WorkspaceId;
 
-  @Exclude()
   @Prop({
     default: () => `${uuidv4()}/`
   })
-  s3BasePath: S3Path;
+  _s3BasePath: S3Path;
 
   @Prop({
     default: []

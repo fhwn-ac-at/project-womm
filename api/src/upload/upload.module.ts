@@ -11,6 +11,7 @@ import { RegisteredUpload, RegisteredUploadSchema } from './entities/upload.enti
     MongooseModule.forFeature([
       { name: RegisteredUpload.name, schema: RegisteredUploadSchema }
     ])
-  ]
+  ],
+  exports: [UploadService]
 })
 export class UploadModule { }

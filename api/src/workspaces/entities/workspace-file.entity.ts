@@ -23,9 +23,8 @@ export class WorkspaceFile {
   @Prop()
   uploadedAt?: Date;
 
-  @Exclude()
   @Prop()
-  s3Path: S3Path;
+  _s3Path: S3Path;
 
   @Prop({
     type: FileMetadataSchema

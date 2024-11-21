@@ -22,6 +22,11 @@ export class WorkspacesController {
     return this.workspacesService.findAll();
   }
 
+  @Get(':workspaceId')
+  findOne(@Param('workspaceId') workspaceId: WorkspaceId) {
+    return this.workspacesService.findOne(workspaceId);
+  }
+
   @Put(':workspaceId/files')
   addFile(@Body() addFileDto: AddFileDto, @Param('workspaceId') workspaceId: WorkspaceId) {
     return this.workspacesService.addFile(workspaceId, addFileDto);

@@ -69,7 +69,7 @@ ENV NODE_ENV development
 RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=package-lock.json,target=package-lock.json \
     --mount=type=cache,target=/root/.npm \
-    npm install
+    npm ci
 
 # Copy source files for live development.
 COPY . .
