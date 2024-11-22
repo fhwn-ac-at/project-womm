@@ -16,7 +16,7 @@ export class StorageService {
     private readonly config: ConfigService
   ) { }
 
-  async uploadFileFromBuffer(buffer: Buffer, path: S3Path) {
+  public async uploadFileFromBuffer(buffer: Buffer, path: S3Path) {
     this.logger.log(`Uploading file to S3 bucket ${this.bucketName} at path ${path}`);
 
     this.s3.createMultipartUpload
@@ -24,6 +24,25 @@ export class StorageService {
     return this.s3.putObject({
       Bucket: this.bucketName,
       Key: path,
+      Body: buffer
+    });
+  }
+
+  public async startMultiPartUpload(path: S3Path) {
+    const res = await this.s3.createMultipartUpload({
+      Bucket: this.bucketName,
+      Key: path
+    });
+
+    return res.UploadId;
+  }
+
+  public async uplaodPart(uploadId: string, partNumber: number, buffer: Buffer, path: S3Path) {
+    return this.s3.uploadPart({
+      Bucket: this.bucketName,
+      Key: path,
+      PartNumber: partNumber,
+      UploadId: uploadId,
       Body: buffer
     });
   }
