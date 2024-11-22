@@ -39,7 +39,9 @@ export class WorkspacesService {
     const upload = await this.uploadService.create({
       expectedSize: addFileDto.fileSize,
       _s3Path: s3Path,
-      maxPartSize: this.configService.get('MAX_UPLOAD_PART_SIZE', 64 * 1024 * 1024)
+      maxPartSize: this.configService.get('MAX_UPLOAD_PART_SIZE', 64 * 1024 * 1024),
+      parts: [],
+      uploadedSize: 0
     })
 
     const file = new WorkspaceFile({

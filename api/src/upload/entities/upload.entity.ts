@@ -3,6 +3,7 @@ import { S3Path } from "../../types/s3Path.type";
 import { Exclude } from "class-transformer";
 import { v4 as uuidv4 } from 'uuid';
 import { UplaodPartDto } from "../dto/upload-part.dto";
+import { RegisterdUplaodPart, RegisterdUplaodPartSchema } from "./upload-part.entity";
 
 
 export type RegisteredUploadId = string & { __brand: "registeredUploadId" };
@@ -19,7 +20,7 @@ export class RegisteredUpload {
   _s3Path: S3Path;
 
   @Prop()
-  _s3UploadId: string;
+  _s3UploadId?: string;
 
   /**
    * The expected size of the file in bytes.
@@ -27,8 +28,16 @@ export class RegisteredUpload {
   @Prop()
   expectedSize: number;
 
-  @Prop()
-  parts: UplaodPartDto[];
+  @Prop({
+    default: 0
+  })
+  uploadedSize: number = 0;
+
+  @Prop({
+    default: [],
+    type: [RegisterdUplaodPartSchema]
+  })
+  parts: RegisterdUplaodPart[] = [];
 
   maxPartSize: number;
 }

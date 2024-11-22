@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectS3, S3 } from 'nestjs-s3';
 import { S3Path } from '../types/s3Path.type';
+import { RegisterdUplaodPart } from '../upload/entities/upload-part.entity';
 
 @Injectable()
 export class StorageService {
@@ -45,6 +46,20 @@ export class StorageService {
       UploadId: uploadId,
       Body: buffer
     });
+  }
+
+  public async finidhMultiPartUpload(uploadId: string, parts: RegisterdUplaodPart[], path: S3Path) {
+    return this.s3.completeMultipartUpload({
+      Bucket: this.bucketName,
+      Key: path,
+      UploadId: uploadId,
+      MultipartUpload: {
+        Parts: parts.map(part => ({
+          ETag: part._ETag,
+          PartNumber: part.partNumber
+        }))
+      }
+    })
   }
 
 }

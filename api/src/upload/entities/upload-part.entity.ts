@@ -1,4 +1,4 @@
-import { Schema } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
 export enum RegisteredUploadPartStatus {
   Uploading = 'uploading',
@@ -9,9 +9,20 @@ export enum RegisteredUploadPartStatus {
 @Schema()
 export class RegisterdUplaodPart {
 
+  @Prop()
   partNumber: number;
 
-  partSize: number;
+  @Prop()
+  partSize?: number;
 
-  status: RegisterdUplaodPart;
+  @Prop({
+    type: String,
+    enum: RegisteredUploadPartStatus,
+  })
+  status: RegisteredUploadPartStatus;
+
+  @Prop()
+  _ETag?: string;
 }
+
+export const RegisterdUplaodPartSchema = SchemaFactory.createForClass(RegisterdUplaodPart);

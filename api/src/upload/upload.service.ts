@@ -31,7 +31,33 @@ export class UploadService {
       upload = await this.createS3MultipartUpload(upload);
     }
 
-    const res = await this.storageService.uplaodPart(upload._s3UploadId, uploadPartDto.partNumber, uploadPartDto.part, upload._s3Path);
+    const res = this.storageService.uplaodPart(upload._s3UploadId, uploadPartDto.partNumber, uploadPartDto.part, upload._s3Path);
+
+    res.then(async (uploadRes) => {
+      this.logger.debug(`Uploaded part ${uploadPartDto.partNumber} for upload ${uploadId}`);
+      const finUplaod = await this.setUploadPartCompletedAndUpdateSize(upload, uploadPartDto, uploadRes.ETag);
+
+      if (finUplaod.uploadedSize === finUplaod.expectedSize) {
+        this.logger.log(`Upload ${uploadId} is completed`);
+        await this.storageService.finidhMultiPartUpload(upload._s3UploadId, finUplaod.parts, upload._s3Path);
+      }
+    }).catch(async () => {
+      this.logger.error(`Failed to upload part ${uploadPartDto.partNumber} for upload ${uploadId}`);
+      await this.setUploadPartFailed(upload, uploadPartDto.partNumber);
+    });
+
+    return await this.uploadModel.findOneAndUpdate(
+      {
+        id: upload.uploadId,
+        "parts.partNumber": uploadPartDto.partNumber
+      }, {
+      $push: {
+        parts: {
+          partNumber: uploadPartDto.partNumber,
+          status: RegisteredUploadPartStatus.Uploading
+        }
+      }
+    }, { new: true });
 
   }
 
@@ -45,7 +71,7 @@ export class UploadService {
     return uplaod;
   }
 
-  private async createS3MultipartUpload(upload: RegisteredUpload) {
+  private async createS3MultipartUpload(upload: RegisteredUpload): Promise<RegisteredUpload> {
     const seUploadId = await this.storageService.startMultiPartUpload(upload._s3Path);
 
     return await this.uploadModel.findOneAndUpdate({ id: upload.uploadId }, {
@@ -55,7 +81,25 @@ export class UploadService {
     }, { new: true });
   }
 
-  private async completeUploadPart(upload: RegisteredUpload, partNumber: number) {
+  private async setUploadPartCompletedAndUpdateSize(upload: RegisteredUpload, part: UplaodPartDto, etag: string): Promise<RegisteredUpload> {
+    return await this.uploadModel.findOneAndUpdate(
+      {
+        id: upload.uploadId,
+        "parts.partNumber": part.partNumber
+      },
+      {
+        $set: {
+          "parts.$.status": RegisteredUploadPartStatus.Completed,
+          "parts.$.partSize": part.part.byteLength,
+          "parts.$._ETag": etag
+        },
+        $inc: {
+          uploadedSize: part.part.byteLength
+        }
+      }, { new: true });
+  }
+
+  private async setUploadPartFailed(upload: RegisteredUpload, partNumber: number): Promise<RegisteredUpload> {
     return await this.uploadModel.findOneAndUpdate(
       {
         id: upload.uploadId,
@@ -63,7 +107,7 @@ export class UploadService {
       },
       {
         $set: {
-          "parts.$.status": RegisteredUploadPartStatus.Completed
+          "parts.$.status": RegisteredUploadPartStatus.Failed
         }
       }, { new: true });
   }
