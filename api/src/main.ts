@@ -11,10 +11,6 @@ async function bootstrap() {
   await internalBootstrap(app);
 
   app.use(helmet());
-  app.setGlobalPrefix('api');
-  app.enableVersioning({
-    type: VersioningType.URI
-  })
 
   const config = new DocumentBuilder()
     .setTitle('WOMM API')

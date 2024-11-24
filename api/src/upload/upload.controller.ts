@@ -37,4 +37,10 @@ export class UploadController {
     body.part = uploadedFile.buffer;
     return this.uploadService.addFilePart(uploadId, body);
   }
+
+  @Get(':uploadId')
+  public async findOne(@Param('uploadId') uploadId: RegisteredUploadId) {
+    const uplaod = await this.uploadService.findOneOrThrow(uploadId);
+    return uplaod;
+  }
 }

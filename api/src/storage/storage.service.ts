@@ -48,7 +48,7 @@ export class StorageService {
     });
   }
 
-  public async finidhMultiPartUpload(uploadId: string, parts: RegisterdUplaodPart[], path: S3Path) {
+  public async finishMultiPartUpload(uploadId: string, parts: RegisterdUplaodPart[], path: S3Path) {
     return this.s3.completeMultipartUpload({
       Bucket: this.bucketName,
       Key: path,

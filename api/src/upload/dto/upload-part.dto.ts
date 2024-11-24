@@ -1,15 +1,13 @@
-import { IsNumber, IsPositive, Max, Min } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsDefined, IsNumber, IsPositive, Max, Min } from "class-validator";
 
 
 export class UplaodPartDto {
   @IsNumber()
-  @Min(0)
-  @Max(5000)
-  partNumber: number;
-
-  @IsNumber()
   @IsPositive()
-  partSize: number;
+  @Max(5000)
+  @Transform(({ value }) => parseInt(value))
+  partNumber: number;
 
   part: Buffer;
 }

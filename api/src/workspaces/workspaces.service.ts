@@ -66,7 +66,7 @@ export class WorkspacesService {
   }
 
   public async findOne(id: WorkspaceId): Promise<Workspace> {
-    const workspace = this.workspaceModel.findOne({
+    const workspace = await this.workspaceModel.findOne({
       id
     });
 

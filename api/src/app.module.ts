@@ -28,6 +28,7 @@ import { UploadModule } from './upload/upload.module';
             secretAccessKey: config.getOrThrow('S3_SECRET_ACCESS_KEY'),
           },
           endpoint: config.getOrThrow('S3_ENDPOINT'),
+          region: config.get('S3_REGION', 'us-east-1'),
           forcePathStyle: true,
           signatureVersion: 'v4',
         },
