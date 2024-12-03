@@ -1,26 +1,17 @@
-﻿namespace lib.storage
-{
-    using Amazon.Runtime;
-    using Amazon.S3;
-    using Amazon.S3.Model;
-    using Amazon.S3.Transfer;
-    using lib.aspects;
-    using lib.exceptions;
-    using lib.options;
-    using Microsoft.Extensions.Options;
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
+using Amazon.S3.Transfer;
+using lib.exceptions;
+using lib.options;
+using Microsoft.Extensions.Options;
 
-    [LoggingClass]
+namespace lib.storage
+{
     public class AmazonS3Storage : IStorageSystem
     {
-        private readonly StorageOptions _options;
-
         private readonly IAmazonS3 _client;
+        private readonly StorageOptions _options;
 
         private bool _disposed;
 
@@ -30,7 +21,7 @@
             _options = options.Value;
 
             AmazonS3Config config = new();
-            config.RegionEndpoint = Amazon.RegionEndpoint.EUCentral1;
+            config.RegionEndpoint = RegionEndpoint.EUCentral1;
 
             AWSCredentials credentials = new BasicAWSCredentials(
                 accessKey: _options.AccessKey,
@@ -88,11 +79,10 @@
                 }
                 else if (Directory.Exists(localPath))
                 {
-
                     var files = Directory.GetFiles(localPath, "*", SearchOption.AllDirectories);
                     if (files.Length == 0)
                     {
-                        throw new StorageException("No files were found in "  + localPath);
+                        throw new StorageException("No files were found in " + localPath);
                     }
 
                     foreach (var file in files)
@@ -127,7 +117,7 @@
         }
 
         protected virtual void Dispose(bool disposing)
-        { 
+        {
             if (_disposed)
             {
                 return;
@@ -136,7 +126,6 @@
             if (disposing)
             {
                 _client.Dispose();
-                
             }
 
             _disposed = true;

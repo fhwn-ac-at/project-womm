@@ -1,12 +1,5 @@
 ﻿namespace lib.storage
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using lib.aspects;
-
     public class LocalStorageSystem : IStorageSystem
     {
         private readonly string _rootFolder;
@@ -15,6 +8,7 @@
         {
             _rootFolder = rootFolder;
         }
+
         public void Dispose()
         {
         }
