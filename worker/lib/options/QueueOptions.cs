@@ -26,9 +26,6 @@
         public string WorkerQueueName { get; set; }
 
         [Required]
-        public string RoutingKey { get; set; }
-
-        [Required]
         public string Exchange{ get; set; }
 
         [Required]

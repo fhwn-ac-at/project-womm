@@ -45,9 +45,12 @@ public class RabbitMQSystem : IMultiQueueSystem<string>
             var message = Encoding.UTF8.GetString(body);
 
             _channel.BasicAck(deliveryTag: args.DeliveryTag, multiple: false);
+            FireOnMessageReceived(new MessageReceivedEventArgs<string>(message));
         };
 
-        _channel.BasicConsume(_options.TaskQueueName, false, consumer);
+        _channel.BasicConsume(queue: _options.TaskQueueName,
+            autoAck: false, 
+            consumer);
     }
 
     public void Enqueue(string queueId, string message)
@@ -58,7 +61,7 @@ public class RabbitMQSystem : IMultiQueueSystem<string>
         var body = Encoding.UTF8.GetBytes(message);
 
         _channel.BasicPublish(exchange: _options.Exchange,
-            _options.RoutingKey,
+            routingKey: queueId,
             null,
             body);
     }

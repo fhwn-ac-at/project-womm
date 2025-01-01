@@ -213,7 +213,6 @@
                     ArtifactQueueName = "artifact-queue",
                     HostName = "foo",
                     Port = 0,
-                    RoutingKey = "foo",
                     TaskQueueName = "task-queue",
                     WorkerQueueName = "worker-queue",
                 }

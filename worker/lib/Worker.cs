@@ -16,6 +16,7 @@ public class Worker : IDisposable
     private readonly ITaskConverter _converter;
 
     private readonly IMessageService _messageService;
+    
     private readonly WorkerOptions _options;
 
     private readonly QueueOptions _queue;
@@ -119,7 +120,7 @@ public class Worker : IDisposable
 
         try
         {
-            string artifactId = UploadResult(result);
+            var artifactId = UploadResult(result);
             ReportArtifactUploaded(task, artifactId);
         }
         catch (StorageException e)
@@ -130,7 +131,7 @@ public class Worker : IDisposable
 
     private void SetupHeartBeat()
     {
-        Timer timer = new Timer();
+        var timer = new Timer();
         timer.Elapsed += (s, e) => { SendHeartbeat(); };
         timer.Interval = _options.HeartbeatSecondsDelay * 1000;
         timer.Enabled = true;
@@ -170,7 +171,7 @@ public class Worker : IDisposable
 
     private void ReportTaskCompletion(TaskProcessedResult result)
     {
-        string message = _messageService
+        var message = _messageService
             .GetProcessingCompleted(result.TaskId, _options.WorkerName);
 
         _queuingSystem.Enqueue(_queue.TaskQueueName, message);
@@ -178,7 +179,7 @@ public class Worker : IDisposable
 
     private void ReportArtifactUploaded(ITask task, string artifactId)
     {
-        string message = _messageService
+        var message = _messageService
             .GetArtifactUploaded(task.ID, artifactId);
 
         _queuingSystem.Enqueue(_queue.ArtifactQueueName, message);
@@ -186,13 +187,13 @@ public class Worker : IDisposable
 
     private string UploadResult(TaskProcessedResult result)
     {
-        var artifactID = Guid.NewGuid().ToString();
+        var artifactId = Guid.NewGuid().ToString();
 
         foreach (var file in result.Files)
         {
-            _storage.Upload(file, artifactID);
+            _storage.Upload(file, artifactId);
         }
 
-        return artifactID;
+        return artifactId;
     }
 }

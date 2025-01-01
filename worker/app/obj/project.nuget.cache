@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "6mvIqoqaB8vjzIu5KfKHc2H1Mw57RPJGvyMHfxlwKO/V1losNmxYAyD7gzgbNOqeFK5sER2ptq79DNGh7CRfYw==",
+  "dgSpecHash": "TOZA7ZMti70=",
   "success": true,
-  "projectFilePath": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\app.csproj",
+  "projectFilePath": "C:\\Dev\\repos\\project-womm\\worker\\app\\app.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\micha\\.nuget\\packages\\awssdk.core\\3.7.400.47\\awssdk.core.3.7.400.47.nupkg.sha512",
     "C:\\Users\\micha\\.nuget\\packages\\awssdk.s3\\3.7.405.11\\awssdk.s3.3.7.405.11.nupkg.sha512",
