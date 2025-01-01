@@ -1,9 +1,0 @@
-{
-  "pattern": "import_source_files",
-  "data": {
-    "id": "w-video_rendering_workflow_v2-t-0",
-    "name": "import_source_files",
-    "parameters": { "description": "Imports video and audio source files for the rendering process." },
-    "results": [ "source_video_mp4", "source_audio_wav" ]
-  }
-}

@@ -12,5 +12,10 @@
         {
             
         }
+
+        public StorageException(string message) : base(message)
+        {
+
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace lib.item_handler.work_items
+﻿namespace lib.exceptions
 {
     using System;
     using System.Collections.Generic;
@@ -6,11 +6,10 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class Trim : IWorkItem
+    internal class QueueException : Exception
     {
-        public T Accept<T>(IWorkItemVisitor<T> visitor)
+        public QueueException(string? message, Exception? innerException) : base(message, innerException)
         {
-            return visitor.Visit(this);
         }
     }
 }
