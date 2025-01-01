@@ -1,4 +1,5 @@
 ﻿using lib.item_handler.work_items;
+using lib.tasks;
 
 namespace lib.converter
 {
@@ -21,6 +22,7 @@ namespace lib.converter
             {
                 "Split" => JsonSerializer.Deserialize<Split>(jsonObject.GetRawText(), options),
                 "ConvertFormat" => JsonSerializer.Deserialize<ConvertFormat>(jsonObject.GetRawText(), options),
+                "Splice" => JsonSerializer.Deserialize<Splice>(jsonObject.GetRawText(), options),
                 _ => throw new NotSupportedException($"Unknown task type: {type}")
             };
         }

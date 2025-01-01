@@ -16,6 +16,12 @@
             this.Item = item;
         }
 
+        public TaskProcessingFailedException(string message, ITask item) : base(message)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+            this.Item = item;
+        }
+
         public ITask Item { get; }
     }
 }

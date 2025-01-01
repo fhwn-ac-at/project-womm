@@ -20,12 +20,12 @@
             KeyName = keyName;
             ID = id;
         }
+        
+        public string ID { get; set; }
 
-        public string SegmentTime { get; private set; }
+        public string SegmentTime { get; set; }
 
-        public string KeyName { get; private set; }
-
-        public string ID { get; private set; }
+        public string KeyName { get; set; }
 
         public T Accept<T>(ITaskVisitor<T> visitor)
         {

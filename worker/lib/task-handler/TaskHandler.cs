@@ -1,4 +1,8 @@
-﻿namespace lib.item_handler
+﻿using System.Text;
+using lib.tasks;
+using Microsoft.Extensions.Primitives;
+
+namespace lib.item_handler
 {
     using lib.commands;
     using lib.exceptions;
@@ -43,7 +47,7 @@
             string downloadedFile;
             try
             {
-                tempFolder = DownloadFileIntoTempFolder(split.KeyName);
+                tempFolder = DownloadIntoTempFolder(split.KeyName);
                 downloadedFile = _fileSystem.Path.Combine(tempFolder, split.KeyName);
             }
             catch (IOException e)
@@ -60,15 +64,8 @@
             command.AddArgument("-segment_time", split.SegmentTime);
             command.AddArgument("-f", "segment");
             command.AddArgument("-reset_timestamps", "1");
-
-            try
-            {
-                command.Execute();
-            }
-            catch (CommandExecutionException)
-            {
-                throw;
-            }
+            
+            command.Execute();
 
             List<string> uploadedFiles;
             try
@@ -81,10 +78,6 @@
             {
                 throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, split);
             }
-            catch (StorageException)
-            {
-                throw;
-            }
 
             return new TaskProcessedResult(split.ID, uploadedFiles);
         }
@@ -96,7 +89,7 @@
             string resultFile;
             try
             {
-                tempFolder = DownloadFileIntoTempFolder(convert.KeyName);
+                tempFolder = DownloadIntoTempFolder(convert.KeyName);
                 downloadedFile = _fileSystem.Path.Combine(tempFolder, convert.KeyName);
                 resultFile = _fileSystem.Path.Combine(tempFolder, GenerateId() + convert.GoalFormat);
             }
@@ -109,14 +102,7 @@
                 source: $"\"{downloadedFile}\"",
                 destination: $"\"{resultFile}\"");
 
-            try
-            {
-                command.Execute();
-            }
-            catch (CommandExecutionException)
-            {
-                throw;
-            }
+            command.Execute();
 
 
             List<string> uploadedFiles;
@@ -129,15 +115,33 @@
             {
                 throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, convert);
             }
-            catch (StorageException)
-            {
-                throw;
-            }
 
             return new TaskProcessedResult(convert.ID, uploadedFiles);
         }
 
-        private string DownloadFileIntoTempFolder(string fileKey)
+        public TaskProcessedResult Visit(Splice splice)
+        {
+            if (splice.FileKeys.Length == 0)
+            {
+                throw new TaskProcessingFailedException("No files were provided", splice);
+            }
+
+            var tempFolder = DownloadIntoTempFolder(splice.FileKeys);
+            var concat = GenerateSourceConcatenation(tempFolder);
+
+            var resultId = GenerateId() + ".mp4";
+            var resultFile = _fileSystem.Path.Combine(tempFolder, resultId);
+            
+            var command = new FFmpegCommand(concat, resultFile);
+            command.AddArgument("-c", "copy");
+            command.Execute();
+            
+            _storage.Upload(resultFile, resultId);
+
+            return new TaskProcessedResult(splice.ID, []);
+        }
+
+        private string DownloadIntoTempFolder(string fileKey)
         {
             string localPath = _fileSystem.Path.Combine(_rootPath, GenerateId());
 
@@ -146,6 +150,19 @@
             _storage.Download(localPath, fileKey);
 
             return localPath;
+        }
+
+        private string DownloadIntoTempFolder(string[] files)
+        {
+            var folder = DownloadIntoTempFolder(files[0]);
+
+            for (var i = 1; i < files.Length; i++)
+            {
+                var file = files[i];
+                _storage.Download(folder, file);
+            }
+            
+            return folder;
         }
 
         private List<string> UploadContents(string folder)
@@ -157,15 +174,7 @@
             foreach (var file in contents)
             {
                 string key = _fileSystem.Path.GetFileName(file);
-                
-                try
-                {
-                    _storage.Upload(file, key);
-                }
-                catch (StorageException)
-                {
-                    throw;
-                }
+                _storage.Upload(file, key);
             }
 
             return contents.Select(f => _fileSystem.Path.GetFileName(f)).ToList();
@@ -174,6 +183,23 @@
         private static string GenerateId()
         {
             return Guid.NewGuid().ToString()[..8];
+        }
+        
+        private static string GenerateSourceConcatenation(string folder)
+        {
+            var sb = new StringBuilder();
+            sb.Append("\"concat:");
+
+            var files = Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories);
+            
+            foreach (var file in files)
+            {
+                sb.Append(file);
+                sb.Append('|');
+            }
+            sb.Append('\"');
+            
+            return sb.ToString();
         }
     }
 }

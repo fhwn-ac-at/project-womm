@@ -8,5 +8,8 @@
 
     public  class TaskConversionException : Exception
     {
+        public TaskConversionException(string message, Exception innerException) : base(message, innerException) {}
+        
+        public TaskConversionException(string message) : base(message) {}
     }
 }

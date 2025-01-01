@@ -1,4 +1,6 @@
-﻿namespace lib.item_handler
+﻿using lib.tasks;
+
+namespace lib.item_handler
 {
     using lib.item_handler.work_items;
     using System;
@@ -12,5 +14,7 @@
         public T Visit(Split item);
 
         public T Visit(ConvertFormat convertFormat);
-    }
+        
+        public T Visit(Splice convertFormat);
+    } 
 }

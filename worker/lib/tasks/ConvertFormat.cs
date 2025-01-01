@@ -19,11 +19,11 @@
             ID = id;
         }
 
-        public string ID { get; private set; }
+        public string ID { get; set; }
 
-        public string KeyName { get; private set; }
+        public string KeyName { get; set; }
 
-        public string GoalFormat { get; private set; }
+        public string GoalFormat { get; set; }
 
         public T Accept<T>(ITaskVisitor<T> visitor)
         {
