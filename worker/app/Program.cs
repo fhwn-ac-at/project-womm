@@ -45,11 +45,15 @@
                     .Bind(config.GetRequiredSection("Messaging"));
 
                 services.AddTransient<Worker>();
-                services.AddTransient<ITaskConverter, JSONTaskConverter>();
+                services.AddTransient<ITaskConverter, TaskConverter>();
                 services.AddTransient<ITaskVisitor<TaskProcessedResult>, TaskHandler>();
                 
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
-                
+                var ls = new LocalStorageSystem("C:\\Users\\micha\\Desktop\\local-storage");
+                services.AddTransient<IStorageSystem, LocalStorageSystem>(s =>
+                {
+                    return ls;
+                });
 
                 services.AddTransient<IFileSystem, System.IO.Abstractions.FileSystem>();
                 services.AddTransient<IMultiQueueSystem<string>, RabbitMQSystem>();
