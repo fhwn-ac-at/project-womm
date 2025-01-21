@@ -20,7 +20,6 @@ have to be extended by one method for each task.
 ## Analyse
 video analysieren und render path gengerieren.
 --->
-
 ## Convert
 Converts the provided video into other formats.
 
@@ -36,8 +35,6 @@ Param:
   "GoalFormat": ".avi",
 }
 ```
-
-
 
 ## Split
 Splits the video into equaly sized segments.
@@ -75,5 +72,5 @@ Merges the given videos together.
 ffmpeg -i "concat:input1.mp4|input2.mp4|input3.mp4|input4.mp4" -c copy output10.mp4
 --->
 
-## overlap
+## Overlap
 videos übereinander
