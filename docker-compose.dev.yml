@@ -79,6 +79,8 @@ services:
       - rabbitmq
     networks:
       - app-network
+    ports:
+      - 3001:3000
     
     volumes:
       - ./task-manager/src:/usr/src/app/src

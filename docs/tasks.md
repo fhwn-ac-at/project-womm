@@ -16,6 +16,17 @@ have to be extended by one method for each task.
 }
 ```
 
+```json
+{
+  "taskId": "32",
+  "results": ["video-part-1.mp4", "video-part-2.mp4"],
+  "name": "Split",
+  "parameters": {
+    "SegmentTime": "00:00:05"
+  }
+}
+```
+
 <!---
 ## Analyse
 video analysieren und render path gengerieren.
