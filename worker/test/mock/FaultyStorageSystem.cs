@@ -1,4 +1,4 @@
-﻿namespace test.item_handler.mock
+﻿namespace test.mock
 {
     using lib.exceptions;
     using lib.storage;
@@ -23,7 +23,7 @@
         }
 
         public void Dispose()
-        { 
+        {
         }
 
         public void Download(string localPath, string keyName)

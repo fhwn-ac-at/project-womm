@@ -7,15 +7,18 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    public class DriverOptions
+    public class WorkerOptions
     {
         [Required]
-        public QueueServerOptions Tasks { get; set; }
+        public QueueOptions Queues { get; set; }
 
         [Required]
-        public QueueServerOptions Results { get; set; }
+        public bool SendHeartbeat { get; set; }
 
         [Required]
-        public string OperationalPath { get; set; } 
+        public int HeartbeatSecondsDelay { get; set; }
+
+        [Required]
+        public string WorkerName { get; set; }
     }
 }

@@ -2,57 +2,27 @@
 {
     using lib.item_handler.work_items;
     using lib.item_handler;
-    using lib.options;
-    using lib.storage;
-    using Microsoft.Extensions.Options;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using lib.storage;
+    using lib.options;
+    using Microsoft.Extensions.Options;
     using lib.item_handler.results;
-    using lib.exceptions;
-    using Microsoft.VisualStudio.TestPlatform.ObjectModel;
     using System.IO.Abstractions;
-    using test.item_handler;
-    using NuGet.ContentModel;
-    using test.item_handler.mock;
+    using lib.exceptions;
+    using test.mock;
 
-    internal class SplitTests
+    internal class ConversionTests
     {
         private readonly string _rootDir = "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\sample-dest\\";
 
         private readonly string _itemSource = "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\test\\sample-source\\";
 
-        [TestCase("::::")]
-        [TestCase("abcd")]
-        [TestCase("100:00:00")]
-        [TestCase("00:100:00")]
-        [TestCase("00:00:100")]
-        [TestCase("12:a:4")]
-        [TestCase("12:4:b")]
-        [TestCase("a:3:4")]
-        public void SplitConstructorThrowsOnInvalidTimeData(string input)
-        {
-            Assert.Throws<InvalidTimeSegmentException>(
-                () => new Split("some-key", input));
-        }
-
-        [TestCase("0:0:0")]
-        [TestCase("1:0:0")]
-        [TestCase("0:2:0")]
-        [TestCase("0:0:3")]
-        [TestCase("51:70:90")]
-        [TestCase("00:10:50")]
-        public void SplitConstructorDoesNotThrowOnInvalidTimeData(string input)
-        {
-            Assert.DoesNotThrow(() => new Split("some-key", input));
-        }
-
-        [TestCase("00:00:10", 3)]
-        [TestCase("00:00:15", 2)]
-        [TestCase("00:01:00", 1)]
-        public void SplitWorksWithDifferentTimes(string time, int expectedSplits)
+        [Test]
+        public void ConvertWorks()
         {
             IOptions<WorkItemHandlerOptions> options =
                 Options.Create(new WorkItemHandlerOptions()
@@ -60,22 +30,22 @@
                     RootDirectory = _rootDir
                 });
 
-            var itemHandler = new WorkItemHandler(
+            var itemHandler = new TaskHandler(
                 new LocalStorageSystem(_itemSource),
                 options,
                 new FileSystem());
 
-            var testItem = new Split("sample-30s.mp4", time);
+            var testItem = new ConvertFormat("sample-30s.mp4", ".avi", "1");
 
-            var uploadedFiles = testItem.Accept(itemHandler);
+            var result = testItem.Accept(itemHandler);
+            string convertedFile = Path.Combine(_itemSource, result.Files.ToArray()[0]);
 
-            Assert.That(uploadedFiles.Files.Count, Is.EqualTo(expectedSplits));
-            
-            foreach (var file in uploadedFiles.Files)
-            {
-                var path = Path.Combine(_itemSource, file);
-                Assert.That(File.Exists(path));
-            }
+            Assert.That(File.Exists(convertedFile));
+
+            //Cleanup
+            Directory.Delete(_rootDir, true);
+            Directory.CreateDirectory(_rootDir);
+            File.Delete(convertedFile);
         }
 
         [TestCase(2)]
@@ -84,7 +54,7 @@
         [TestCase(5)]
         [TestCase(6)]
         [TestCase(7)]
-        public void SplitThrowsOnFileSystemFailure(int throwErrorOnCall)
+        public void ConvertThrowsOnFileSystemFailure(int throwErrorOnCall)
         {
             IOptions<WorkItemHandlerOptions> options =
                 Options.Create(new WorkItemHandlerOptions()
@@ -94,23 +64,22 @@
 
             var faultyFileSystem = new FaultyFileSystem(new FileSystem(), throwErrorOnCall, new IOException());
 
-            var itemHandler = new WorkItemHandler(
+            var itemHandler = new TaskHandler(
                 new LocalStorageSystem(_itemSource),
                 options,
                 faultyFileSystem);
 
-            var split = new Split("sample-30s.mp4", "00:00:10");
+            var convert = new ConvertFormat("sample-30s.mp4", ".avi", "1");
 
-            Assert.Throws<WorkItemProcessingFailedException>(() =>
+            Assert.Throws<TaskProcessingFailedException>(() =>
             {
-                _ = split.Accept(itemHandler);
+                _ = convert.Accept(itemHandler);
             });
         }
 
         [TestCase(1)]
         [TestCase(2)]
-        [TestCase(3)]
-        public void SplitThrowsOnStorageFailure(int failOnNthCall)
+        public void ConvertThrowsOnStorageFailure(int failOnNthCall)
         {
             IOptions<WorkItemHandlerOptions> options =
                 Options.Create(new WorkItemHandlerOptions()
@@ -120,16 +89,16 @@
 
             var faultyStorageSystem = new FaultyStorageSystem(new LocalStorageSystem(_itemSource), failOnNthCall);
 
-            var itemHandler = new WorkItemHandler(
+            var itemHandler = new TaskHandler(
                 faultyStorageSystem,
                 options,
                 new FileSystem());
 
-            var split = new Split("sample-30s.mp4", "00:00:10");
+            var convert = new ConvertFormat("sample-30s.mp4", ".avi", "1");
 
             Assert.Throws<StorageException>(() =>
             {
-                _ = split.Accept(itemHandler);
+                _ = convert.Accept(itemHandler);
             });
         }
 
@@ -145,11 +114,11 @@
                 File.Delete(upload);
             }
 
-            var downloads = Directory.EnumerateFiles(_rootDir);
+            var downloads = Directory.EnumerateDirectories(_rootDir);
 
             foreach (var donwload in downloads)
             {
-                File.Delete(donwload);
+                Directory.Delete(donwload, true);
             }
         }
     }

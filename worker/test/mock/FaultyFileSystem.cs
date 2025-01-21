@@ -1,4 +1,4 @@
-﻿namespace test.item_handler
+﻿namespace test.mock
 {
     using System;
     using System.Collections.Generic;
@@ -10,7 +10,7 @@
     internal class FaultyFileSystem : IFileSystem
     {
         private int _count;
-        
+
         private readonly IFileSystem _realFileSystem;
 
         private int _throwErrorOn;
@@ -23,7 +23,7 @@
             _exceptionToTest = exceptionToTest;
         }
 
-        public IFile File 
+        public IFile File
         {
             get
             {

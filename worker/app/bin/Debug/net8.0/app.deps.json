@@ -1950,7 +1950,10 @@
           "System.IO.Abstractions": "13.2.47"
         },
         "runtime": {
-          "lib.dll": {}
+          "lib.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

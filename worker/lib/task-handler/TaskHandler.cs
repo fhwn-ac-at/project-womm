@@ -1,4 +1,8 @@
-﻿namespace lib.item_handler
+﻿using System.Text;
+using lib.tasks;
+using Microsoft.Extensions.Primitives;
+
+namespace lib.item_handler
 {
     using lib.commands;
     using lib.exceptions;
@@ -10,7 +14,7 @@
     using Microsoft.Extensions.Options;
     using System;
     
-    public class WorkItemHandler : IWorkItemVisitor<ItemProcessedResult>
+    public class TaskHandler : ITaskVisitor<TaskProcessedResult>
     {
         private readonly IStorageSystem _storage;
 
@@ -18,7 +22,7 @@
         
         private readonly string _rootPath;
 
-        public WorkItemHandler(
+        public TaskHandler(
             IStorageSystem storage,
             IOptions<WorkItemHandlerOptions> options, 
             IFileSystem fileSystem)
@@ -37,18 +41,18 @@
             }
         }
 
-        public ItemProcessedResult Visit(Split split)
+        public TaskProcessedResult Visit(Split split)
         {
             string tempFolder;
             string downloadedFile;
             try
             {
-                tempFolder = DownloadFileIntoTempFolder(split.KeyName);
+                tempFolder = DownloadIntoTempFolder(split.KeyName);
                 downloadedFile = _fileSystem.Path.Combine(tempFolder, split.KeyName);
             }
             catch (IOException e)
             {
-                throw new WorkItemProcessingFailedException("Unable to download File locally: " + e.Message, e, split);
+                throw new TaskProcessingFailedException("Unable to download File locally: " + e.Message, e, split);
             }
 
             FFmpegCommand command = new(
@@ -60,15 +64,8 @@
             command.AddArgument("-segment_time", split.SegmentTime);
             command.AddArgument("-f", "segment");
             command.AddArgument("-reset_timestamps", "1");
-
-            try
-            {
-                command.Execute();
-            }
-            catch (CommandExecutionException)
-            {
-                throw;
-            }
+            
+            command.Execute();
 
             List<string> uploadedFiles;
             try
@@ -79,44 +76,33 @@
             }
             catch (IOException e)
             {
-                throw new WorkItemProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, split);
-            }
-            catch (StorageException)
-            {
-                throw;
+                throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, split);
             }
 
-            return new ItemProcessedResult(uploadedFiles);
+            return new TaskProcessedResult(split.ID, uploadedFiles);
         }
 
-        public ItemProcessedResult Visit(ConvertFormat convert)
+        public TaskProcessedResult Visit(ConvertFormat convert)
         {
             string tempFolder;
             string downloadedFile;
             string resultFile;
             try
             {
-                tempFolder = DownloadFileIntoTempFolder(convert.KeyName);
+                tempFolder = DownloadIntoTempFolder(convert.KeyName);
                 downloadedFile = _fileSystem.Path.Combine(tempFolder, convert.KeyName);
                 resultFile = _fileSystem.Path.Combine(tempFolder, GenerateId() + convert.GoalFormat);
             }
             catch (IOException e)
             {
-                throw new WorkItemProcessingFailedException("Unable to download File locally: " + e.Message, e, convert);
+                throw new TaskProcessingFailedException("Unable to download File locally: " + e.Message, e, convert);
             }
 
             FFmpegCommand command = new(
                 source: $"\"{downloadedFile}\"",
                 destination: $"\"{resultFile}\"");
 
-            try
-            {
-                command.Execute();
-            }
-            catch (CommandExecutionException)
-            {
-                throw;
-            }
+            command.Execute();
 
 
             List<string> uploadedFiles;
@@ -127,22 +113,35 @@
             }
             catch (IOException e)
             {
-                throw new WorkItemProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, convert);
-            }
-            catch (StorageException)
-            {
-                throw;
+                throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, convert);
             }
 
-            return new ItemProcessedResult(uploadedFiles);
+            return new TaskProcessedResult(convert.ID, uploadedFiles);
         }
 
-        public ItemProcessedResult Visit(Trim trim)
+        public TaskProcessedResult Visit(Splice splice)
         {
-            throw new NotImplementedException();
+            if (splice.FileKeys.Length == 0)
+            {
+                throw new TaskProcessingFailedException("No files were provided", splice);
+            }
+
+            var tempFolder = DownloadIntoTempFolder(splice.FileKeys);
+            var concat = GenerateSourceConcatenation(tempFolder);
+
+            var resultId = GenerateId() + ".mp4";
+            var resultFile = _fileSystem.Path.Combine(tempFolder, resultId);
+            
+            var command = new FFmpegCommand(concat, resultFile);
+            command.AddArgument("-c", "copy");
+            command.Execute();
+            
+            _storage.Upload(resultFile, resultId);
+
+            return new TaskProcessedResult(splice.ID, []);
         }
 
-        private string DownloadFileIntoTempFolder(string fileKey)
+        private string DownloadIntoTempFolder(string fileKey)
         {
             string localPath = _fileSystem.Path.Combine(_rootPath, GenerateId());
 
@@ -151,6 +150,19 @@
             _storage.Download(localPath, fileKey);
 
             return localPath;
+        }
+
+        private string DownloadIntoTempFolder(string[] files)
+        {
+            var folder = DownloadIntoTempFolder(files[0]);
+
+            for (var i = 1; i < files.Length; i++)
+            {
+                var file = files[i];
+                _storage.Download(folder, file);
+            }
+            
+            return folder;
         }
 
         private List<string> UploadContents(string folder)
@@ -162,15 +174,7 @@
             foreach (var file in contents)
             {
                 string key = _fileSystem.Path.GetFileName(file);
-                
-                try
-                {
-                    _storage.Upload(file, key);
-                }
-                catch (StorageException)
-                {
-                    throw;
-                }
+                _storage.Upload(file, key);
             }
 
             return contents.Select(f => _fileSystem.Path.GetFileName(f)).ToList();
@@ -179,6 +183,23 @@
         private static string GenerateId()
         {
             return Guid.NewGuid().ToString()[..8];
+        }
+        
+        private static string GenerateSourceConcatenation(string folder)
+        {
+            var sb = new StringBuilder();
+            sb.Append("\"concat:");
+
+            var files = Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories);
+            
+            foreach (var file in files)
+            {
+                sb.Append(file);
+                sb.Append('|');
+            }
+            sb.Append('\"');
+            
+            return sb.ToString();
         }
     }
 }

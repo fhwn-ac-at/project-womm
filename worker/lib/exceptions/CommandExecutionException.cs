@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class CommandExecutionException : Exception
+    public class CommandExecutionException : Exception
     {
         public CommandExecutionException(string? message,
                                          Exception? innerException) : base(message, innerException)
