@@ -91,7 +91,7 @@ services:
   app:
     build:
       context: .
-      target: e2e-tests
+      target: dev
     container_name: nestjs-app
     depends_on:
       - mongo1

@@ -6,6 +6,7 @@ import { WorkflowModule } from './workflow/workflow.module';
 import { S3Module } from 'nestjs-s3';
 import { StorageModule } from './storage/storage.module';
 import { UploadModule } from './upload/upload.module';
+import { ScenesModule } from './scenes/scenes.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { UploadModule } from './upload/upload.module';
     WorkflowModule,
     StorageModule,
     UploadModule,
+    ScenesModule,
   ],
   controllers: [],
   providers: [],
