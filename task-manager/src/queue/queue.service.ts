@@ -28,8 +28,7 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
   async emit(queueName: string, eventName: string, message: any) {
     await this.channel.assertQueue(queueName, { durable: true });
     this.channel.sendToQueue(queueName, Buffer.from(JSON.stringify({
-      pattern: eventName,
-      data: message
+      ...message
     })));
   }
 

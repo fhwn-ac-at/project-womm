@@ -9,5 +9,5 @@ export class WorkerHeartbeatDto {
 
   @IsString()
   @MaxLength(100)
-  listensOn: string;
+  listensOn: string; // queue namen vom worker
 }
