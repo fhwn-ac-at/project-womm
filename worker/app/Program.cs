@@ -1,12 +1,12 @@
-﻿namespace app
+﻿using lib.tasks;
+using lib.tasks.creation;
+using lib.tasks.creation;
+
+namespace app
 {
     using lib;
-    using lib.converter;
-    using lib.item_handler;
-    using lib.item_handler.results;
     using lib.messaging;
     using lib.options;
-    using lib.parser;
     using lib.queue;
     using lib.settings;
     using lib.storage;
@@ -14,7 +14,6 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Microsoft.VisualBasic;
     using System.IO.Abstractions;
 
     public class Program
@@ -45,26 +44,31 @@
                     .Bind(config.GetRequiredSection("Messaging"));
 
                 services.AddTransient<Worker>();
-                services.AddTransient<ITaskConverter, TaskConverter>();
-                services.AddTransient<ITaskVisitor<TaskProcessedResult>, TaskHandler>();
-                
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
-                var ls = new LocalStorageSystem("C:\\Users\\micha\\Desktop\\local-storage");
-                services.AddTransient<IStorageSystem, LocalStorageSystem>(s =>
-                {
-                    return ls;
-                });
-
                 services.AddTransient<IFileSystem, System.IO.Abstractions.FileSystem>();
+                services.AddTransient<ITaskExecutor, TaskExecutor>(BuildTaskExecutor);
                 services.AddTransient<IMultiQueueSystem<string>, RabbitMQSystem>();
                 services.AddTransient<IMessageService, MessageService>();
-
-
             }).Build();
 
             host.Services
                 .GetRequiredService<Worker>().Run();
             Console.ReadKey();
+        }
+
+        private static TaskExecutor BuildTaskExecutor(IServiceProvider sp)
+        {
+            var storage = sp.GetService<IStorageSystem>();
+            var fs = sp.GetService<IFileSystem>();
+            
+            if (fs == null || storage == null) return new TaskExecutor([]);
+            
+            var mapping = new Dictionary<string, ITaskFactory>();
+            mapping.Add("split", new SplitFactory(storage, fs));
+            mapping.Add("splice", new SpliceFactory(storage, fs));
+            mapping.Add("convert", new ConvertFactory(storage, fs));
+
+            return new TaskExecutor(mapping); 
         }
     }
 }

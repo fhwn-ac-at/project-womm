@@ -1,4 +1,7 @@
-﻿namespace lib.exceptions
+﻿using lib.tasks;
+using lib.tasks.types;
+
+namespace lib.exceptions
 {
     using lib.item_handler;
     using System;

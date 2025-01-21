@@ -6,6 +6,9 @@ using RabbitMQ.Client.Events;
 
 namespace lib.queue;
 
+// TODO: Implement artifact queue creation and deletion in ctor
+// TODO: Task Queue: fail, success, uploads
+// TODO: Heartbeat has listensOn property containing artifact queue name
 public class RabbitMQSystem : IMultiQueueSystem<string>
 {
     private readonly QueueOptions _options;

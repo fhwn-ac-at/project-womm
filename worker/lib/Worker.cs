@@ -1,55 +1,45 @@
 ﻿using lib.exceptions;
-using lib.item_handler;
 using lib.item_handler.results;
 using lib.messaging;
-using lib.parser;
 using lib.queue;
 using lib.settings;
-using lib.storage;
+using lib.tasks;
+using lib.tasks.types;
 using Microsoft.Extensions.Options;
 using Timer = System.Timers.Timer;
 
 namespace lib;
-
+//TODO: Containerize with Docker
+//TODO: Do Upload and check if results in ITask corresponds with actual files
 public class Worker : IDisposable
 {
-    private readonly ITaskConverter _converter;
-
     private readonly IMessageService _messageService;
     
     private readonly WorkerOptions _options;
 
-    private readonly QueueOptions _queue;
+    private readonly QueueOptions _queueOptions;
 
     private readonly IMultiQueueSystem<string> _queuingSystem;
-
-    private readonly IStorageSystem _storage;
-
-    private readonly ITaskVisitor<TaskProcessedResult> _workItemHandler;
+    
+    private readonly ITaskExecutor _taskExecutor;
 
     private bool _disposed;
 
     public Worker(
         IOptions<WorkerOptions> options,
-        ITaskConverter converter,
-        ITaskVisitor<TaskProcessedResult> taskHandler,
-        IStorageSystem remoteStorage,
         IMultiQueueSystem<string> queuingSystem,
+        ITaskExecutor taskExecutor,
         IMessageService messageService)
     {
         ArgumentNullException.ThrowIfNull(messageService);
         ArgumentNullException.ThrowIfNull(queuingSystem);
-        ArgumentNullException.ThrowIfNull(converter);
-        ArgumentNullException.ThrowIfNull(taskHandler);
         ArgumentNullException.ThrowIfNull(options.Value);
-        ArgumentNullException.ThrowIfNull(remoteStorage);
+        ArgumentNullException.ThrowIfNull(taskExecutor);
 
         _options = options.Value;
-        _queue = _options.Queues;
-        _converter = converter;
-        _workItemHandler = taskHandler;
-        _storage = remoteStorage;
+        _queueOptions = _options.Queues;
         _queuingSystem = queuingSystem;
+        _taskExecutor = taskExecutor;
         _messageService = messageService;
     }
 
@@ -78,7 +68,6 @@ public class Worker : IDisposable
 
         if (disposing)
         {
-            _storage.Dispose();
             _queuingSystem.Dispose();
         }
 
@@ -93,40 +82,31 @@ public class Worker : IDisposable
 
     private void MessageReceivedCallback(object? sender, MessageReceivedEventArgs<string> eventArgs)
     {
-        ITask task;
+        var result = _taskExecutor.ExecuteTask(eventArgs.Message);
 
-        try
+        if (!result.IsRight)
         {
-            task = _converter.Convert(eventArgs.Message);
-        }
-        catch (TaskConversionException e)
-        {
-            ReportTaskProcessingFailure(e);
+            ReportTaskProcessingFailure(result.GetLeftOrThrow());
             return;
         }
-
-        TaskProcessedResult result;
+        
+        var processingResult = result.GetRightOrThrow();
+        ReportTaskCompletion(processingResult);
+        
         try
         {
-            result = task.Accept(_workItemHandler);
-            ReportTaskProcessingStarted(task);
-            ReportTaskCompletion(result);
-        }
-        catch (TaskProcessingFailedException e)
-        {
-            ReportTaskProcessingFailure(task, e);
-            return;
-        }
-
-        try
-        {
-            var artifactId = UploadResult(result);
-            ReportArtifactUploaded(task, artifactId);
+            var artifactId = UploadResult(processingResult);
+            ReportArtifactUploaded(processingResult.TaskId, artifactId);
         }
         catch (StorageException e)
         {
-            ReportTaskProcessingFailure(task, e);
+            ReportTaskProcessingFailure(processingResult.TaskId, e.Message);
         }
+    }
+
+    private string UploadResult(TaskProcessedResult processingResult)
+    {
+        throw new NotImplementedException();
     }
 
     private void SetupHeartBeat()
@@ -140,33 +120,25 @@ public class Worker : IDisposable
     private void SendHeartbeat()
     {
         string message = _messageService.GetHeartbeat(
-            _options.WorkerName, _queue.TaskQueueName);
+            _options.WorkerName, _queueOptions.TaskQueueName);
 
-        _queuingSystem.Enqueue(_queue.WorkerQueueName, message);
+        _queuingSystem.Enqueue(_queueOptions.WorkerQueueName, message);
     }
 
-    private void ReportTaskProcessingFailure(Exception e)
+    private void ReportTaskProcessingFailure(string error)
     {
-        string message = _messageService
-            .GetProcessingFailed("-1", _options.WorkerName, e.Message);
+        var message = _messageService
+            .GetProcessingFailed("-1", _options.WorkerName, error);
 
-        _queuingSystem.Enqueue(_queue.TaskQueueName, message);
+        _queuingSystem.Enqueue(_queueOptions.TaskQueueName, message);
     }
 
-    private void ReportTaskProcessingFailure(ITask task, Exception e)
+    private void ReportTaskProcessingFailure(string taskId, string error)
     {
         string message = _messageService
-            .GetProcessingFailed(task.ID, _options.WorkerName, e.Message);
+            .GetProcessingFailed(taskId, _options.WorkerName, error);
 
-        _queuingSystem.Enqueue(_queue.TaskQueueName, message);
-    }
-
-    private void ReportTaskProcessingStarted(ITask item)
-    {
-        string message = _messageService
-            .GetProcessingStarted(item.ID, _options.WorkerName);
-
-        _queuingSystem.Enqueue(_queue.TaskQueueName, message);
+        _queuingSystem.Enqueue(_queueOptions.TaskQueueName, message);
     }
 
     private void ReportTaskCompletion(TaskProcessedResult result)
@@ -174,26 +146,14 @@ public class Worker : IDisposable
         var message = _messageService
             .GetProcessingCompleted(result.TaskId, _options.WorkerName);
 
-        _queuingSystem.Enqueue(_queue.TaskQueueName, message);
+        _queuingSystem.Enqueue(_queueOptions.TaskQueueName, message);
     }
 
-    private void ReportArtifactUploaded(ITask task, string artifactId)
+    private void ReportArtifactUploaded(string taskId, string artifactId)
     {
         var message = _messageService
-            .GetArtifactUploaded(task.ID, artifactId);
+            .GetArtifactUploaded(taskId, artifactId);
 
-        _queuingSystem.Enqueue(_queue.ArtifactQueueName, message);
-    }
-
-    private string UploadResult(TaskProcessedResult result)
-    {
-        var artifactId = Guid.NewGuid().ToString();
-
-        foreach (var file in result.Files)
-        {
-            _storage.Upload(file, artifactId);
-        }
-
-        return artifactId;
+        _queuingSystem.Enqueue(_queueOptions.ArtifactQueueName, message);
     }
 }

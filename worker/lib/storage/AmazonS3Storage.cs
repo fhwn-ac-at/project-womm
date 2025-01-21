@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace lib.storage
 {
+    //TODO: Test with minIO
     public class AmazonS3Storage : IStorageSystem
     {
         private readonly IAmazonS3 _client;
