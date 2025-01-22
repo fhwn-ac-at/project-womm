@@ -35,8 +35,8 @@ Param:
   "results": ["some-converted-video.mp4"],
   "name": "ConvertFormat",
   "parameters": {
-    "GoalFormat": ".avi",
-    "KeyName": "some-video.mp4",
+    "goalFormat": ".avi",
+    "keyName": "some-video.mp4"
   }
 }
 ```
@@ -54,8 +54,8 @@ Param:
   "results": ["video-part-1.mp4", "video-part-2.mp4"],
   "name": "Split",
   "parameters": {
-      "SegmentTime": "00:00:05",
-      "KeyName": "some-video.mp4"
+      "segmentTime": "00:00:05",
+      "keyName": "some-video.mp4"
   }
 }
 ```
@@ -74,7 +74,7 @@ Merges the given videos together.
   "results": ["merged-video.mp4"],
   "name": "Splice",
   "parameters": {
-    "FileKeys": ["input1.mp4", "input2.mp4", "input3.mp4"]
+    "fileKeys": ["input1.mp4", "input2.mp4", "input3.mp4"]
   }
 }
 ```
