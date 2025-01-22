@@ -57,6 +57,7 @@ Param:
       "SegmentTime": "00:00:05",
       "KeyName": "some-video.mp4"
   }
+}
 ```
 <!---
 video aufteilen an 1s 3s 4s 
