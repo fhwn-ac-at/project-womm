@@ -1,9 +1,11 @@
 ﻿using lib.exceptions;
-using lib.item_handler.results;
 using lib.messaging;
+using lib.options;
 using lib.queue;
 using lib.settings;
 using lib.tasks;
+using lib.tasks.data;
+using lib.tasks.exec;
 using lib.tasks.types;
 using Microsoft.Extensions.Options;
 using Timer = System.Timers.Timer;
@@ -14,7 +16,8 @@ namespace lib;
 public class Worker : IDisposable
 {
     private readonly IMessageService _messageService;
-    
+    private readonly MessagingOptions _messagingOptions;
+
     private readonly WorkerOptions _options;
 
     private readonly QueueOptions _queueOptions;
@@ -29,11 +32,13 @@ public class Worker : IDisposable
         IOptions<WorkerOptions> options,
         IMultiQueueSystem<string> queuingSystem,
         ITaskExecutor taskExecutor,
-        IMessageService messageService)
+        IMessageService messageService,
+        IOptions<MessagingOptions> messagingOptions)
     {
         ArgumentNullException.ThrowIfNull(messageService);
         ArgumentNullException.ThrowIfNull(queuingSystem);
         ArgumentNullException.ThrowIfNull(options.Value);
+        ArgumentNullException.ThrowIfNull(messagingOptions.Value);
         ArgumentNullException.ThrowIfNull(taskExecutor);
 
         _options = options.Value;
@@ -41,6 +46,7 @@ public class Worker : IDisposable
         _queuingSystem = queuingSystem;
         _taskExecutor = taskExecutor;
         _messageService = messageService;
+        _messagingOptions = messagingOptions.Value;
     }
 
     public void Dispose()
@@ -77,36 +83,32 @@ public class Worker : IDisposable
     private void SubscribeQueue()
     {
         _queuingSystem.OnMessageReceived += MessageReceivedCallback;
+        _taskExecutor.OnTaskStatusChanged += TaskStatusChangedCallback;
         _queuingSystem.Init();
     }
 
     private void MessageReceivedCallback(object? sender, MessageReceivedEventArgs<string> eventArgs)
     {
-        var result = _taskExecutor.ExecuteTask(eventArgs.Message);
-
-        if (!result.IsRight)
-        {
-            ReportTaskProcessingFailure(result.GetLeftOrThrow());
-            return;
-        }
-        
-        var processingResult = result.GetRightOrThrow();
-        ReportTaskCompletion(processingResult);
-        
-        try
-        {
-            var artifactId = UploadResult(processingResult);
-            ReportArtifactUploaded(processingResult.TaskId, artifactId);
-        }
-        catch (StorageException e)
-        {
-            ReportTaskProcessingFailure(processingResult.TaskId, e.Message);
-        }
+        _taskExecutor.ExecuteTask(eventArgs.Message);
     }
-
-    private string UploadResult(TaskProcessedResult processingResult)
+    
+    private void TaskStatusChangedCallback(object? sender, TaskStatusEventArgs e)
     {
-        throw new NotImplementedException();
+        if (e.Status == _messagingOptions.ArtifactUploaded)
+        {
+            var m = _messageService.GetArtifactUploadedMessage(e.Status, e.TaskId);
+            _queuingSystem.Enqueue(_queueOptions.ArtifactQueueName, m);
+        }
+        else if (e.Status == _messagingOptions.ProcessingFailed)
+        {
+            var m = _messageService.GetTaskStatusChangeMessage(e.Status, e.TaskId, _options.WorkerName,e.Message);
+            _queuingSystem.Enqueue(_queueOptions.TaskQueueName, m);
+        }
+        else
+        {
+            var m = _messageService.GetTaskStatusChangeMessage(e.Status, e.TaskId, _options.WorkerName);
+            _queuingSystem.Enqueue(_queueOptions.TaskQueueName, m);
+        }
     }
 
     private void SetupHeartBeat()
@@ -119,41 +121,9 @@ public class Worker : IDisposable
 
     private void SendHeartbeat()
     {
-        string message = _messageService.GetHeartbeat(
+        string message = _messageService.GetHeartbeatMessage(
             _options.WorkerName, _queueOptions.TaskQueueName);
 
         _queuingSystem.Enqueue(_queueOptions.WorkerQueueName, message);
-    }
-
-    private void ReportTaskProcessingFailure(string error)
-    {
-        var message = _messageService
-            .GetProcessingFailed("-1", _options.WorkerName, error);
-
-        _queuingSystem.Enqueue(_queueOptions.TaskQueueName, message);
-    }
-
-    private void ReportTaskProcessingFailure(string taskId, string error)
-    {
-        string message = _messageService
-            .GetProcessingFailed(taskId, _options.WorkerName, error);
-
-        _queuingSystem.Enqueue(_queueOptions.TaskQueueName, message);
-    }
-
-    private void ReportTaskCompletion(TaskProcessedResult result)
-    {
-        var message = _messageService
-            .GetProcessingCompleted(result.TaskId, _options.WorkerName);
-
-        _queuingSystem.Enqueue(_queueOptions.TaskQueueName, message);
-    }
-
-    private void ReportArtifactUploaded(string taskId, string artifactId)
-    {
-        var message = _messageService
-            .GetArtifactUploaded(taskId, artifactId);
-
-        _queuingSystem.Enqueue(_queueOptions.ArtifactQueueName, message);
     }
 }

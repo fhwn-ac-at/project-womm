@@ -1,6 +1,9 @@
-﻿using lib.tasks;
-using lib.tasks.creation;
-using lib.tasks.creation;
+﻿using System.Text.Json;
+using lib.tasks;
+using lib.tasks.data;
+using lib.tasks.exec;
+using lib.tasks.types;
+using Microsoft.Extensions.Options;
 
 namespace app
 {
@@ -42,11 +45,11 @@ namespace app
 
                 services.AddOptions<MessagingOptions>()
                     .Bind(config.GetRequiredSection("Messaging"));
-
+                
                 services.AddTransient<Worker>();
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
                 services.AddTransient<IFileSystem, System.IO.Abstractions.FileSystem>();
-                services.AddTransient<ITaskExecutor, TaskExecutor>(BuildTaskExecutor);
+                services.AddTransient<ITaskExecutor, TaskExecutor>( s => BuildTaskExecutor(s, config));
                 services.AddTransient<IMultiQueueSystem<string>, RabbitMQSystem>();
                 services.AddTransient<IMessageService, MessageService>();
             }).Build();
@@ -56,19 +59,34 @@ namespace app
             Console.ReadKey();
         }
 
-        private static TaskExecutor BuildTaskExecutor(IServiceProvider sp)
+        private static TaskExecutor BuildTaskExecutor(IServiceProvider sp, IConfiguration config)
         {
             var storage = sp.GetService<IStorageSystem>();
             var fs = sp.GetService<IFileSystem>();
             
-            if (fs == null || storage == null) return new TaskExecutor([]);
+            var rootDir = config
+                .GetRequiredSection("Operation")
+                .GetValue<string>("RootDirectory") 
+                          ?? throw new ArgumentException("Root directory is missing.");
+            var messagingOptions = sp.GetService<IOptions<MessagingOptions>>()
+                                   ?? throw new ArgumentException("Messaging Section is missing.");;
             
-            var mapping = new Dictionary<string, ITaskFactory>();
-            mapping.Add("split", new SplitFactory(storage, fs));
-            mapping.Add("splice", new SpliceFactory(storage, fs));
-            mapping.Add("convert", new ConvertFactory(storage, fs));
+            var jsonOptions = new JsonSerializerOptions
+            {
+                Converters = { new TaskDataJsonConverter() },
+                PropertyNameCaseInsensitive = true
+            };
+            
+            if (fs == null || storage == null) return new TaskExecutor([], jsonOptions, messagingOptions);
+            
+            var mapping = new Dictionary<string, Func<TaskData, EditingTask>>
+            {
+                { "Split", (data) => new Split(data, fs, storage, rootDir) },
+                { "Splice", (data) => new Splice(data, fs, storage, rootDir) },
+                { "Convert", (data) => new ConvertFormat(data, fs, storage, rootDir) }
+            };
 
-            return new TaskExecutor(mapping); 
+            return new TaskExecutor(mapping, jsonOptions , messagingOptions); 
         }
     }
 }

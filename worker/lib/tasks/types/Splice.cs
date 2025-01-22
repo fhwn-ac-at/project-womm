@@ -2,63 +2,47 @@
 using System.Text;
 using lib.commands;
 using lib.exceptions;
-using lib.item_handler.results;
 using lib.storage;
+using lib.tasks.data;
+using lib.tasks.exec;
 
 namespace lib.tasks.types;
 
-public class Splice : ITask
+public class Splice : EditingTask
 {
-    private readonly IFileSystem _fs;
-        
-    private readonly IStorageSystem _storage;
-
-    private readonly string _rootPath;
-
-    public Splice(IFileSystem fs, IStorageSystem storage, string rootPath, 
-        string id, string[] fileKeys, string[] results)
+    private readonly SpliceParameters _parameters;
+    
+    public Splice(TaskData data, IFileSystem fs, IStorageSystem storage, string workingDirectory)
+        : base(data, fs, storage, workingDirectory)
     {
-        ArgumentNullException.ThrowIfNull(fs);
-        ArgumentNullException.ThrowIfNull(storage);
-        ArgumentNullException.ThrowIfNull(results);
-        ArgumentNullException.ThrowIfNull(fileKeys);
-        ArgumentException.ThrowIfNullOrEmpty(rootPath);
-        ArgumentException.ThrowIfNullOrEmpty(id);
+        if (data.parameters is not SpliceParameters parameters)
+        {
+            throw new InvalidDataException("parameters must be of type SplitParameters");
+        }
             
-        _fs = fs;
-        _storage = storage;
-        _rootPath = rootPath;
-        Id = id;
-        FileKeys = fileKeys;
-        Results = results;
+        _parameters = parameters;
     }
-    
-    public string Id { get;}
-    
-    public string[] Results { get; }
 
-    public string[] FileKeys { get; } 
+    public string[] FileKeys => _parameters.fileKeys;
     
-    public TaskProcessedResult Process()
+    public override void Process()
     {
         if (FileKeys.Length == 0)
         {
             throw new TaskProcessingFailedException("No files were provided", this);
         }
 
-        var tempFolder = _storage.DownloadIntoTempFolder(_rootPath, FileKeys);
+        var tempFolder = Storage.DownloadIntoTempFolder(WorkingDirectory, FileKeys);
         var concat = GenerateSourceConcatenation(tempFolder);
 
         var resultId = Guid.NewGuid().ToString()[..8] + ".mp4";
-        var resultFile = _fs.Path.Combine(tempFolder, resultId);
+        var resultFile = Fs.Path.Combine(tempFolder, resultId);
             
         var command = new FFmpegCommand(concat, resultFile);
         command.AddArgument("-c", "copy");
         command.Execute();
             
-        _storage.Upload(resultFile, resultId);
-
-        return new TaskProcessedResult(Id, []);
+        Storage.Upload(resultFile, resultId);
     }
     
     private static string GenerateSourceConcatenation(string folder)

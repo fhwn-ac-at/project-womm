@@ -1,57 +1,41 @@
 ﻿using System.IO.Abstractions;
 using lib.commands;
 using lib.exceptions;
-using lib.item_handler.results;
 using lib.storage;
+using lib.tasks.data;
+using lib.tasks.exec;
 
 namespace lib.tasks.types
 {
-    public class ConvertFormat : ITask
+    public class ConvertFormat : EditingTask
     {
-        private IFileSystem _fs;
-        
-        private IStorageSystem _storage;
+        private readonly ConvertParameters _parameters;
 
-        private string _rootPath;
-
-        public ConvertFormat(IFileSystem fs, IStorageSystem storage, string rootPath, 
-            string id, string keyName, string goalFormat, string[] results)
+        public ConvertFormat(TaskData data, IFileSystem fs, IStorageSystem storage, string workingDirectory)
+            : base(data, fs, storage, workingDirectory)
         {
-            ArgumentNullException.ThrowIfNull(fs);
-            ArgumentNullException.ThrowIfNull(storage);
-            ArgumentNullException.ThrowIfNull(results);
-            ArgumentException.ThrowIfNullOrEmpty(rootPath);
-            ArgumentException.ThrowIfNullOrEmpty(id);
-            ArgumentException.ThrowIfNullOrEmpty(keyName);
-            ArgumentException.ThrowIfNullOrEmpty(goalFormat);
+            if (data.parameters is not ConvertParameters parameters)
+            {
+                throw new InvalidDataException("parameters must be of type SplitParameters");
+            }
             
-            _fs = fs;
-            _storage = storage;
-            _rootPath = rootPath;
-            Id = id;
-            KeyName = keyName;
-            GoalFormat = goalFormat;
-            Results = results;
+            _parameters = parameters;
         }
-        
-        public string Id { get; }
-        
-        public string[] Results { get; }
 
-        public string KeyName { get; }
+        public string KeyName => _parameters.keyName;
 
-        public string GoalFormat { get; }
+        public string GoalFormat => _parameters.goalFormat;
 
-        public TaskProcessedResult Process()
+        public override void Process()
         {
             string tempFolder;
             string downloadedFile;
             string resultFile;
             try
             {
-                tempFolder = _storage.DownloadIntoTempFolder(_rootPath, KeyName); 
-                downloadedFile = _fs.Path.Combine(tempFolder, KeyName);
-                resultFile = _fs.Path.Combine(tempFolder, Guid.NewGuid().ToString()[..8] + GoalFormat);
+                tempFolder = Storage.DownloadIntoTempFolder(WorkingDirectory, KeyName); 
+                downloadedFile = Fs.Path.Combine(tempFolder, KeyName);
+                resultFile = Fs.Path.Combine(tempFolder, Guid.NewGuid().ToString()[..8] + GoalFormat);
             }
             catch (IOException e)
             {
@@ -67,15 +51,13 @@ namespace lib.tasks.types
             List<string> uploadedFiles;
             try
             {
-                uploadedFiles = _storage.UploadFolderContents(tempFolder).ToList(); 
-                _fs.Directory.Delete(tempFolder, true);
+                uploadedFiles = Storage.UploadFolderContents(tempFolder).ToList(); 
+                Fs.Directory.Delete(tempFolder, true);
             }
             catch (IOException e)
             {
                 throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, this);
             }
-
-            return new TaskProcessedResult(Id, uploadedFiles);
         }
     }
 }

@@ -1,55 +1,39 @@
 ﻿using System.IO.Abstractions;
 using lib.commands;
 using lib.exceptions;
-using lib.item_handler.results;
 using lib.storage;
+using lib.tasks.data;
+using lib.tasks.exec;
 
 namespace lib.tasks.types
 {
-    public class Split : ITask
+    public class Split : EditingTask
     {
-        private readonly IFileSystem _fs;
-        
-        private readonly IStorageSystem _storage;
+        private readonly SplitParameters _parameters;
 
-        private readonly string _rootPath;
-
-        public Split(IFileSystem fs, IStorageSystem storage, string rootPath, 
-            string id, string segmentTime, string keyName, string[] results)
+        public Split(TaskData data, IFileSystem fs, IStorageSystem storage, string workingDirectory) 
+            : base(data, fs, storage, workingDirectory)
         {
-            ArgumentNullException.ThrowIfNull(fs);
-            ArgumentNullException.ThrowIfNull(storage);
-            ArgumentNullException.ThrowIfNull(results);
-            ArgumentException.ThrowIfNullOrEmpty(rootPath);
-            ArgumentException.ThrowIfNullOrEmpty(id);
-            ArgumentException.ThrowIfNullOrEmpty(segmentTime);
-            ArgumentException.ThrowIfNullOrEmpty(keyName);
+            if (data.parameters is not SplitParameters parameters)
+            {
+                throw new InvalidDataException("parameters must be of type SplitParameters");
+            }
             
-            _fs = fs;
-            _storage = storage;
-            _rootPath = rootPath;
-            Id = id;
-            SegmentTime = segmentTime;
-            KeyName = keyName;
-            Results = results;
+            _parameters = parameters;
         }
-        
-        public string Id { get; }
-        
-        public string[] Results { get; }
-        
-        public string SegmentTime { get; }
 
-        public string KeyName { get; }
+        public string SegmentTime => _parameters.segmentTime;
 
-        public TaskProcessedResult Process()
+        public string KeyName => _parameters.keyName;
+
+        public override void Process()
         {
             string tempFolder;
             string downloadedFile;
             try
             {
-                tempFolder = _storage.DownloadIntoTempFolder(_rootPath, KeyName); 
-                downloadedFile = _fs.Path.Combine(tempFolder, KeyName);
+                tempFolder = Storage.DownloadIntoTempFolder(WorkingDirectory, KeyName); 
+                downloadedFile = Fs.Path.Combine(tempFolder, KeyName);
             }
             catch (IOException e)
             {
@@ -71,16 +55,14 @@ namespace lib.tasks.types
             List<string> uploadedFiles;
             try
             {
-                _fs.File.Delete(downloadedFile);
-                uploadedFiles = _storage.UploadFolderContents(tempFolder);
-                _fs.Directory.Delete(tempFolder, true);
+                Fs.File.Delete(downloadedFile);
+                uploadedFiles = Storage.UploadFolderContents(tempFolder);
+                Fs.Directory.Delete(tempFolder, true);
             }
             catch (IOException e)
             {
                 throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, this);
             }
-
-            return new TaskProcessedResult(Id, uploadedFiles);
         }
     }
 }

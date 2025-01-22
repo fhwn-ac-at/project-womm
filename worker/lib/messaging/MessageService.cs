@@ -18,7 +18,7 @@
             _options = options.Value;
         }
 
-        public string GetHeartbeat(string workerName, string taskQueueName)
+        public string GetHeartbeatMessage(string workerName, string taskQueueName)
         {
             var message = new
             {
@@ -33,11 +33,11 @@
             return JsonSerializer.Serialize(message);
         }
 
-        public string GetProcessingStarted(string taskId, string workerName)
+        public string GetTaskStatusChangeMessage(string statusPattern, string taskId, string workerName)
         {
             var message = new
             {
-                pattern = _options.ProcessingStarted,
+                pattern = statusPattern,
                 data = new
                 {
                     taskId = taskId,
@@ -47,27 +47,12 @@
 
             return JsonSerializer.Serialize(message);
         }
-
-        public string GetProcessingCompleted(string taskId, string workerName)
+        
+        public string GetTaskStatusChangeMessage(string statusPattern, string taskId, string workerName, string error)
         {
             var message = new
             {
-                pattern = _options.ProcessingCompleted,
-                data = new
-                {
-                    taskId = taskId,
-                    worker = workerName
-                }
-            };
-
-            return JsonSerializer.Serialize(message);
-        }
-
-        public string GetProcessingFailed(string taskId, string workerName, string error)
-        {
-            var message = new
-            {
-                pattern = _options.ProcessingFailed,
+                pattern = statusPattern,
                 data = new
                 {
                     taskId = taskId,
@@ -79,7 +64,7 @@
             return JsonSerializer.Serialize(message);
         }
 
-        public string GetArtifactUploaded(string taskId, string artifactId)
+        public string GetArtifactUploadedMessage(string taskId, string artifactId)
         {
             var message = new
             {
