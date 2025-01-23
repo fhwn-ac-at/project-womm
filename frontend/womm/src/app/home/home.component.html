@@ -1,15 +1,16 @@
 <mat-toolbar color="primary">
   <span>My App</span>
   <span class="spacer"></span>
-  <button mat-button>Home</button>
+  <button mat-button>Video List</button>
   <button mat-button>About</button>
   <button mat-button>Contact</button>
 </mat-toolbar>
 
 <div class="main-content">
-  <div class="upload-container">
-    <h2>Upload and Arrange Videos</h2>
-    <input type="file" multiple (change)="onFileSelected($event)" accept="video/*">
+  <div class="upload-container" (drop)="onDropInUpload($event)" (dragover)="onDragOver($event)">
+    <h2>Drag and drop your video files in this area</h2>
+    <button mat-raised-button color="primary" (click)="fileInput.click()">Select Videos</button>
+    <input #fileInput type="file" accept="video/*" multiple hidden (change)="onFileSelected($event)" style="position: absolute; left: -9999px;" />
   </div>
 
   <div class="uploaded-videos-container">
@@ -25,6 +26,12 @@
         <p>{{ video.name }}</p>
       </div>
     </div>
+  </div>
+
+  <div>
+    <button mat-raised-button>
+      Render video
+    </button>
   </div>
 </div>
 

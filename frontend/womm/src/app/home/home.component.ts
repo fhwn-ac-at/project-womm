@@ -25,11 +25,9 @@ export class HomeComponent {
   draggedIndex: number | null = null;
 
   onFileSelected(event: Event): void {
-    const files = (event.target as HTMLInputElement).files;
-    console.log('Files selected:', files); // Check if files are received
-
-    if (files) {
-      Array.from(files).forEach((file) => {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      Array.from(input.files).forEach(file => {
         const url = URL.createObjectURL(file);
         this.videos.push({ file, url, name: file.name });
       });
@@ -43,6 +41,16 @@ export class HomeComponent {
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();  // Necessary to allow a drop
+  }
+
+  onDropInUpload(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer?.files) {
+      Array.from(event.dataTransfer.files).forEach(file => {
+        const url = URL.createObjectURL(file);
+        this.videos.push({ file, url, name: file.name });
+      });
+    }
   }
 
   onDrop(event: DragEvent, index: number): void {
