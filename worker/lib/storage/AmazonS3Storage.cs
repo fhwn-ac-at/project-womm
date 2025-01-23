@@ -1,5 +1,6 @@
 ﻿using Amazon;
 using Amazon.Runtime;
+using Amazon.Runtime.Endpoints;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using lib.exceptions;
@@ -9,7 +10,6 @@ using Microsoft.Extensions.Options;
 
 namespace lib.storage
 {
-    //TODO: Test with minIO
     public class AmazonS3Storage : IStorageSystem
     {
         private readonly ILogger<AmazonS3Storage> _logger;
@@ -24,14 +24,13 @@ namespace lib.storage
             _logger = logger;
             _options = options.Value;
 
-            AmazonS3Config config = new();
-            config.RegionEndpoint = RegionEndpoint.EUCentral1;
-
-            AWSCredentials credentials = new BasicAWSCredentials(
-                accessKey: _options.AccessKey,
-                secretKey: _options.SecreteKey);
-
-            _client = new AmazonS3Client(credentials, config);
+            var config = new AmazonS3Config
+            {
+                ServiceURL = _options.Endpoint,
+                ForcePathStyle = true
+            };
+            
+            _client = new AmazonS3Client(_options.AccessKey, _options.SecreteKey, config);
         }
 
         public void Download(string localPath, string keyName)
@@ -43,16 +42,19 @@ namespace lib.storage
             _logger.LogInformation($"Downloading file {keyName} into local path {localPath}");
 
             TransferUtility transferUtility = new TransferUtility(_client);
-            TransferUtilityUploadRequest request = new()
+            
+            var obj = _client.GetObjectAsync(_options.BucketName, keyName).Result;
+            
+            TransferUtilityDownloadRequest request = new()
             {
                 BucketName = _options.BucketName,
                 Key = keyName,
-                FilePath = localPath
+                FilePath = Path.Join(localPath, obj.Key),
             };
 
             try
             {
-                transferUtility.Upload(request);
+                transferUtility.Download(request);
             }
             catch (AmazonS3Exception e)
             {
@@ -74,11 +76,10 @@ namespace lib.storage
             {
                 if (File.Exists(localPath))
                 {
-                    string fileKey = keyName + Path.GetFileName(localPath);
                     TransferUtilityUploadRequest fileRequest = new()
                     {
                         BucketName = _options.BucketName,
-                        Key = fileKey,
+                        Key = keyName,
                         FilePath = localPath
                     };
 
@@ -86,26 +87,13 @@ namespace lib.storage
                 }
                 else if (Directory.Exists(localPath))
                 {
-                    var files = Directory.GetFiles(localPath, "*", SearchOption.AllDirectories);
-                    if (files.Length == 0)
+                    TransferUtilityUploadDirectoryRequest request = new()
                     {
-                        _logger.LogInformation($"Cannot upload from {localPath} since the directory is empty");
-                        throw new StorageException("No files were found in " + localPath);
-                    }
-
-                    foreach (var file in files)
-                    {
-                        string fileKey = keyName + file;
-
-                        TransferUtilityUploadRequest dirFileRequest = new()
-                        {
-                            BucketName = _options.BucketName,
-                            Key = fileKey,
-                            FilePath = file
-                        };
-
-                        transferUtility.Upload(dirFileRequest);
-                    }
+                        BucketName = _options.BucketName,
+                        Directory = localPath
+                    };
+                    
+                    transferUtility.UploadDirectory(request);
                 }
                 else
                 {

@@ -54,6 +54,5 @@ public class TaskDataJsonConverter : JsonConverter<TaskData>
 
     public override void Write(Utf8JsonWriter writer, TaskData value, JsonSerializerOptions options)
     {
-        throw new NotImplementedException("Serialization is not implemented.");
     }
 }

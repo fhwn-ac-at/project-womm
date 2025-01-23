@@ -11,14 +11,14 @@ namespace lib.tasks.types
     {
         private readonly SplitParameters _parameters;
 
-        public Split(TaskData data, IFileSystem fs, IStorageSystem storage, string workingDirectory) 
+        public Split(TaskData data, IFileSystem fs, IStorageSystem storage, string workingDirectory)
             : base(data, fs, storage, workingDirectory)
         {
             if (data.parameters is not SplitParameters parameters)
             {
                 throw new InvalidDataException("parameters must be of type SplitParameters");
             }
-            
+
             _parameters = parameters;
         }
 
@@ -26,42 +26,40 @@ namespace lib.tasks.types
 
         public string KeyName => _parameters.keyName;
 
+        //TODO: Test with ffmpeg
         public override void Process()
         {
-            string tempFolder;
-            string downloadedFile;
-            try
-            {
-                tempFolder = Storage.DownloadIntoTempFolder(WorkingDirectory, KeyName); 
-                downloadedFile = Fs.Path.Combine(tempFolder, KeyName);
-            }
-            catch (IOException e)
-            {
-                throw new TaskProcessingFailedException("Unable to download File locally: " + e.Message, e, this);
-            }
-
+            string downloadedFile = Path.Join(WorkingDirectory, _parameters.keyName);
+            Storage.Download(WorkingDirectory, 
+                KeyName);
+            
             FFmpegCommand command = new(
-                source: $"\"{downloadedFile}\"", 
-                destination: $"\"{tempFolder}\"/output%03d.mp4");
+                source: $"\"{downloadedFile}\"",
+                destination: $"output%03d.mp4");
 
             command.AddArgument("-c", "copy");
             command.AddArgument("-map", "0");
             command.AddArgument("-segment_time", SegmentTime);
             command.AddArgument("-f", "segment");
             command.AddArgument("-reset_timestamps", "1");
-            
-            command.Execute();
 
-            List<string> uploadedFiles;
-            try
+            command.Execute();
+            
+            
+            File.Delete(downloadedFile);
+            var files = Directory.GetFiles(WorkingDirectory, 
+                "*", 
+                SearchOption.AllDirectories);
+
+            if (files.Length == Results.Length)
             {
-                Fs.File.Delete(downloadedFile);
-                uploadedFiles = Storage.UploadFolderContents(tempFolder);
-                Fs.Directory.Delete(tempFolder, true);
+                throw new Exception($"Found {files.Length} files but expected {Results.Length}");
             }
-            catch (IOException e)
+            
+            for (int i = 0; i < files.Length; i++)
             {
-                throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, this);
+                Storage.Upload(files[i], Results[i]);
+                File.Delete(files[i]);
             }
         }
     }

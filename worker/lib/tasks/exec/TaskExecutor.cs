@@ -81,7 +81,6 @@ public class TaskExecutor : ITaskExecutor
                 taskData.taskId));
             _logger.LogInformation("Completed processing: " + taskData.name);
             
-            //TODO: Upload Artifacts
             FireOnTaskStatusChanged(new TaskStatusEventArgs(
                 _messagingOptions.ArtifactUploaded, 
                 "Uploaded Artifacts: " + taskData.name, 

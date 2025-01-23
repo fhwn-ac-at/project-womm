@@ -9,8 +9,6 @@ using RabbitMQ.Client.Events;
 
 namespace lib.queue;
 
-// TODO: Implement artifact queue creation and deletion in ctor
-// TODO: Task Queue: fail, success, uploads
 public class RabbitMQSystem : IMultiQueueSystem<string>
 {
     private readonly ILogger<RabbitMQSystem> _logger;

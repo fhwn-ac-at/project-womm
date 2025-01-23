@@ -17,5 +17,8 @@
 
         [Required]
         public string SecreteKey { get; set; }
+        
+        [Required]
+        public string Endpoint { get; set; }
     }
 }

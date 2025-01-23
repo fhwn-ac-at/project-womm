@@ -19,13 +19,13 @@ public static class StorageExtensions
 
     public static string DownloadIntoTempFolder(this IStorageSystem storage, string rootPath, string fileKey)
     {
-        string localPath = Path.Combine(rootPath, GenerateId());
+        //string localPath = Path.Combine(rootPath, GenerateId());
 
-        Directory.CreateDirectory(localPath);
+        //Directory.CreateDirectory(localPath);
 
-        storage.Download(localPath, fileKey);
+        storage.Download(rootPath, fileKey);
 
-        return localPath;
+        return rootPath;
     }
 
     public static string DownloadIntoTempFolder(this IStorageSystem storage, string rootPath, string[] files)

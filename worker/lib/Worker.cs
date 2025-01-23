@@ -14,7 +14,6 @@ using Timer = System.Timers.Timer;
 
 namespace lib;
 //TODO: Containerize with Docker
-//TODO: Do Upload and check if results in ITask corresponds with actual files
 public class Worker : IDisposable
 {
     private readonly IMessageService _messageService;

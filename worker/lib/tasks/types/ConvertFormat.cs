@@ -26,6 +26,7 @@ namespace lib.tasks.types
 
         public string GoalFormat => _parameters.goalFormat;
 
+        //TODO: Test and simplify
         public override void Process()
         {
             string tempFolder;
