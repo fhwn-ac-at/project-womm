@@ -4,6 +4,7 @@ using Amazon.S3;
 using Amazon.S3.Transfer;
 using lib.exceptions;
 using lib.options;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace lib.storage
@@ -11,14 +12,16 @@ namespace lib.storage
     //TODO: Test with minIO
     public class AmazonS3Storage : IStorageSystem
     {
+        private readonly ILogger<AmazonS3Storage> _logger;
         private readonly IAmazonS3 _client;
         private readonly StorageOptions _options;
 
         private bool _disposed;
 
-        public AmazonS3Storage(IOptions<StorageOptions> options)
+        public AmazonS3Storage(IOptions<StorageOptions> options, ILogger<AmazonS3Storage> logger)
         {
             ArgumentNullException.ThrowIfNull(options.Value, nameof(options));
+            _logger = logger;
             _options = options.Value;
 
             AmazonS3Config config = new();
@@ -37,6 +40,7 @@ namespace lib.storage
             {
                 throw new ArgumentException($"The given path does not exist: {localPath}");
             }
+            _logger.LogInformation($"Downloading file {keyName} into local path {localPath}");
 
             TransferUtility transferUtility = new TransferUtility(_client);
             TransferUtilityUploadRequest request = new()
@@ -52,6 +56,7 @@ namespace lib.storage
             }
             catch (AmazonS3Exception e)
             {
+                _logger.LogError($"Error downloading file {keyName}: {e.Message}");
                 throw new InvalidOperationException(e.Message);
             }
         }
@@ -62,6 +67,7 @@ namespace lib.storage
             {
                 throw new ArgumentException($"The given path does not exist: {localPath}");
             }
+            _logger.LogInformation($"Uploading file {keyName} into local path {localPath}");
 
             TransferUtility transferUtility = new TransferUtility(_client);
             try
@@ -83,6 +89,7 @@ namespace lib.storage
                     var files = Directory.GetFiles(localPath, "*", SearchOption.AllDirectories);
                     if (files.Length == 0)
                     {
+                        _logger.LogInformation($"Cannot upload from {localPath} since the directory is empty");
                         throw new StorageException("No files were found in " + localPath);
                     }
 
@@ -102,11 +109,13 @@ namespace lib.storage
                 }
                 else
                 {
+                    _logger.LogError($"File {keyName} does not exist in local path {localPath}");
                     throw new ArgumentException($"The given path is neither a file nor a directory: {localPath}");
                 }
             }
             catch (AmazonS3Exception e)
             {
+                _logger.LogError($"Error uploading {keyName}: {e.Message}");
                 throw new InvalidOperationException($"Failed to upload to S3: {e.Message}", e);
             }
         }

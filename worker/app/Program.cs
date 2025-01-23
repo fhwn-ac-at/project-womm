@@ -28,9 +28,7 @@ namespace app
                 {
                     logging.ClearProviders();
                     logging.AddConsole();
-
-                })
-                .ConfigureServices((hostContext, services) =>
+                }).ConfigureServices((hostContext, services) =>
             {
                 services.AddLogging();
                 IConfiguration config = hostContext.Configuration;
@@ -77,7 +75,8 @@ namespace app
                 PropertyNameCaseInsensitive = true
             };
             
-            if (fs == null || storage == null) return new TaskExecutor([], jsonOptions, messagingOptions);
+            if (fs == null || storage == null) return new TaskExecutor([], jsonOptions, messagingOptions, 
+                sp.GetService<ILogger<TaskExecutor>>());
             
             var mapping = new Dictionary<string, Func<TaskData, ScheduledTask>>
             {
@@ -86,7 +85,7 @@ namespace app
                 { "ConvertFormat", (data) => new ConvertFormat(data, fs, storage, rootDir) }
             };
 
-            return new TaskExecutor(mapping, jsonOptions , messagingOptions); 
+            return new TaskExecutor(mapping, jsonOptions , messagingOptions, sp.GetService<ILogger<TaskExecutor>>()); 
         }
     }
 }

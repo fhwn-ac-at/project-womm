@@ -75,10 +75,12 @@ public class Worker : IDisposable
 
     public void Run()
     {
+        _logger.LogInformation("Worker running...");
         SubscribeQueue();
 
         if (_options.SendHeartbeat)
         {
+            _logger.LogInformation("Setting up heartbeat...");
             SetupHeartBeat();
         }
     }
@@ -102,7 +104,15 @@ public class Worker : IDisposable
     {
         _queuingSystem.OnMessageReceived += MessageReceivedCallback;
         _taskExecutor.OnTaskStatusChanged += TaskStatusChangedCallback;
-        _queuingSystem.Init();
+
+        try
+        {
+            _queuingSystem.Init();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Unhandled exception during Queue setup:" + e.Message);
+        }
     }
 
     private void MessageReceivedCallback(object? sender, MessageReceivedEventArgs<string> eventArgs)
@@ -139,6 +149,7 @@ public class Worker : IDisposable
 
     private void SendHeartbeat()
     {
+        _logger.LogInformation("Sending heartbeat...");
         string message = _messageService.GetHeartbeatMessage(
             _options.WorkerName, _queueOptions.ListensOnQueue);
 

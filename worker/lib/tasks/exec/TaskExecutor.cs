@@ -3,6 +3,7 @@ using lib.messaging;
 using lib.options;
 using lib.tasks.data;
 using lib.tasks.types;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace lib.tasks.exec;
@@ -13,14 +14,18 @@ public class TaskExecutor : ITaskExecutor
     
     private readonly JsonSerializerOptions _options;
     
+    private readonly ILogger<TaskExecutor> _logger;
+
     private readonly MessagingOptions _messagingOptions;
 
     public TaskExecutor(Dictionary<string, Func<TaskData, ScheduledTask>> taskFactories,
         JsonSerializerOptions options,
-        IOptions<MessagingOptions> messagingOptions)
+        IOptions<MessagingOptions> messagingOptions, 
+        ILogger<TaskExecutor> logger)
     {
         _taskFactories = taskFactories;
         _options = options;
+        _logger = logger;
         _messagingOptions = messagingOptions.Value ?? throw new ArgumentNullException(nameof(messagingOptions));
     }
 
@@ -40,6 +45,7 @@ public class TaskExecutor : ITaskExecutor
                 _messagingOptions.ProcessingFailed, 
                 e.Message, 
                 "-1"));
+            _logger.LogError("Unable to parse task: " + rawTask);
             return;
         }
         
@@ -51,6 +57,7 @@ public class TaskExecutor : ITaskExecutor
                 _messagingOptions.ProcessingFailed, 
                 "Did not find task: " + taskData.name, 
                 taskData.taskId));
+            _logger.LogError("Unknown task name encountered: " + rawTask);
             return;
         }
         
@@ -63,6 +70,8 @@ public class TaskExecutor : ITaskExecutor
                 _messagingOptions.ProcessingStarted, 
                 "Started processing: " + taskData.name, 
                 taskData.taskId));
+            _logger.LogInformation("Started processing: " + taskData.name);
+            
             
             task.Process();
             
@@ -70,12 +79,14 @@ public class TaskExecutor : ITaskExecutor
                 _messagingOptions.ProcessingCompleted, 
                 "Completed processing: " + taskData.name, 
                 taskData.taskId));
+            _logger.LogInformation("Completed processing: " + taskData.name);
             
             //TODO: Upload Artifacts
             FireOnTaskStatusChanged(new TaskStatusEventArgs(
                 _messagingOptions.ArtifactUploaded, 
                 "Uploaded Artifacts: " + taskData.name, 
                 taskData.taskId));
+            _logger.LogInformation("Uploaded Artifacts: " + taskData.name);
         }
         catch (Exception e)
         {
@@ -83,6 +94,7 @@ public class TaskExecutor : ITaskExecutor
                 _messagingOptions.ProcessingFailed, 
                 e.Message, 
                 taskData.taskId));
+            _logger.LogError("Error executing task: " + e.Message);
         }
     }
 

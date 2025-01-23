@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using lib.settings;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -12,6 +13,7 @@ namespace lib.queue;
 // TODO: Task Queue: fail, success, uploads
 public class RabbitMQSystem : IMultiQueueSystem<string>
 {
+    private readonly ILogger<RabbitMQSystem> _logger;
     private readonly QueueOptions _options;
 
     private readonly string _workerName;
@@ -22,8 +24,9 @@ public class RabbitMQSystem : IMultiQueueSystem<string>
     
     private bool _disposed;
 
-    public RabbitMQSystem(IOptions<WorkerOptions> options)
+    public RabbitMQSystem(IOptions<WorkerOptions> options, ILogger<RabbitMQSystem> logger)
     {
+        _logger = logger;
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(options.Value);
 
@@ -54,7 +57,7 @@ public class RabbitMQSystem : IMultiQueueSystem<string>
             var message = Encoding.UTF8.GetString(body);
 
             FireOnMessageReceived(new MessageReceivedEventArgs<string>(message));
-            Debug.WriteLine("Received Message: " + message);
+            _logger.LogInformation($"Received message: {message}");
         };
 
         _channel.QueueDeclare(_options.ListensOnQueue, 
@@ -75,13 +78,12 @@ public class RabbitMQSystem : IMultiQueueSystem<string>
 
         var body = Encoding.UTF8.GetBytes(message);
         
+        _logger.LogInformation($"Enqueuing into {queueId}, message: {message}");
         _channel.BasicPublish(
             exchange: _options.Exchange,
             routingKey: queueId,
             null,
             body);
-        
-        Debug.WriteLine("Publish Message: " + message);
     }
 
     public void Dispose()
