@@ -7,22 +7,13 @@ For adding a new task, the `ITaskHandler` and corresponding implementations
 have to be extended by one method for each task.
 
 ## General Structure
-
-```json
-{
-  "Type": "SomeType",
-  "ID": "42",
-  "AdditionalData" : "42"
-}
-```
-
 ```json
 {
   "taskId": "32",
   "results": ["video-part-1.mp4", "video-part-2.mp4"],
   "name": "Split",
   "parameters": {
-    "SegmentTime": "00:00:05"
+    "AdditionalData": "42"
   }
 }
 ```
@@ -40,10 +31,13 @@ Param:
 
 ```json
 {
-  "Type": "ConvertFormat",
-  "ID": "42",
-  "KeyName": "some-video.mp4",
-  "GoalFormat": ".avi",
+  "taskId": "32",
+  "results": ["some-converted-video.mp4"],
+  "name": "ConvertFormat",
+  "parameters": {
+    "goalFormat": ".avi",
+    "keyName": "some-video.mp4"
+  }
 }
 ```
 
@@ -54,13 +48,16 @@ Param:
 - `KeyName` : Unique key to identify the source file.
 - `SegmentTime` : Size of the segments.
 
-```json
-  {
-    "Type": "Split",
-    "ID": "42",
-    "KeyName": "some-video.mp4",
-    "SegmentTime": "00:00:05",
+```json+
+{
+  "taskId": "32",
+  "results": ["video-part-1.mp4", "video-part-2.mp4"],
+  "name": "Split",
+  "parameters": {
+      "segmentTime": "00:00:05",
+      "keyName": "some-video.mp4"
   }
+}
 ```
 <!---
 video aufteilen an 1s 3s 4s 
@@ -72,11 +69,14 @@ ffmpeg -ss 3.3 -t 6 -c copy -i file
 ## Splice
 Merges the given videos together.
 ```json
-  {
-    "Type": "Splice",
-    "ID": "42",
-    "FileKeys": ["input1.mp4", "input2.mp4", "input3.mp4"],
+{
+  "taskId": "32",
+  "results": ["merged-video.mp4"],
+  "name": "Splice",
+  "parameters": {
+    "fileKeys": ["input1.mp4", "input2.mp4", "input3.mp4"]
   }
+}
 ```
 
 <!---
