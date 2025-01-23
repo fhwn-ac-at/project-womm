@@ -1,4 +1,6 @@
-﻿using lib.exceptions;
+﻿using System.Diagnostics;
+using lib.exceptions;
+using Newtonsoft.Json;
 
 namespace lib.tasks.data;
 
@@ -11,7 +13,22 @@ public class TaskDataJsonConverter : JsonConverter<TaskData>
 {
     public override TaskData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var jsonDoc = JsonDocument.ParseValue(ref reader);
+        JsonDocument jsonDoc;
+        try
+        {
+            jsonDoc = JsonDocument.ParseValue(ref reader);
+        }
+        catch (JsonReaderException e)
+        {
+            Debug.WriteLine($"JSON parsing error: {e.Message}");
+            throw;
+        }
+        catch (JsonException e)
+        {
+            Debug.WriteLine($"General JSON error: {e.Message}");
+            throw;
+        }
+        
         var root = jsonDoc.RootElement;
         
         var taskData = new TaskData

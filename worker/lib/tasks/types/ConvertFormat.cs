@@ -7,7 +7,7 @@ using lib.tasks.exec;
 
 namespace lib.tasks.types
 {
-    public class ConvertFormat : EditingTask
+    public class ConvertFormat : ScheduledTask
     {
         private readonly ConvertParameters _parameters;
 

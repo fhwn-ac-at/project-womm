@@ -79,11 +79,11 @@ namespace app
             
             if (fs == null || storage == null) return new TaskExecutor([], jsonOptions, messagingOptions);
             
-            var mapping = new Dictionary<string, Func<TaskData, EditingTask>>
+            var mapping = new Dictionary<string, Func<TaskData, ScheduledTask>>
             {
                 { "Split", (data) => new Split(data, fs, storage, rootDir) },
                 { "Splice", (data) => new Splice(data, fs, storage, rootDir) },
-                { "Convert", (data) => new ConvertFormat(data, fs, storage, rootDir) }
+                { "ConvertFormat", (data) => new ConvertFormat(data, fs, storage, rootDir) }
             };
 
             return new TaskExecutor(mapping, jsonOptions , messagingOptions); 

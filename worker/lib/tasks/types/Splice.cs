@@ -8,7 +8,7 @@ using lib.tasks.exec;
 
 namespace lib.tasks.types;
 
-public class Splice : EditingTask
+public class Splice : ScheduledTask
 {
     private readonly SpliceParameters _parameters;
     

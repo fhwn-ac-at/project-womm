@@ -9,13 +9,13 @@ namespace lib.tasks.exec;
 
 public class TaskExecutor : ITaskExecutor
 {
-    private readonly Dictionary<string, Func<TaskData, EditingTask>> _taskFactories;
+    private readonly Dictionary<string, Func<TaskData, ScheduledTask>> _taskFactories;
     
     private readonly JsonSerializerOptions _options;
     
     private readonly MessagingOptions _messagingOptions;
 
-    public TaskExecutor(Dictionary<string, Func<TaskData, EditingTask>> taskFactories,
+    public TaskExecutor(Dictionary<string, Func<TaskData, ScheduledTask>> taskFactories,
         JsonSerializerOptions options,
         IOptions<MessagingOptions> messagingOptions)
     {
@@ -34,7 +34,7 @@ public class TaskExecutor : ITaskExecutor
             taskData = JsonSerializer.Deserialize<TaskData>(rawTask, _options) 
                        ?? throw new JsonException("Invalid JSON"); ;
         }
-        catch (JsonException e)
+        catch (Exception e)
         {
             FireOnTaskStatusChanged(new TaskStatusEventArgs(
                 _messagingOptions.ProcessingFailed, 
@@ -54,7 +54,7 @@ public class TaskExecutor : ITaskExecutor
             return;
         }
         
-        EditingTask task;
+        ScheduledTask task;
         try
         {
             task = factory(taskData);

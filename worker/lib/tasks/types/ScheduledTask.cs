@@ -6,7 +6,7 @@ using lib.tasks.exec;
 namespace lib.tasks.types;
 
 //TODO: Implement upload to Results keys
-public abstract class EditingTask(TaskData taskData, IFileSystem fs, 
+public abstract class ScheduledTask(TaskData taskData, IFileSystem fs, 
     IStorageSystem storageSystem, string workingDirectory)
 {
     public IFileSystem Fs { get; } = fs;

@@ -7,7 +7,7 @@ using lib.tasks.exec;
 
 namespace lib.tasks.types
 {
-    public class Split : EditingTask
+    public class Split : ScheduledTask
     {
         private readonly SplitParameters _parameters;
 

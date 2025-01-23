@@ -11,19 +11,19 @@ namespace lib.exceptions
 
     public class TaskProcessingFailedException : Exception
     {
-        public TaskProcessingFailedException(string message, Exception innerException, EditingTask item) : base(message, innerException)
+        public TaskProcessingFailedException(string message, Exception innerException, ScheduledTask item) : base(message, innerException)
         {
             ArgumentNullException.ThrowIfNull(item);
 
             this.Item = item;
         }
 
-        public TaskProcessingFailedException(string message, EditingTask item) : base(message)
+        public TaskProcessingFailedException(string message, ScheduledTask item) : base(message)
         {
             ArgumentNullException.ThrowIfNull(item);
             this.Item = item;
         }
 
-        public EditingTask Item { get; }
+        public ScheduledTask Item { get; }
     }
 }

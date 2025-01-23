@@ -1,4 +1,5 @@
-﻿using lib.exceptions;
+﻿using System.Diagnostics;
+using lib.exceptions;
 using lib.messaging;
 using lib.options;
 using lib.queue;
@@ -7,6 +8,7 @@ using lib.tasks;
 using lib.tasks.data;
 using lib.tasks.exec;
 using lib.tasks.types;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Timer = System.Timers.Timer;
 
@@ -16,6 +18,9 @@ namespace lib;
 public class Worker : IDisposable
 {
     private readonly IMessageService _messageService;
+    
+    private readonly ILogger<Worker> _logger;
+
     private readonly MessagingOptions _messagingOptions;
 
     private readonly WorkerOptions _options;
@@ -33,7 +38,8 @@ public class Worker : IDisposable
         IMultiQueueSystem<string> queuingSystem,
         ITaskExecutor taskExecutor,
         IMessageService messageService,
-        IOptions<MessagingOptions> messagingOptions)
+        IOptions<MessagingOptions> messagingOptions,
+        ILogger<Worker> logger)
     {
         ArgumentNullException.ThrowIfNull(messageService);
         ArgumentNullException.ThrowIfNull(queuingSystem);
@@ -46,7 +52,19 @@ public class Worker : IDisposable
         _queuingSystem = queuingSystem;
         _taskExecutor = taskExecutor;
         _messageService = messageService;
+        _logger = logger;
         _messagingOptions = messagingOptions.Value;
+
+        BuildListenerQueueName(_options);
+    }
+
+    private void BuildListenerQueueName(WorkerOptions options)
+    {
+        if (string.IsNullOrEmpty(_options.Queues.ListensOnQueue))
+        {
+            _options.Queues.ListensOnQueue = options.WorkerName 
+                                             + "_" + Guid.NewGuid().ToString(); 
+        }
     }
 
     public void Dispose()
@@ -122,7 +140,7 @@ public class Worker : IDisposable
     private void SendHeartbeat()
     {
         string message = _messageService.GetHeartbeatMessage(
-            _options.WorkerName, _queueOptions.TaskQueueName);
+            _options.WorkerName, _queueOptions.ListensOnQueue);
 
         _queuingSystem.Enqueue(_queueOptions.WorkerQueueName, message);
     }
