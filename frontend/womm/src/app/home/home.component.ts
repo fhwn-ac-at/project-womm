@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatButton} from '@angular/material/button';
 import {NgForOf} from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 interface VideoFile {
   file: File;
@@ -15,7 +16,8 @@ interface VideoFile {
   imports: [
     MatToolbar,
     MatButton,
-    NgForOf
+    NgForOf,
+    RouterModule
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'

@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import {HomeComponent} from './home/home.component';
-import {VideoEditorComponent} from './video-editor/video-editor.component';
+import { VideoListComponent } from './video-list/video-list.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'video-editor', component: VideoEditorComponent }
+  { path: 'video-list', component: VideoListComponent }
 ];

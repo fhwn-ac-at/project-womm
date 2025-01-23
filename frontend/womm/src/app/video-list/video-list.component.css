@@ -1,0 +1,28 @@
+/* Toolbar Styles */
+mat-toolbar {
+    background-color: #1976d2;  /* Primary color */
+    padding: 10px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  mat-toolbar span {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .spacer {
+    flex: 1;
+  }
+  
+  /* Button Styles */
+  button.mat-button {
+    color: white;
+    font-size: 1rem;
+  }
+  
+  button.mat-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
