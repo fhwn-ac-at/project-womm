@@ -1,28 +1,60 @@
+
+
 /* Toolbar Styles */
 mat-toolbar {
-    background-color: #1976d2;  /* Primary color */
-    padding: 10px 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  mat-toolbar span {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-  }
-  
-  .spacer {
-    flex: 1;
-  }
-  
-  /* Button Styles */
-  button.mat-button {
-    color: white;
-    font-size: 1rem;
-  }
-  
-  button.mat-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-  }
+  background-color: #1976d2;  /* Primary color */
+  padding: 10px 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+mat-toolbar span {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.video-container {
+  width: 100%;
+  max-width: 800px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.video-heading {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.video-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.video-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+.video-name {
+  font-size: 1.2rem;
+  color: #333;
+}
