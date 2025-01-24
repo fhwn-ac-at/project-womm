@@ -19,4 +19,17 @@ public abstract class ScheduledTask(TaskData taskData, IFileSystem fs,
     public string[] Results => taskData.results;
     
     public abstract void Process();
+
+    protected void CleanUp()
+    {
+        foreach (var dir in Directory.GetDirectories(WorkingDirectory))
+        {
+            Directory.Delete(dir, true); 
+        }
+            
+        foreach (var file in Directory.GetFiles(WorkingDirectory))
+        {
+            File.Delete(file);
+        }
+    }
 }

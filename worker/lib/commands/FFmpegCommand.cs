@@ -16,16 +16,19 @@
 
         public FFmpegCommand(string source, string destination)
         {
-            ArgumentException.ThrowIfNullOrEmpty(source, nameof(source));
             ArgumentException.ThrowIfNullOrEmpty(destination, nameof(destination));
 
             _destination = destination;
 
             _stringBuilder = new StringBuilder();
-            _stringBuilder.Append("-i");
-            _stringBuilder.Append(' ');
-            _stringBuilder.Append(source);
-            _stringBuilder.Append(' ');
+
+            if (!string.IsNullOrEmpty(source))
+            {
+                _stringBuilder.Append("-i");
+                _stringBuilder.Append(' ');
+                _stringBuilder.Append(source);
+                _stringBuilder.Append(' ');
+            }
         }
 
         public void AddArgument(string name, string value)

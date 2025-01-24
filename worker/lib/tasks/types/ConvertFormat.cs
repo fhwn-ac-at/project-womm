@@ -28,6 +28,11 @@ namespace lib.tasks.types
         
         public override void Process()
         {
+            if (Results.Length != 1)
+            {
+                throw new Exception($"Expected 1 file in Results array, but got {Results.Length}");
+            }
+            
             string downloadedFile = Path.Join(WorkingDirectory, _parameters.keyName);
             Storage.Download(WorkingDirectory, 
                 KeyName);
@@ -39,25 +44,18 @@ namespace lib.tasks.types
                 source: $"\"{downloadedFile}\"",
                 destination: $"\"{destination}\"");
 
-            command.Execute();
-            
-            
-            if (Results.Length != 1)
+            try
             {
-                throw new Exception($"Expected 1 file in Results array, but got {Results.Length}");
+                command.Execute();
+                Storage.Upload(destination, Results[0]);
             }
-            
-            Storage.Upload(destination, Results[0]);
-
-            
-            foreach (var dir in Directory.GetDirectories(WorkingDirectory))
+            catch (Exception e)
             {
-                Directory.Delete(dir, true); 
+                throw;
             }
-            
-            foreach (var file in Directory.GetFiles(WorkingDirectory))
+            finally
             {
-                File.Delete(file);
+                CleanUp();
             }
         }
     }

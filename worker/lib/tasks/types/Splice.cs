@@ -28,39 +28,47 @@ public class Splice : ScheduledTask
     //TODO: Test and simplify
     public override void Process()
     {
-        if (FileKeys.Length == 0)
+        if (Results.Length != 1)
         {
-            throw new TaskProcessingFailedException("No files were provided", this);
+            throw new Exception($"Expected 1 file in Results array, but got {Results.Length}");
+        }
+        
+        HashSet<string> files = new HashSet<string>(); 
+        foreach (var fileKey in FileKeys)
+        {
+            Storage.Download(WorkingDirectory, fileKey);
+            files.Add(Path.Join(WorkingDirectory, fileKey));
         }
 
-        var tempFolder = Storage.DownloadIntoTempFolder(WorkingDirectory, FileKeys);
-        var concat = GenerateSourceConcatenation(tempFolder);
+        string destination = Path.Join(WorkingDirectory, Results[0]);
 
-        var resultId = Guid.NewGuid().ToString()[..8] + ".mp4";
-        var resultFile = Fs.Path.Combine(tempFolder, resultId);
-            
-        var command = new FFmpegCommand(concat, resultFile);
+        string fileList = GenerateListFile(files);
+        
+        var command = new FFmpegCommand(string.Empty,$"\"{destination}\"");
+        command.AddArgument("-f", "concat");
+        command.AddArgument("-safe", "0");
+        command.AddArgument("-i", fileList);
         command.AddArgument("-c", "copy");
-        command.Execute();
-            
-        Storage.Upload(resultFile, resultId);
+
+        try
+        {
+            command.Execute();
+            Storage.Upload(destination, Results[0]);
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
+        finally
+        {
+            CleanUp();
+        }
     }
     
-    private static string GenerateSourceConcatenation(string folder)
+    private string GenerateListFile(IEnumerable<string> files)
     {
-        var sb = new StringBuilder();
-        sb.Append("\"concat:");
-
-        var files = Directory.EnumerateFiles(folder, 
-            "*.*", SearchOption.AllDirectories);
-            
-        foreach (var file in files)
-        {
-            sb.Append(file);
-            sb.Append('|');
-        }
-        sb.Append('\"');
-            
-        return sb.ToString();
+        string filePath = Path.Join(WorkingDirectory, "listing.txt");
+        File.WriteAllLines(filePath, files.Select(file => "file \'" + file + "\'"));
+        return filePath;
     }
 }

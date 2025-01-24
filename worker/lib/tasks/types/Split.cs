@@ -43,27 +43,32 @@ namespace lib.tasks.types
             command.AddArgument("-f", "segment");
             command.AddArgument("-reset_timestamps", "1");
 
-            command.Execute();
+            try
+            {
+                command.Execute();
             
-            File.Delete(downloadedFile);
-            var files = Directory.GetFiles(WorkingDirectory, 
-                "*", 
-                SearchOption.AllDirectories);
+                File.Delete(downloadedFile);
+                var files = Directory.GetFiles(WorkingDirectory, 
+                    "*", 
+                    SearchOption.AllDirectories);
 
-            if (files.Length != Results.Length)
-            {
-                throw new Exception($"Found {files.Length} files but expected {Results.Length}");
-            }
+                if (files.Length != Results.Length)
+                {
+                    throw new Exception($"Found {files.Length} files but expected {Results.Length}");
+                }
             
-            for (int i = 0; i < files.Length; i++)
-            {
-                Storage.Upload(files[i], Results[i]);
-                File.Delete(files[i]);
+                for (int i = 0; i < files.Length; i++)
+                {
+                    Storage.Upload(files[i], Results[i]);
+                }
             }
-            
-            foreach (var dir in Directory.GetDirectories(WorkingDirectory))
+            catch (Exception e)
             {
-                Directory.Delete(dir, true); 
+                throw;
+            }
+            finally
+            {
+                CleanUp();
             }
         }
     }
