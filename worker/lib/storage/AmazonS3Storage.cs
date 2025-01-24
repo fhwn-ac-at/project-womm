@@ -69,7 +69,7 @@ namespace lib.storage
             {
                 throw new ArgumentException($"The given path does not exist: {localPath}");
             }
-            _logger.LogInformation($"Uploading file {keyName} into local path {localPath}");
+            _logger.LogInformation($"Uploading file {keyName} from local path {localPath}");
 
             TransferUtility transferUtility = new TransferUtility(_client);
             try

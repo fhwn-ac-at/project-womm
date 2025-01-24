@@ -25,17 +25,17 @@ namespace lib.tasks.types
         public string SegmentTime => _parameters.segmentTime;
 
         public string KeyName => _parameters.keyName;
-
-        //TODO: Test with ffmpeg
+        
         public override void Process()
         {
             string downloadedFile = Path.Join(WorkingDirectory, _parameters.keyName);
             Storage.Download(WorkingDirectory, 
                 KeyName);
             
+            string destination = Path.Join(WorkingDirectory, "output%03d.mp4");
             FFmpegCommand command = new(
                 source: $"\"{downloadedFile}\"",
-                destination: $"output%03d.mp4");
+                destination: $"\"{destination}\"");
 
             command.AddArgument("-c", "copy");
             command.AddArgument("-map", "0");
@@ -45,13 +45,12 @@ namespace lib.tasks.types
 
             command.Execute();
             
-            
             File.Delete(downloadedFile);
             var files = Directory.GetFiles(WorkingDirectory, 
                 "*", 
                 SearchOption.AllDirectories);
 
-            if (files.Length == Results.Length)
+            if (files.Length != Results.Length)
             {
                 throw new Exception($"Found {files.Length} files but expected {Results.Length}");
             }
@@ -60,6 +59,11 @@ namespace lib.tasks.types
             {
                 Storage.Upload(files[i], Results[i]);
                 File.Delete(files[i]);
+            }
+            
+            foreach (var dir in Directory.GetDirectories(WorkingDirectory))
+            {
+                Directory.Delete(dir, true); 
             }
         }
     }

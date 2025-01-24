@@ -25,39 +25,39 @@ namespace lib.tasks.types
         public string KeyName => _parameters.keyName;
 
         public string GoalFormat => _parameters.goalFormat;
-
-        //TODO: Test and simplify
+        
         public override void Process()
         {
-            string tempFolder;
-            string downloadedFile;
-            string resultFile;
-            try
-            {
-                tempFolder = Storage.DownloadIntoTempFolder(WorkingDirectory, KeyName); 
-                downloadedFile = Fs.Path.Combine(tempFolder, KeyName);
-                resultFile = Fs.Path.Combine(tempFolder, Guid.NewGuid().ToString()[..8] + GoalFormat);
-            }
-            catch (IOException e)
-            {
-                throw new TaskProcessingFailedException("Unable to download File locally: " + e.Message, e, this);
-            }
+            string downloadedFile = Path.Join(WorkingDirectory, _parameters.keyName);
+            Storage.Download(WorkingDirectory, 
+                KeyName);
+            
+            string key = KeyName.TrimEnd('.') + GoalFormat;
+            string destination = Path.Join(WorkingDirectory, key);
 
             FFmpegCommand command = new(
                 source: $"\"{downloadedFile}\"",
-                destination: $"\"{resultFile}\"");
+                destination: $"\"{destination}\"");
 
             command.Execute();
             
-            List<string> uploadedFiles;
-            try
+            
+            if (Results.Length != 1)
             {
-                uploadedFiles = Storage.UploadFolderContents(tempFolder).ToList(); 
-                Fs.Directory.Delete(tempFolder, true);
+                throw new Exception($"Expected 1 file in Results array, but got {Results.Length}");
             }
-            catch (IOException e)
+            
+            Storage.Upload(destination, Results[0]);
+
+            
+            foreach (var dir in Directory.GetDirectories(WorkingDirectory))
             {
-                throw new TaskProcessingFailedException("Unable to Cleanup after processing: " + e.Message, e, this);
+                Directory.Delete(dir, true); 
+            }
+            
+            foreach (var file in Directory.GetFiles(WorkingDirectory))
+            {
+                File.Delete(file);
             }
         }
     }
