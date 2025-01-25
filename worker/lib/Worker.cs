@@ -8,13 +8,14 @@ using lib.tasks;
 using lib.tasks.data;
 using lib.tasks.exec;
 using lib.tasks.types;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Timer = System.Timers.Timer;
 
 namespace lib;
-//TODO: Containerize with Docker
-public class Worker : IDisposable
+
+public class Worker : IDisposable, IHostedService 
 {
     private readonly IMessageService _messageService;
     
@@ -72,18 +73,6 @@ public class Worker : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public void Run()
-    {
-        _logger.LogInformation("Worker running...");
-        SubscribeQueue();
-
-        if (_options.SendHeartbeat)
-        {
-            _logger.LogInformation("Setting up heartbeat...");
-            SetupHeartBeat();
-        }
-    }
-
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
@@ -110,7 +99,7 @@ public class Worker : IDisposable
         }
         catch (Exception e)
         {
-            _logger.LogError("Unhandled exception during Queue setup:" + e.Message);
+            _logger.LogError("Cannot instantiate queue: " + _options.Queues.HostName + ":" + _options.Queues.Port);
         }
     }
 
@@ -153,5 +142,26 @@ public class Worker : IDisposable
             _options.WorkerName, _queueOptions.ListensOnQueue);
 
         _queuingSystem.Enqueue(_queueOptions.WorkerQueueName, message);
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Worker running...");
+
+        if (_options.SendHeartbeat)
+        {
+            _logger.LogInformation("Setting up heartbeat...");
+            SetupHeartBeat();
+        }
+
+        SubscribeQueue();
+
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Worker stopping...");
+        return Task.CompletedTask;
     }
 }

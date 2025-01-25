@@ -1,0 +1,47 @@
+version: '3'
+services:
+  rabbit-2:
+    image: rabbitmq:3-management
+    container_name: rabbit-2
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "5673:5673"
+    volumes:
+      - C:\Dev\docker\rabbitmq:/var/lib/rabbitmq
+    networks:
+      - womm_net
+    restart: always
+
+  minio-2:
+    image: quay.io/minio/minio
+    container_name: minio-2
+    environment:
+      - MINIO_ROOT_USER=guest
+      - MINIO_ROOT_PASSWORD=password123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - C:\Dev\docker\minio:/data 
+    networks:
+      - womm_net
+    restart: always
+
+  worker-2:
+    image: womm-worker
+    container_name: worker-2
+    ports:
+      - "18002:18002"
+    networks:
+      - womm_net
+    restart: always
+    depends_on: 
+      - rabbit-2
+      - minio-2
+      
+networks:
+  womm_net:
+    driver: bridge
+    external: true

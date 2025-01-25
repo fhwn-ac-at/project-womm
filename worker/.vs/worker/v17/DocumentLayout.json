@@ -1,34 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\",
+  "WorkspaceRootPath": "C:\\Dev\\repos\\project-womm\\worker\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\dev\\repos\\project-womm\\worker\\lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|c:\\dev\\repos\\project-womm\\worker\\app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|solutionrelative:app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\task-handler\\tasks\\convertformat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\task-handler\\tasks\\convertformat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\task-handler\\itaskvisitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\task-handler\\itaskvisitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\task-handler\\taskhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\task-handler\\taskhandler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\aspects\\logfabric.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\aspects\\logfabric.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\aspects\\logattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\aspects\\logattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\users\\micha\\fh\\5_semester\\verteilte systeme\\project-womm\\worker\\lib\\aspects\\loggingclassattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\aspects\\loggingclassattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -43,93 +23,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\Program.cs",
-              "RelativeDocumentMoniker": "app\\Program.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\app\\Program.cs",
-              "RelativeToolTip": "app\\Program.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABYAAAAKAAAA",
+              "Title": "Worker.cs",
+              "DocumentMoniker": "C:\\Dev\\repos\\project-womm\\worker\\lib\\Worker.cs",
+              "RelativeDocumentMoniker": "lib\\Worker.cs",
+              "ToolTip": "C:\\Dev\\repos\\project-womm\\worker\\lib\\Worker.cs",
+              "RelativeToolTip": "lib\\Worker.cs",
+              "ViewState": "AgIAAJAAAAAAAAAAAAAcwJwAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T18:05:46.447Z",
-              "IsPinned": true,
+              "WhenOpened": "2025-01-24T20:27:43.862Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ConvertFormat.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\task-handler\\tasks\\ConvertFormat.cs",
-              "RelativeDocumentMoniker": "lib\\task-handler\\tasks\\ConvertFormat.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\task-handler\\tasks\\ConvertFormat.cs",
-              "RelativeToolTip": "lib\\task-handler\\tasks\\ConvertFormat.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Dev\\repos\\project-womm\\worker\\app\\Program.cs",
+              "RelativeDocumentMoniker": "app\\Program.cs",
+              "ToolTip": "C:\\Dev\\repos\\project-womm\\worker\\app\\Program.cs",
+              "RelativeToolTip": "app\\Program.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAiwDcAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T20:45:24.78Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ITaskVisitor.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\task-handler\\ITaskVisitor.cs",
-              "RelativeDocumentMoniker": "lib\\task-handler\\ITaskVisitor.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\task-handler\\ITaskVisitor.cs",
-              "RelativeToolTip": "lib\\task-handler\\ITaskVisitor.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAA0AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T20:40:14.416Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "TaskHandler.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\task-handler\\TaskHandler.cs",
-              "RelativeDocumentMoniker": "lib\\task-handler\\TaskHandler.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\task-handler\\TaskHandler.cs",
-              "RelativeToolTip": "lib\\task-handler\\TaskHandler.cs",
-              "ViewState": "AQIAAHEAAAAAAAAAAAAuwIoAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T20:39:56.008Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "LogFabric.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\aspects\\LogFabric.cs",
-              "RelativeDocumentMoniker": "lib\\aspects\\LogFabric.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\aspects\\LogFabric.cs",
-              "RelativeToolTip": "lib\\aspects\\LogFabric.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABkAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T18:08:35.841Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "LoggingClassAttribute.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\aspects\\LoggingClassAttribute.cs",
-              "RelativeDocumentMoniker": "lib\\aspects\\LoggingClassAttribute.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\aspects\\LoggingClassAttribute.cs",
-              "RelativeToolTip": "lib\\aspects\\LoggingClassAttribute.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T18:08:34.225Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "LogAttribute.cs",
-              "DocumentMoniker": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\aspects\\LogAttribute.cs",
-              "RelativeDocumentMoniker": "lib\\aspects\\LogAttribute.cs",
-              "ToolTip": "C:\\Users\\micha\\FH\\5_Semester\\Verteilte Systeme\\project-womm\\worker\\lib\\aspects\\LogAttribute.cs",
-              "RelativeToolTip": "lib\\aspects\\LogAttribute.cs",
-              "ViewState": "AQIAAAcAAAAAAAAAAAAcwB4AAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-11-19T18:08:37.24Z",
+              "WhenOpened": "2025-01-24T18:47:22.409Z",
               "EditorCaption": ""
             }
           ]

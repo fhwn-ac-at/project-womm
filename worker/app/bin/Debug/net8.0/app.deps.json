@@ -9,6 +9,7 @@
       "app/1.0.0": {
         "dependencies": {
           "Metalama.Framework": "2024.2.29",
+          "Microsoft.Extensions.FileSystemGlobbing": "8.0.0",
           "Microsoft.Extensions.Hosting": "8.0.1",
           "RabbitMQ.Client": "6.8.1",
           "System.IO.Abstractions": "13.2.47",
@@ -1943,6 +1944,7 @@
           "AWSSDK.S3": "3.7.405.11",
           "Metalama.Extensions.DependencyInjection": "2024.2.29",
           "Metalama.Framework": "2024.2.29",
+          "Microsoft.Extensions.Hosting.Abstractions": "8.0.1",
           "Microsoft.Extensions.Logging.Abstractions": "8.0.2",
           "Microsoft.Extensions.Options": "8.0.2",
           "Microsoft.VisualStudio.Web.CodeGeneration.Core": "9.0.0",

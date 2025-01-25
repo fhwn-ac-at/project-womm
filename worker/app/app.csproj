@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="RabbitMQ.cLient" Version="6.8.1" />
     <PackageReference Include="System.IO.Abstractions" Version="13.2.47" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

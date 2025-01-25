@@ -1,0 +1,14 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+
+WORKDIR /worker
+COPY ./app ./app
+COPY ./lib ./lib
+
+WORKDIR /worker/app
+RUN ls -la
+RUN dotnet publish -c Release -o ./publish
+
+FROM mcr.microsoft.com/dotnet/runtime:8.0
+
+WORKDIR /publish
+ENTRYPOINT ["dotnet", "app.dll"]

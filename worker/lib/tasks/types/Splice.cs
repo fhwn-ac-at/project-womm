@@ -25,7 +25,6 @@ public class Splice : ScheduledTask
 
     public string[] FileKeys => _parameters.fileKeys;
     
-    //TODO: Test and simplify
     public override void Process()
     {
         if (Results.Length != 1)

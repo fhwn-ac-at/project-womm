@@ -44,17 +44,16 @@ namespace app
                 services.AddOptions<MessagingOptions>()
                     .Bind(config.GetRequiredSection("Messaging"));
                 
-                services.AddTransient<Worker>();
                 services.AddTransient<IStorageSystem, AmazonS3Storage>();
                 services.AddTransient<IFileSystem, System.IO.Abstractions.FileSystem>();
                 services.AddTransient<ITaskExecutor, TaskExecutor>( s => BuildTaskExecutor(s, config));
                 services.AddTransient<IMultiQueueSystem<string>, RabbitMQSystem>();
                 services.AddTransient<IMessageService, MessageService>();
+                //services.AddTransient<Worker>();
+                services.AddHostedService<Worker>();
             }).Build();
 
-            host.Services
-                .GetRequiredService<Worker>().Run();
-            Console.ReadKey();
+            host.Start();
         }
 
         private static TaskExecutor BuildTaskExecutor(IServiceProvider sp, IConfiguration config)
