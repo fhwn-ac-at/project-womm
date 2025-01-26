@@ -48,8 +48,16 @@ export class ScenesService {
     return scene.toObject();
   }
 
-  update(id: SceneId, updateSceneDto: UpdateSceneDto) {
-    return `This action updates a ${id} scene`;
+  async update(id: SceneId, updateSceneDto: UpdateSceneDto) {
+    const scene = await this.findOne(id);
+    
+    const newScene = await this.sceneModel.findOneAndUpdate({
+      id: id
+    }, {
+      ...updateSceneDto.scene
+    }, {new: true});
+
+    return newScene.toObject();
   }
 
   async remove(id: SceneId) {

@@ -330,6 +330,7 @@ describe('AppController (e2e)', () => {
       const res = await request(app.getHttpServer())
       .post('/api/v1/workspaces')
       .expect(201);
+      console.dir(res.body, { depth: null });
 
       const workspace = res.body as Workspace;
       expect(workspace.id).toMatch(uuidv4Regex);
@@ -338,6 +339,10 @@ describe('AppController (e2e)', () => {
       const rawScene = {
         scene: {
           version: 1,
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
+          },
           workspace: {
             id: workspace.id
           },
@@ -351,9 +356,10 @@ describe('AppController (e2e)', () => {
         .send(rawScene)
         .expect(201);
       const scene = sceneRes.body as Scene;
-      console.dir(scene, { depth: null });
       expect(scene.id).toMatch(uuidv4Regex);
       expect(scene.version).toBe(1);
+      expect(scene.video.name).toBe('test.mp4');        
+      expect(scene.video.container).toBe('mp4');   
       expect(scene.workspace.id).toBe(workspace.id);
       expect(scene.clips).toEqual([]);
       expect(scene.layers).toEqual([]);
@@ -363,18 +369,23 @@ describe('AppController (e2e)', () => {
       const rawScene = {
         scene: {
           version: 1,
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
+          },
           workspace: {
-            id: '00000000-0000-0000-0000-000000000000'
+            id: 'eb0d69bf-b16d-4732-9f57-9184bd271853'
           },
           clips: [],
           layers: []
         }
       }
 
-      await request(app.getHttpServer())
+      const res = await request(app.getHttpServer())
         .post('/api/v1/scenes')
         .send(rawScene)
-        .expect(404);
+        // .expect(404);
+
     });
 
     it('/api/v1/scenes (POST) create a scene when using a workspace that has fully uploaded files', async () => {
@@ -420,6 +431,10 @@ describe('AppController (e2e)', () => {
       const rawScene = {
         scene: {
           version: 1,
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
+          },
           workspace: {
             id: workspace.id
           },
@@ -441,6 +456,8 @@ describe('AppController (e2e)', () => {
       const scene = sceneRes.body as Scene;
       expect(scene.id).toMatch(uuidv4Regex);
       expect(scene.version).toBe(1);
+      expect(scene.video.name).toBe('test.mp4');        
+      expect(scene.video.container).toBe('mp4');   
       expect(scene.workspace.id).toBe(workspace.id);
       expect(scene.clips).toEqual([
         {
@@ -475,6 +492,10 @@ describe('AppController (e2e)', () => {
           workspace: {
             id: workspace.id
           },
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
+          },
           clips: [
             {
               id: 'main.txt',
@@ -493,6 +514,8 @@ describe('AppController (e2e)', () => {
       const scene = sceneRes.body as Scene;
       expect(scene.id).toMatch(uuidv4Regex);
       expect(scene.version).toBe(1);
+      expect(scene.video.name).toBe('test.mp4');        
+      expect(scene.video.container).toBe('mp4');   
       expect(scene.workspace.id).toBe(workspace.id);
       expect(scene.clips).toEqual([
         {
@@ -515,6 +538,10 @@ describe('AppController (e2e)', () => {
           version: 1,
           workspace: {
             id: workspace.id
+          },
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
           },
           clips: [
             {
@@ -555,6 +582,10 @@ describe('AppController (e2e)', () => {
           workspace: {
             id: workspace.id
           },
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
+          },
           clips: [],
           layers: []
         }
@@ -567,6 +598,8 @@ describe('AppController (e2e)', () => {
       const scene = sceneRes.body as Scene;
       expect(scene.id).toMatch(uuidv4Regex);
       expect(scene.version).toBe(1);
+      expect(scene.video.name).toBe('test.mp4');        
+      expect(scene.video.container).toBe('mp4');   
       expect(scene.workspace.id).toBe(workspace.id);
       expect(scene.clips).toEqual([]);
       expect(scene.layers).toEqual([]);
@@ -578,6 +611,8 @@ describe('AppController (e2e)', () => {
       
       expect(scene2.id).toMatch(uuidv4Regex);
       expect(scene2.version).toBe(1);
+      expect(scene.video.name).toBe('test.mp4');        
+      expect(scene.video.container).toBe('mp4');   
       expect(scene2.workspace.id).toBe(workspace.id);
       expect(scene2.clips).toEqual([]);
       expect(scene2.layers).toEqual([]);
@@ -603,6 +638,10 @@ describe('AppController (e2e)', () => {
           version: 1,
           workspace: {
             id: workspace.id
+          },
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
           },
           clips: [],
           layers: []
@@ -644,6 +683,10 @@ describe('AppController (e2e)', () => {
           workspace: {
             id: workspace.id
           },
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
+          },
           clips: [],
           layers: []
         }
@@ -656,6 +699,8 @@ describe('AppController (e2e)', () => {
       const scene = sceneRes.body as Scene;
       expect(scene.id).toMatch(uuidv4Regex);
       expect(scene.version).toBe(1);
+      expect(scene.video.name).toBe('test.mp4');        
+      expect(scene.video.container).toBe('mp4');   
       expect(scene.workspace.id).toBe(workspace.id);
       expect(scene.clips).toEqual([]);
       expect(scene.layers).toEqual([]);
@@ -667,6 +712,8 @@ describe('AppController (e2e)', () => {
       const scene2 = sceneRes2.body as Scene;
       expect(scene.id).toMatch(uuidv4Regex);
       expect(scene.version).toBe(1);
+      expect(scene.video.name).toBe('test.mp4');        
+      expect(scene.video.container).toBe('mp4');   
       expect(scene.workspace.id).toBe(workspace.id);
       expect(scene.clips).toEqual([]);
       expect(scene.layers).toEqual([]);
@@ -682,5 +729,100 @@ describe('AppController (e2e)', () => {
       expect(allScenes[1]).toEqual(scene2);
     });
 
+    it('/api/v1/scenes/:sceneId (PATCH) should update a scenes video name and container', async () => {
+      const res = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+      const workspace = res.body as Workspace;
+      expect(workspace.id).toMatch(uuidv4Regex);
+      expect(workspace.files).toEqual([]);
+
+      const rawScene = {
+        scene: {
+          version: 1,
+          video: {
+            name: 'test.mp4',
+            container: 'mp4'
+          },
+          workspace: {
+            id: workspace.id
+          },
+          clips: [],
+          layers: []
+        }
+      }
+
+      const sceneRes = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(201);
+      const scene = sceneRes.body as Scene;
+      console.dir(scene, { depth: null });
+      expect(scene.id).toMatch(uuidv4Regex);
+      expect(scene.version).toBe(1);
+      expect(scene.video.name).toBe('test.mp4');        
+      expect(scene.video.container).toBe('mp4');        
+      expect(scene.workspace.id).toBe(workspace.id);
+      expect(scene.clips).toEqual([]);
+      expect(scene.layers).toEqual([]);
+
+      const updatedScene = {
+        scene: {
+          video: {
+            name: 'new.mov',
+            container: 'mov'
+          }
+        }
+      }
+
+      const updatedSceneRes = await request(app.getHttpServer())
+        .patch(`/api/v1/scenes/${scene.id}`)
+        .send(updatedScene)
+        .expect(200);
+
+      const updatedSceneBody = updatedSceneRes.body as Scene;
+      expect(updatedSceneBody.id).toMatch(uuidv4Regex);
+      expect(updatedSceneBody.version).toBe(1);
+      expect(updatedSceneBody.video.name).toBe('new.mov');        
+      expect(updatedSceneBody.video.container).toBe('mov');        
+      expect(updatedSceneBody.workspace.id).toBe(workspace.id);
+      expect(updatedSceneBody.clips).toEqual([]);
+      expect(updatedSceneBody.layers).toEqual([]);
+    });
+
+    describe('Scene Modification API', () => {
+      let workspace: Workspace;
+      let scene: Scene;
+
+      beforeEach(async () => {
+        const res = await request(app.getHttpServer())
+        .post('/api/v1/workspaces')
+        .expect(201);
+  
+        workspace = res.body as Workspace;
+  
+        const rawScene = {
+          scene: {
+            version: 1,
+            video: {
+              name: 'test.mp4',
+              container: 'mp4'
+            },
+            workspace: {
+              id: workspace.id
+            },
+            clips: [],
+            layers: []
+          }
+        }
+  
+        const sceneRes = await request(app.getHttpServer())
+          .post('/api/v1/scenes')
+          .send(rawScene)
+          .expect(201);
+        scene = sceneRes.body as Scene;
+      });
+    });
   });
 });

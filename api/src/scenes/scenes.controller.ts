@@ -35,4 +35,23 @@ export class ScenesController {
   remove(@Param('id') id: SceneId) {
     return this.scenesService.remove(id);
   }
+
+  addLayer() {
+
+  }
+
+  removeLayer() {
+
+  }
+
+  addClipToLayer() {
+
+  }
+
+  removeClipFromLayer() {
+
+  }
+
+  updateClipInLayer() {
+  }
 }

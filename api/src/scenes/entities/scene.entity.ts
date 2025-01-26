@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { IsArray, IsInt, IsNumber, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength, ValidateNested } from "class-validator";
+import { IsArray, IsInt, IsNotEmptyObject, IsNumber, IsObject, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength, ValidateNested } from "class-validator";
 import { SceneVideo } from "./scene-video.entity";
 import { Workspace, WorkspaceId } from "../../workspaces/entities/workspace.entity";
-import { Exclude } from "class-transformer";
+import { Exclude, Type } from "class-transformer";
 import { ClipDefinition } from "./clip-definition.entity";
 import { LayerDefinition } from "./layer-definition.entity";
 import { v4 as uuidv4 } from 'uuid';
@@ -36,12 +36,18 @@ export class Scene {
   @Prop({
     type: SceneVideo
   })
+  @Type(() => SceneVideo)
+  @IsObject()
+  @IsNotEmptyObject()
   @ValidateNested()
   video: SceneVideo;
 
   @Prop({
     type: SceneWorkspaceDefinition
   })
+  @Type(() => SceneWorkspaceDefinition)
+  @IsObject()
+  @IsNotEmptyObject()
   @ValidateNested()
   workspace: SceneWorkspaceDefinition;  
 
@@ -50,6 +56,7 @@ export class Scene {
     default: []
   })
   @ValidateNested({ each: true })
+  @Type(() => ClipDefinition)
   @IsArray()
   clips: ClipDefinition[] = [];
 

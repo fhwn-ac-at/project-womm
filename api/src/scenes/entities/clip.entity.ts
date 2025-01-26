@@ -1,7 +1,8 @@
 import { Prop, Schema } from "@nestjs/mongoose";
-import { IsNumber, IsString, Max, MaxLength, Min, MinLength, Validate, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
+import { IsNumber, IsOptional, IsString, Max, MaxLength, Min, MinLength, Validate, ValidateNested, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
 import { CutOperation } from "./cut-operation.entity";
 import { Scene } from "./scene.entity";
+import { Type } from "class-transformer";
 
 @ValidatorConstraint({ async: false })
 class ClipIdExistsConstraint implements ValidatorConstraintInterface {
@@ -42,5 +43,8 @@ export class Clip {
     type: CutOperation,
     required: false
   })
+  @Type(() => CutOperation)
+  @ValidateNested()
+  @IsOptional()
   cut?: CutOperation;
 }
