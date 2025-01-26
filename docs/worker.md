@@ -43,14 +43,14 @@ Param:
 - `keyName` : Unique key to identify the source file.
 - `segmentTime` : Size of the segments.
 
-```json+
+```json
 {
   "taskId": "32",
   "results": ["task-1/video-part-1.mp4", "task-1/video-part-2.mp4", "task-1/video-part-3.mp4"],
   "name": "Split",
   "parameters": {
       "keyName": "task-1/file_example.mp4",
-      "segmentTime": "00:00:10"
+      "segmentTime": "00:00:12"
   }
 }
 ```
