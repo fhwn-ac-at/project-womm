@@ -1,14 +1,14 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { S3Path } from "../../types/s3Path.type";
 import { IsString, MaxLength, MinLength } from "class-validator";
-import { Exclude } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 import { FileMetadata, FileMetadataSchema } from "./file-metadata.entity";
 import { RegisteredUploadId } from "../../upload/entities/upload.entity";
 
 @Schema()
 export class WorkspaceFile {
 
-  constructor(partial: WorkspaceFile) {
+  constructor(partial: Partial<WorkspaceFile>) {
     Object.assign(this, partial);
   }
 
@@ -22,6 +22,16 @@ export class WorkspaceFile {
 
   @Prop()
   uploadedAt?: Date;
+
+  @Prop({
+    required: false
+  })
+  uploadFinishedAt?: Date;
+
+  @Expose()
+  get uploadFinished() {
+    return !!this.uploadFinishedAt;
+  }
 
   @Prop()
   _s3Path: S3Path;

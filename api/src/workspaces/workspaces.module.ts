@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
 import { WorkspacesController } from './workspaces.controller';
 import { StorageModule } from '../storage/storage.module';
@@ -14,7 +14,8 @@ import { UploadModule } from '../upload/upload.module';
       { name: Workspace.name, schema: WorkspaceSchema }
     ]),
     StorageModule,
-    UploadModule
-  ]
+    forwardRef(() => UploadModule)
+  ],
+  exports: [WorkspacesService]
 })
 export class WorkspacesModule { }

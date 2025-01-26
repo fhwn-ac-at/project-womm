@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { CreateUploadDto } from './dto/create-upload.dto';
 import { UpdateUploadDto } from './dto/update-upload.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -10,6 +10,7 @@ import { UplaodPartDto } from './dto/upload-part.dto';
 import { RegisteredUploadPartStatus } from './entities/upload-part.entity';
 import { ConfigService } from '@nestjs/config';
 import { UploadPartCommandOutput } from '@aws-sdk/client-s3';
+import { WorkspacesService } from '../workspaces/workspaces.service';
 
 @Injectable()
 export class UploadService {
@@ -20,7 +21,9 @@ export class UploadService {
     @InjectModel(RegisteredUpload.name)
     private readonly uploadModel: Model<RegisteredUpload>,
     private readonly storageService: StorageService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Inject(forwardRef(() => WorkspacesService))
+    private readonly workspacesService: WorkspacesService
   ) { }
 
   public get maxPartSize(): number {
@@ -58,6 +61,7 @@ export class UploadService {
     if (updatedUpload.uploadedSize === updatedUpload.expectedSize) {
       this.logger.log(`Upload ${uploadId} is completed`);
       await this.storageService.finishMultiPartUpload(upload._s3UploadId, updatedUpload.parts, upload._s3Path);
+      await this.workspacesService.fileUploadFinishedAt(uploadId, new Date());
     }
 
     return this.findOneOrThrow(uploadId);

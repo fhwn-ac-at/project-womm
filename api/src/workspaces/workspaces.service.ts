@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { AddFileDto } from './dto/add-file.dto';
@@ -11,6 +11,7 @@ import { NotFoundError } from 'rxjs';
 import { UploadService } from '../upload/upload.service';
 import { ConfigService } from '@nestjs/config';
 import { RegisteredUpload } from 'src/upload/entities/upload.entity';
+import { UploadId } from 'aws-sdk/clients/ecr';
 
 @Injectable()
 export class WorkspacesService {
@@ -20,6 +21,7 @@ export class WorkspacesService {
   public constructor(
     @InjectModel(Workspace.name)
     private readonly workspaceModel: Model<Workspace>,
+    @Inject(forwardRef(() => UploadService))
     private readonly uploadService: UploadService,
     private readonly configService: ConfigService
   ) { }
@@ -47,7 +49,7 @@ export class WorkspacesService {
     const file = new WorkspaceFile({
       ...addFileDto,
       _s3Path: s3Path,
-      uploadId: upload.uploadId
+      uploadId: upload.uploadId,
     });
 
     await this.workspaceModel.updateOne({
@@ -75,5 +77,15 @@ export class WorkspacesService {
     }
 
     return workspace;
+  }
+
+  public fileUploadFinishedAt(uplaodId: UploadId, finishedAt: Date) {
+    return this.workspaceModel.updateOne({
+      'files.uploadId': uplaodId
+    }, {
+      $set: {
+        'files.$.uploadFinishedAt': finishedAt
+      }
+    });
   }
 }

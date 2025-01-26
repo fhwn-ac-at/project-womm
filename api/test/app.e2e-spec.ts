@@ -10,6 +10,7 @@ import { AddFileDto } from '../src/workspaces/dto/add-file.dto';
 import { RegisteredUpload } from '../src/upload/entities/upload.entity';
 import * as AWS from 'aws-sdk';
 import { createHash, randomBytes } from 'crypto';
+import { Scene } from '../src/scenes/entities/scene.entity';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -321,5 +322,365 @@ describe('AppController (e2e)', () => {
     const fileBufferHash = createHash('sha256').update(fileBuffer).digest('hex');
     const s3FileHash = createHash('sha256').update(s3File.Body as Buffer).digest('hex');
     expect(fileBufferHash).toEqual(s3FileHash);
+  });
+
+  describe('Scene Creation and Deletion API', () => {
+
+    it('/api/v1/scenes (POST) should create a scene when using an empty workspace', async () => {
+      const res = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+      const workspace = res.body as Workspace;
+      expect(workspace.id).toMatch(uuidv4Regex);
+      expect(workspace.files).toEqual([]);
+
+      const rawScene = {
+        scene: {
+          version: 1,
+          workspace: {
+            id: workspace.id
+          },
+          clips: [],
+          layers: []
+        }
+      }
+
+      const sceneRes = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(201);
+      const scene = sceneRes.body as Scene;
+      console.dir(scene, { depth: null });
+      expect(scene.id).toMatch(uuidv4Regex);
+      expect(scene.version).toBe(1);
+      expect(scene.workspace.id).toBe(workspace.id);
+      expect(scene.clips).toEqual([]);
+      expect(scene.layers).toEqual([]);
+    });
+
+    it('/api/v1/scenes (POST) should return 404 when the workspace does not exist', async () => {
+      const rawScene = {
+        scene: {
+          version: 1,
+          workspace: {
+            id: '00000000-0000-0000-0000-000000000000'
+          },
+          clips: [],
+          layers: []
+        }
+      }
+
+      await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(404);
+    });
+
+    it('/api/v1/scenes (POST) create a scene when using a workspace that has fully uploaded files', async () => {
+      const workspaceRes = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+      const workspace = workspaceRes.body as Workspace;
+      const fileBuffer = Buffer.from('this is a test file', 'utf-8');
+      const addFile: AddFileDto = {
+        name: 'main.txt',
+        fileSize: fileBuffer.byteLength
+      };
+
+      const uploadRes = await request(app.getHttpServer())
+        .put(`/api/v1/workspaces/${workspace.id}/files`)
+        .send(addFile)
+        .expect(200);
+
+      const upload = uploadRes.body as RegisteredUpload;
+
+      const partRes = await request(app.getHttpServer())
+        .post(`/api/v1/uploads/${upload.uploadId}/part`)
+        .attach('part', fileBuffer, 'main.txt')
+        .field('partNumber', '1')
+
+      const finishedUpload = partRes.body as RegisteredUpload;
+      expect(finishedUpload.uploadedSize).toBe(finishedUpload.expectedSize);
+      expect(finishedUpload.parts).toHaveLength(1);
+      expect(finishedUpload.parts[0]).toEqual({ partNumber: 1, partSize: fileBuffer.byteLength, status: 'completed' });
+
+      // search for a file in s3 and check if it has the right content.
+      const s3Objects = await s3.listObjectsV2({ Bucket: bucketName }).promise();
+      const s3Files = s3Objects.Contents;
+      expect(s3Files).toHaveLength(1);
+      expect(s3Files[0].Key).toContain('main.txt');
+
+      // get the file from s3
+      const s3File = await s3.getObject({ Bucket: bucketName, Key: s3Files[0].Key }).promise();
+      expect(s3File.Body).toEqual(fileBuffer);
+
+      // workspace setup finsihed, now create a scene
+      const rawScene = {
+        scene: {
+          version: 1,
+          workspace: {
+            id: workspace.id
+          },
+          clips: [
+            {
+              id: 'main.txt',
+              name: 'Main part'
+            }
+          ],
+          layers: []
+        }
+      }
+
+      const sceneRes = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(201);
+
+      const scene = sceneRes.body as Scene;
+      expect(scene.id).toMatch(uuidv4Regex);
+      expect(scene.version).toBe(1);
+      expect(scene.workspace.id).toBe(workspace.id);
+      expect(scene.clips).toEqual([
+        {
+          id: 'main.txt',
+          name: 'Main part'
+        }
+      ]);
+      expect(scene.layers).toEqual([]);
+    });
+
+    it('/api/v1/scenes (POST) create a scene when using a workspace that has not fully uploaded files', async () => {
+      const workspaceRes = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+      const workspace = workspaceRes.body as Workspace;
+      const fileBuffer = Buffer.from('this is a test file', 'utf-8');
+      const addFile: AddFileDto = {
+        name: 'main.txt',
+        fileSize: fileBuffer.byteLength
+      };
+
+      const uploadRes = await request(app.getHttpServer())
+        .put(`/api/v1/workspaces/${workspace.id}/files`)
+        .send(addFile)
+        .expect(200);
+
+      // workspace setup finsihed, now create a scene
+      const rawScene = {
+        scene: {
+          version: 1,
+          workspace: {
+            id: workspace.id
+          },
+          clips: [
+            {
+              id: 'main.txt',
+              name: 'Main part'
+            }
+          ],
+          layers: []
+        }
+      }
+
+      const sceneRes = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(201);
+
+      const scene = sceneRes.body as Scene;
+      expect(scene.id).toMatch(uuidv4Regex);
+      expect(scene.version).toBe(1);
+      expect(scene.workspace.id).toBe(workspace.id);
+      expect(scene.clips).toEqual([
+        {
+          id: 'main.txt',
+          name: 'Main part'
+        }
+      ]);
+      expect(scene.layers).toEqual([]);
+    });
+
+    it('/api/v1/scenes (POST) should return 404 when a clip is not found in the workspace', async () => {
+      const workspaceRes = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+      const workspace = workspaceRes.body as Workspace;
+
+      const rawScene = {
+        scene: {
+          version: 1,
+          workspace: {
+            id: workspace.id
+          },
+          clips: [
+            {
+              id: 'main.txt',
+              name: 'Main part'
+            }
+          ],
+          layers: []
+        }
+      }
+
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(409);
+
+      expect(res.body.message).toBe('Clip with ID main.txt not found in workspace');
+    });
+
+    it('/api/v1/scenes/:sceneId (GET) should return 404 when the scene does not exist', async () => {
+      return await request(app.getHttpServer())
+        .get('/api/v1/scenes/123')
+        .expect(404);
+    });
+
+    it('/api/v1/scenes/:sceneId (GET) should return a scene', async () => {
+      const res = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+      const workspace = res.body as Workspace;
+      expect(workspace.id).toMatch(uuidv4Regex);
+      expect(workspace.files).toEqual([]);
+
+      const rawScene = {
+        scene: {
+          version: 1,
+          workspace: {
+            id: workspace.id
+          },
+          clips: [],
+          layers: []
+        }
+      }
+
+      const sceneRes = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(201);
+      const scene = sceneRes.body as Scene;
+      expect(scene.id).toMatch(uuidv4Regex);
+      expect(scene.version).toBe(1);
+      expect(scene.workspace.id).toBe(workspace.id);
+      expect(scene.clips).toEqual([]);
+      expect(scene.layers).toEqual([]);
+
+      const sceneRes2 = await request(app.getHttpServer())
+        .get(`/api/v1/scenes/${scene.id}`)
+        .expect(200);
+      const scene2 = sceneRes2.body as Scene;
+      
+      expect(scene2.id).toMatch(uuidv4Regex);
+      expect(scene2.version).toBe(1);
+      expect(scene2.workspace.id).toBe(workspace.id);
+      expect(scene2.clips).toEqual([]);
+      expect(scene2.layers).toEqual([]);
+    });
+
+    it('/api/v1/scenes/:sceneId (DELETE) should return 404 when the scene does not exist', async () => {
+      return await request(app.getHttpServer())
+        .delete('/api/v1/scenes/123')
+        .expect(404);
+    });
+
+    it('/api/v1/scenes/:sceneId (DELETE) should delete a scene', async () => {
+      const res = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+      const workspace = res.body as Workspace;
+      expect(workspace.id).toMatch(uuidv4Regex);
+      expect(workspace.files).toEqual([]);
+
+      const rawScene = {
+        scene: {
+          version: 1,
+          workspace: {
+            id: workspace.id
+          },
+          clips: [],
+          layers: []
+        }
+      }
+
+      const sceneRes = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(201);
+      const scene = sceneRes.body as Scene;
+      expect(scene.id).toMatch(uuidv4Regex);
+      expect(scene.version).toBe(1);
+      expect(scene.workspace.id).toBe(workspace.id);
+      expect(scene.clips).toEqual([]);
+      expect(scene.layers).toEqual([]);
+
+      await request(app.getHttpServer())
+        .delete(`/api/v1/scenes/${scene.id}`)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get(`/api/v1/scenes/${scene.id}`)
+        .expect(404);
+    });
+
+    it('/api/v1/scenes (GET) should return two scenes', async () => {
+      const res = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+      const workspace = res.body as Workspace;
+      expect(workspace.id).toMatch(uuidv4Regex);
+      expect(workspace.files).toEqual([]);
+
+      const rawScene = {
+        scene: {
+          version: 1,
+          workspace: {
+            id: workspace.id
+          },
+          clips: [],
+          layers: []
+        }
+      }
+
+      const sceneRes = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(201);
+      const scene = sceneRes.body as Scene;
+      expect(scene.id).toMatch(uuidv4Regex);
+      expect(scene.version).toBe(1);
+      expect(scene.workspace.id).toBe(workspace.id);
+      expect(scene.clips).toEqual([]);
+      expect(scene.layers).toEqual([]);
+
+      const sceneRes2 = await request(app.getHttpServer())
+        .post('/api/v1/scenes')
+        .send(rawScene)
+        .expect(201);
+      const scene2 = sceneRes2.body as Scene;
+      expect(scene.id).toMatch(uuidv4Regex);
+      expect(scene.version).toBe(1);
+      expect(scene.workspace.id).toBe(workspace.id);
+      expect(scene.clips).toEqual([]);
+      expect(scene.layers).toEqual([]);
+
+      const allScenesRes = await request(app.getHttpServer())
+        .get('/api/v1/scenes')
+        .expect(200);
+
+      const allScenes = allScenesRes.body as Scene[];
+
+      expect(allScenes).toHaveLength(2);
+      expect(allScenes[0]).toEqual(scene);
+      expect(allScenes[1]).toEqual(scene2);
+    });
+
   });
 });
