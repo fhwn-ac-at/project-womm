@@ -1,4 +1,7 @@
-# Tasks Structure
+# Overview
+The following document describes the syntax to to provide tasks for the worker and also documentaion for simple deployment.
+
+## Tasks Structure
 ```json
 {
   "taskId": "32",
@@ -72,6 +75,14 @@ Merges the given videos together.
 }
 ```
 
-<!---
-ffmpeg -i "concat:input1.mp4|input2.mp4|input3.mp4|input4.mp4" -c copy output10.mp4
---->
+## How to Deploy a Worker 
+After implementing changes to the worker, it is neccessary to run docker build to create a docker image.
+```bash
+cd project-womm/worker
+docker build -t womm-worker .
+```
+For testing the worker a docker-compose file is provided, which uses minio and rabbitmq containers, to use it run the following command.
+```bash
+cd project-womm\deploy
+docker compose up
+```
