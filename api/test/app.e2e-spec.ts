@@ -791,7 +791,7 @@ describe('AppController (e2e)', () => {
       expect(updatedSceneBody.layers).toEqual([]);
     });
 
-    describe('Scene Modification API', () => {
+    describe.only('Scene Modification API', () => {
       let workspace: Workspace;
       let scene: Scene;
 
@@ -823,6 +823,105 @@ describe('AppController (e2e)', () => {
           .expect(201);
         scene = sceneRes.body as Scene;
       });
+
+      it('/api/v1/scenes/:sceneId/layers (PUT) should add a layer to a scene', async () => {
+        const res = await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        console.dir(res.body, { depth: null });
+
+        const updatedScene = res.body as Scene;
+        expect(updatedScene.layers).toHaveLength(1);
+        expect(updatedScene.layers[0].clips).toEqual([]);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers (PUT) should be able to add multiple layers', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        const res = await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+        console.dir(res.body, { depth: null });
+
+        const updatedScene = res.body as Scene;
+        expect(updatedScene.layers).toHaveLength(2);
+        expect(updatedScene.layers[0].clips).toEqual([]);
+        expect(updatedScene.layers[1].clips).toEqual([]);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers (PUT) should return 404 when the scene does not exist', async () => {
+        return await request(app.getHttpServer())
+          .put('/api/v1/scenes/123/layers')
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex (DELETE) should remove a layer from a scene', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        const res = await request(app.getHttpServer())
+          .delete(`/api/v1/scenes/${scene.id}/layers/0`)
+          .expect(200);
+
+        const updatedScene = res.body as Scene;
+        expect(updatedScene.layers).toHaveLength(0);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex (DELETE) should return 404 when the scene does not exist', async () => {
+        return await request(app.getHttpServer())
+          .delete('/api/v1/scenes/123/layers/0')
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex (DELETE) should return 404 when the layer does not exist', async () => {
+        return await request(app.getHttpServer())
+          .delete(`/api/v1/scenes/${scene.id}/layers/0`)
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex (DELETE) should only remove one index', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        const res = await request(app.getHttpServer())
+          .delete(`/api/v1/scenes/${scene.id}/layers/1`)
+          .expect(200);
+
+        
+        const updatedScene = res.body as Scene;
+        expect(updatedScene.layers).toHaveLength(1);
+        expect(updatedScene.layers[0].clips).toEqual([]);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips (PUT) should add a clip to a layer', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        const clip = {
+          id: 'main.txt',
+          name: 'Main part'
+        }
+
+        const res = await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers/0/clips`)
+          .send(clip)
+          .expect(200);
+
+        const updatedScene = res.body as Scene;
+        expect(updatedScene.layers[0].clips).toEqual([clip]);
+      });
+
+
     });
   });
 });

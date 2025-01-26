@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { ScenesService } from './scenes.service';
 import { CreateSceneDto } from './dto/create-scene.dto';
 import { UpdateSceneDto } from './dto/update-scene.dto';
 import { SceneId } from './entities/scene.entity';
+import { CreateClipDto } from './dto/create-clip.dto';
 
 @Controller({
   version: '1',
@@ -36,22 +37,41 @@ export class ScenesController {
     return this.scenesService.remove(id);
   }
 
-  addLayer() {
+  @Put(':id/layers')
+  addLayer(@Param('id') id: SceneId) {
+    return this.scenesService.addLayerToScene(id);
+  }
+
+  @Delete(':id/layers/:layerIndex')
+  removeLayer(@Param('id') id: SceneId, @Param('layerIndex') layerIndex: number) {
+    return this.scenesService.removeLayerFromScene(id, layerIndex);
+  }
+
+  @Put(':id/clips')
+  addClipFromScene(@Param('id') id: SceneId) {
+  }
+
+  @Delete(':id/clips/:clipName')
+  removeClipFromScene() {
 
   }
 
-  removeLayer() {
+  @Patch(':id/clips/:clipName')
+  updateClipInScene() {
+  }
+
+  @Patch(':id/layers/:layerIndex')
+  addClipToLayer(@Param('id') id: SceneId, @Param('layerIndex') layerIndex: number, @Body() clip: CreateClipDto) {
+    return this.scenesService.addClipToLayer(id, layerIndex, clip);
 
   }
 
-  addClipToLayer() {
-
-  }
-
+  @Delete(':id/layers/:layerIndex/clips/:clipName')
   removeClipFromLayer() {
 
   }
 
+  @Patch(':id/layers/:layerIndex/clips/:clipName')
   updateClipInLayer() {
   }
 }

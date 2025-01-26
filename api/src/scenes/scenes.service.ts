@@ -6,6 +6,7 @@ import { createWriteStream } from 'fs';
 import { Scene, SceneId } from './entities/scene.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { CreateClipDto } from './dto/create-clip.dto';
 
 @Injectable()
 export class ScenesService {
@@ -65,6 +66,74 @@ export class ScenesService {
     await this.sceneModel.deleteOne({
       id: id
     });
+  }
+
+  public async addLayerToScene(id: SceneId) {
+    const newScene = await this.sceneModel.findOneAndUpdate({
+      id: id
+    }, {
+      $push: {
+        layers: {
+          clips: []
+        }
+      }
+    }, {new: true});
+
+    if (!newScene) {
+      throw new NotFoundException(`Scene with ID ${id} not found`);
+    }
+
+    return newScene.toObject();
+  }
+
+  public async removeLayerFromScene(id: SceneId, layerIndex: number) {
+    const scene = await this.findOne(id);
+
+    if (layerIndex < 0 || layerIndex >= scene.layers.length) {
+      throw new NotFoundException(`Layer with index ${layerIndex} not found in scene with ID ${id}`);
+    }
+
+    // first set the index to null
+    await this.sceneModel.findOneAndUpdate({
+      id: id,
+    }, {
+      $unset: {
+        [`layers.${layerIndex}`]: 1
+      }
+    });
+
+    // second remove all null index values
+    const newScene = await this.sceneModel.findOneAndUpdate({
+      id: id
+    }, {
+      $pull: {
+        layers: null
+      }
+    }, {new: true});
+
+    return newScene.toObject();
+  }
+
+  public async addClipToLayer(id: SceneId, layerIndex: number, clip: CreateClipDto) {
+    const scene = await this.findOne(id);
+
+    
+    if (layerIndex < 0 || layerIndex >= scene.layers.length) {
+      throw new NotFoundException(`Layer with index ${layerIndex} not found in scene with ID ${id}`);
+    }
+    
+    scene.layers[layerIndex].clips.push(clip);
+    await this.validateClipAvailability(scene);
+
+    const newScene = await this.sceneModel.findOneAndUpdate({
+      id: id
+    }, {
+      $push: {
+        [`layers.${layerIndex}.clips`]: clip
+      }
+    }, {new: true});
+
+    return newScene.toObject();
   }
 
   private async validateClipAvailability(scene: Scene, partialUploadAllowed: boolean = false) {
