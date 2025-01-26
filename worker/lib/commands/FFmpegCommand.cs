@@ -51,15 +51,15 @@
         public void Execute()
         {
             _stringBuilder.Append(_destination);
-
+            string command = string.Empty;
             try
             {
-                string command = _stringBuilder.ToString();
+                command = _stringBuilder.ToString();
                 FFmpegRunner.RunFFmpeg(command);
             }
             catch (Exception e)
             {
-                throw new CommandExecutionException(e.Message, e.InnerException);
+                throw new CommandExecutionException(e.Message +": "+ command, e.InnerException);
             }
         }
     }

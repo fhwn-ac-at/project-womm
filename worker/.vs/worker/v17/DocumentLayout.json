@@ -3,12 +3,24 @@
   "WorkspaceRootPath": "C:\\Dev\\repos\\project-womm\\worker\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\dev\\repos\\project-womm\\worker\\lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\dev\\repos\\project-womm\\worker\\lib\\tasks\\types\\splice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\tasks\\types\\splice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\dev\\repos\\project-womm\\worker\\lib\\commands\\ffmpegcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\commands\\ffmpegcommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\dev\\repos\\project-womm\\worker\\lib\\tasks\\exec\\taskexecutor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\tasks\\exec\\taskexecutor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|c:\\dev\\repos\\project-womm\\worker\\app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8DD607F0-8DC8-48BA-ADB8-FE66BA281589}|app\\app.csproj|solutionrelative:app\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|c:\\dev\\repos\\project-womm\\worker\\lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CCAF4A09-78DD-4829-9EB5-86275DC2F43B}|lib\\lib.csproj|solutionrelative:lib\\worker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,32 +30,72 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "FFmpegCommand.cs",
+              "DocumentMoniker": "C:\\Dev\\repos\\project-womm\\worker\\lib\\commands\\FFmpegCommand.cs",
+              "RelativeDocumentMoniker": "lib\\commands\\FFmpegCommand.cs",
+              "ToolTip": "C:\\Dev\\repos\\project-womm\\worker\\lib\\commands\\FFmpegCommand.cs",
+              "RelativeToolTip": "lib\\commands\\FFmpegCommand.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAMwD0AAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-26T11:02:25.635Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "Splice.cs",
+              "DocumentMoniker": "C:\\Dev\\repos\\project-womm\\worker\\lib\\tasks\\types\\Splice.cs",
+              "RelativeDocumentMoniker": "lib\\tasks\\types\\Splice.cs",
+              "ToolTip": "C:\\Dev\\repos\\project-womm\\worker\\lib\\tasks\\types\\Splice.cs",
+              "RelativeToolTip": "lib\\tasks\\types\\Splice.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAD4vz8AAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-26T10:49:34.667Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "TaskExecutor.cs",
+              "DocumentMoniker": "C:\\Dev\\repos\\project-womm\\worker\\lib\\tasks\\exec\\TaskExecutor.cs",
+              "RelativeDocumentMoniker": "lib\\tasks\\exec\\TaskExecutor.cs",
+              "ToolTip": "C:\\Dev\\repos\\project-womm\\worker\\lib\\tasks\\exec\\TaskExecutor.cs",
+              "RelativeToolTip": "lib\\tasks\\exec\\TaskExecutor.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAkwFoAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-26T09:59:40.849Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "Worker.cs",
               "DocumentMoniker": "C:\\Dev\\repos\\project-womm\\worker\\lib\\Worker.cs",
               "RelativeDocumentMoniker": "lib\\Worker.cs",
               "ToolTip": "C:\\Dev\\repos\\project-womm\\worker\\lib\\Worker.cs",
               "RelativeToolTip": "lib\\Worker.cs",
-              "ViewState": "AgIAAJQAAAAAAAAAAAAgwKAAAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAALEAAAAAAAAAAAAEwLkAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-24T20:27:43.862Z",
+              "WhenOpened": "2025-01-26T09:40:47.605Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Dev\\repos\\project-womm\\worker\\app\\Program.cs",
               "RelativeDocumentMoniker": "app\\Program.cs",
               "ToolTip": "C:\\Dev\\repos\\project-womm\\worker\\app\\Program.cs",
               "RelativeToolTip": "app\\Program.cs",
-              "ViewState": "AgIAACgAAAAAAAAAAAAiwDcAAAAWAAAAAAAAAA==",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAkwD4AAAA8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-24T18:47:22.409Z"
+              "WhenOpened": "2025-01-24T18:47:22.409Z",
+              "EditorCaption": ""
             }
           ]
         }

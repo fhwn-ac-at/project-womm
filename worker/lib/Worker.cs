@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading;
 using lib.exceptions;
 using lib.messaging;
 using lib.options;
@@ -32,6 +33,7 @@ public class Worker : IDisposable, IHostedService
     private readonly ITaskExecutor _taskExecutor;
 
     private bool _disposed;
+    private bool _exit;
 
     public Worker(
         IOptions<WorkerOptions> options,
@@ -54,8 +56,10 @@ public class Worker : IDisposable, IHostedService
         _messageService = messageService;
         _logger = logger;
         _messagingOptions = messagingOptions.Value;
+        _exit = false;
 
         BuildListenerQueueName(_options);
+        CreateRootPathIfNeeded(_options.RootDirectory);
     }
 
     private void BuildListenerQueueName(WorkerOptions options)
@@ -64,6 +68,15 @@ public class Worker : IDisposable, IHostedService
         {
             _options.Queues.ListensOnQueue = options.WorkerName 
                                              + "_" + Guid.NewGuid().ToString(); 
+        }
+    }
+
+    private void CreateRootPathIfNeeded(string rootDirectory)
+    {
+        if (!Directory.Exists(rootDirectory))
+        {
+            _logger.LogInformation("Root directory " +  rootDirectory + " does not exists, creating it...");
+            Directory.CreateDirectory(rootDirectory);
         }
     }
 
@@ -139,10 +152,19 @@ public class Worker : IDisposable, IHostedService
 
     private void SetupHeartBeat()
     {
-        var timer = new Timer();
-        timer.Elapsed += (s, e) => { SendHeartbeat(); };
-        timer.Interval = _options.HeartbeatSecondsDelay * 1000;
-        timer.Enabled = true;
+        Thread thr = new Thread(HeartbeatWorker);
+        thr.IsBackground = false;
+        thr.Start();
+    }
+
+    private void HeartbeatWorker(object? obj)
+    {
+        int delay = _options.HeartbeatSecondsDelay * 1000;
+        while (!_exit)
+        {
+            SendHeartbeat();
+            Thread.Sleep(delay);
+        }
     }
 
     private void SendHeartbeat()
@@ -160,11 +182,8 @@ public class Worker : IDisposable, IHostedService
 
         SubscribeQueue();
 
-        if (_options.SendHeartbeat)
-        {
-            _logger.LogInformation("Setting up heartbeat...");
-            SetupHeartBeat();
-        }
+        _logger.LogInformation("Setting up heartbeat...");
+        SetupHeartBeat();
 
         return Task.CompletedTask;
     }
@@ -172,6 +191,7 @@ public class Worker : IDisposable, IHostedService
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Worker stopping...");
+        _exit = true;
         return Task.CompletedTask;
     }
 }

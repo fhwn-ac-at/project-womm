@@ -26,7 +26,8 @@ public class TaskExecutor : ITaskExecutor
         _taskFactories = taskFactories;
         _options = options;
         _logger = logger;
-        _messagingOptions = messagingOptions.Value ?? throw new ArgumentNullException(nameof(messagingOptions));
+        _messagingOptions = messagingOptions.Value 
+            ?? throw new ArgumentNullException(nameof(messagingOptions));
     }
 
     public event EventHandler<TaskStatusEventArgs> OnTaskStatusChanged;

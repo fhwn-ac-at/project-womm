@@ -13,9 +13,6 @@
         public QueueOptions Queues { get; set; }
 
         [Required]
-        public bool SendHeartbeat { get; set; }
-
-        [Required]
         public int HeartbeatSecondsDelay { get; set; }
 
         [Required]
@@ -26,5 +23,8 @@
 
         [Required]
         public int QueuePollIntervalMilliseconds { get; set; }
+
+        [Required]
+        public string RootDirectory { get; set; }
     }
 }

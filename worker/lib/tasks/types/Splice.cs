@@ -36,7 +36,7 @@ public class Splice : ScheduledTask
         foreach (var fileKey in FileKeys)
         {
             Storage.Download(WorkingDirectory, fileKey);
-            files.Add(Path.Join(WorkingDirectory, fileKey));
+            files.Add(Path.GetRelativePath(Directory.GetCurrentDirectory(),fileKey));
         }
 
         string destination = Path.Join(WorkingDirectory, Results[0]);
@@ -54,9 +54,10 @@ public class Splice : ScheduledTask
             command.Execute();
             Storage.Upload(destination, Results[0]);
         }
-        catch (Exception e)
+        catch (CommandExecutionException e)
         {
-            throw;
+            throw new CommandExecutionException(
+                e.Message + "Executing in: " + Directory.GetCurrentDirectory(), e);
         }
         finally
         {

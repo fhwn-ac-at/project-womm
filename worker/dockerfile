@@ -7,8 +7,12 @@ COPY ./lib ./lib
 WORKDIR /worker/app
 RUN dotnet publish -c Release -o /publish
 
-# Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+
+RUN apt update -y
+RUN apt upgrade -y
+RUN apt install -y ffmpeg 
+
 WORKDIR /app
 COPY --from=build /publish .
 

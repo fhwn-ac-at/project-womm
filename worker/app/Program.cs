@@ -38,9 +38,6 @@ namespace app
                 services.AddOptions<StorageOptions>()
                     .Bind(config.GetRequiredSection("Storage"));
 
-                services.AddOptions<WorkItemHandlerOptions>()
-                    .Bind(config.GetRequiredSection("Operation"));
-
                 services.AddOptions<MessagingOptions>()
                     .Bind(config.GetRequiredSection("Messaging"));
                 
@@ -61,10 +58,10 @@ namespace app
             var storage = sp.GetService<IStorageSystem>();
             var fs = sp.GetService<IFileSystem>();
             
-            var rootDir = config
-                .GetRequiredSection("Operation")
-                .GetValue<string>("RootDirectory") 
-                          ?? throw new ArgumentException("Root directory is missing.");
+            var workerOptions = sp.GetService<IOptions<WorkerOptions>>()
+                                   ?? throw new ArgumentException("Messaging Section is missing.");
+            var rootDir = workerOptions.Value.RootDirectory;
+
             var messagingOptions = sp.GetService<IOptions<MessagingOptions>>()
                                    ?? throw new ArgumentException("Messaging Section is missing.");;
             
