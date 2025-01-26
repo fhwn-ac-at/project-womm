@@ -30,8 +30,8 @@ Param:
   "results": ["task-1/converted-video.avi"],
   "name": "ConvertFormat",
   "parameters": {
-    "keyName": "task-1/merged-video.mp4"
-    "goalFormat": ".avi",
+    "keyName": "task-1/merged-video.mp4",
+    "goalFormat": ".avi"
   }
 }
 ```
@@ -49,8 +49,8 @@ Param:
   "results": ["task-1/video-part-1.mp4", "task-1/video-part-2.mp4", "task-1/video-part-3.mp4"],
   "name": "Split",
   "parameters": {
-      "keyName": "task-1/file_example.mp4"
-      "segmentTime": "00:00:10",
+      "keyName": "task-1/file_example.mp4",
+      "segmentTime": "00:00:10"
   }
 }
 ```
