@@ -40,6 +40,8 @@ services:
     depends_on: 
       - rabbit-2
       - minio-2
+    volumes:
+      - .\appsettings.json:/app/appsettings.json
       
 networks:
   womm_net:
