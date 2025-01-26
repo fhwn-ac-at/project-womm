@@ -77,11 +77,20 @@ Merges the given videos together.
 
 ## How to Deploy a Worker 
 After implementing changes to the worker, it is neccessary to run docker build to create a docker image.
+This command uses the default configuration from the file worker\app\appsettings.json 
 ```bash
 cd project-womm/worker
 docker build -t womm-worker .
 ```
+
+To load the configuration into the docker contianer after building the image the following command can be used.
+Make sure the appsettings.json file is in the directory you execute the command in.
+```bash
+docker run -v .\appsettings.json:/app/appsettings.json womm-worker
+```
+
 For testing the worker a docker-compose file is provided, which uses minio and rabbitmq containers, to use it run the following command.
+The compose creates a single worker instance using the configuration in the \deploy\appsettings.json file.
 ```bash
 cd project-womm\deploy
 docker compose up
