@@ -1,14 +1,15 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 WORKDIR /worker
 COPY ./app ./app
 COPY ./lib ./lib
 
 WORKDIR /worker/app
-RUN ls -la
-RUN dotnet publish -c Release -o ./publish
+RUN dotnet publish -c Release -o /publish
 
-FROM mcr.microsoft.com/dotnet/runtime:8.0
+# Stage 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /publish .
 
-WORKDIR /publish
 ENTRYPOINT ["dotnet", "app.dll"]

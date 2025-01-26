@@ -93,13 +93,23 @@ public class Worker : IDisposable, IHostedService
         _queuingSystem.OnMessageReceived += MessageReceivedCallback;
         _taskExecutor.OnTaskStatusChanged += TaskStatusChangedCallback;
 
-        try
+        int tries = _options.QueuePolls;
+
+        while(tries > 0)
         {
-            _queuingSystem.Init();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("Cannot instantiate queue: " + _options.Queues.HostName + ":" + _options.Queues.Port);
+            try
+            {
+                _queuingSystem.Init();
+                break;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Cannot subscribe to queue " + _options.Queues.HostName + ":" + _options.Queues.Port +
+                " trying again in " + _options.QueuePollIntervalMilliseconds + " milliseconds." + 
+                tries + " tries left.");
+                tries--;
+                Thread.Sleep(_options.QueuePollIntervalMilliseconds);
+            }
         }
     }
 
@@ -148,13 +158,13 @@ public class Worker : IDisposable, IHostedService
     {
         _logger.LogInformation("Worker running...");
 
+        SubscribeQueue();
+
         if (_options.SendHeartbeat)
         {
             _logger.LogInformation("Setting up heartbeat...");
             SetupHeartBeat();
         }
-
-        SubscribeQueue();
 
         return Task.CompletedTask;
     }

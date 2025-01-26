@@ -20,5 +20,11 @@
 
         [Required]
         public string WorkerName { get; set; }
+
+        [Required]
+        public int QueuePolls { get; set; }
+
+        [Required]
+        public int QueuePollIntervalMilliseconds { get; set; }
     }
 }
