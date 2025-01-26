@@ -1,4 +1,3 @@
-version: '3'
 services:
   rabbit-2:
     image: rabbitmq:3-management
@@ -9,6 +8,12 @@ services:
       - "5673:5673"
     volumes:
       - C:\Dev\docker\rabbitmq:/var/lib/rabbitmq
+      - type: bind
+        source: ./rabbit/rabbitmq.config
+        target: /etc/rabbitmq/rabbitmq.config
+      - type: bind
+        source: ./rabbit/rabbitmq-defs.json
+        target: /etc/rabbitmq/rabbitmq-defs.json
     networks:
       - womm_net
     restart: always

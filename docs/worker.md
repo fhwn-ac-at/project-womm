@@ -95,3 +95,5 @@ The compose creates a single worker instance using the configuration in the \dep
 cd project-womm\deploy
 docker compose up
 ```
+
+Notice that, rabbitmq queues neccessary for the worker, are also being created on deployment. If you change the names of TaskQueueName, ArtifactQueueName or WorkerQueueName, make sure to change them in /deplyoment/rabbit/rabbitmq-defs.json as well.
