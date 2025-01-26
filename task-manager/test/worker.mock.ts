@@ -66,12 +66,12 @@ export class WorkerMock {
     }), 'utf-8'));
   }
 
-  public async receiveTask(): Promise<ReadPacket<ScheduledTaskDto>> {
-    return await getOneMessageFrom<ReadPacket<ScheduledTaskDto>>(this.connection, this.listensOn);
+  public async receiveTask(): Promise<ScheduledTaskDto> {
+    return await getOneMessageFrom<ScheduledTaskDto>(this.connection, this.listensOn);
   }
 
-  public async receiveTaskHoldRequest(): Promise<ReadPacket<PrefetchCommandDto>> {
-    return await getOneMessageFrom<ReadPacket<PrefetchCommandDto>>(this.connection, this.listensOn);
+  public async receiveTaskHoldRequest(): Promise<PrefetchCommandDto> {
+    return await getOneMessageFrom<PrefetchCommandDto>(this.connection, this.listensOn);
   }
 
   public async sendTaskHoldRequest(worker: string) {
