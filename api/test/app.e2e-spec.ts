@@ -791,7 +791,7 @@ describe('AppController (e2e)', () => {
       expect(updatedSceneBody.layers).toEqual([]);
     });
 
-    describe.only('Scene Modification API', () => {
+    describe('Scene Modification API', () => {
       let workspace: Workspace;
       let scene: Scene;
 
@@ -902,9 +902,13 @@ describe('AppController (e2e)', () => {
         expect(updatedScene.layers[0].clips).toEqual([]);
       });
 
-      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips (PUT) should add a clip to a layer', async () => {
+      it('/api/v1/scenes/clips (PUT) should add a clip to a scene', async () => {
         await request(app.getHttpServer())
-          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .put(`/api/v1/workspaces/${workspace.id}/files`)
+          .send({
+            name: 'main.txt',
+            fileSize: 100
+          })
           .expect(200);
 
         const clip = {
@@ -913,14 +917,390 @@ describe('AppController (e2e)', () => {
         }
 
         const res = await request(app.getHttpServer())
-          .put(`/api/v1/scenes/${scene.id}/layers/0/clips`)
+          .put(`/api/v1/scenes/${scene.id}/clips`)
           .send(clip)
           .expect(200);
 
         const updatedScene = res.body as Scene;
+        expect(updatedScene.clips).toEqual([clip]);
+      });
+
+      it('/api/v1/scenes/:sceneId/clips/:clipId (PUT) should return 404 when the scene does not exist', async () => {
+        return await request(app.getHttpServer())
+          .put('/api/v1/scenes/123/clips')
+          .send({
+            name: 'main.txt',
+            id: 'main.txt'
+          })
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/clips/:clipId (PUT) should return 404 when the clip does not exist in the workspace', async () => {
+        return await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/clips`)
+          .send({
+            name: 'main.txt',
+            id: 'main.txt'
+          })
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/clips/:clipId (DELETE) should remove a clip from a scene', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/workspaces/${workspace.id}/files`)
+          .send({
+            name: 'main.txt',
+            fileSize: 100
+          })
+          .expect(200);
+
+        const clip = {
+          id: 'main.txt',
+          name: 'Main part'
+        }
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/clips`)
+          .send(clip)
+          .expect(200);
+
+        const res = await request(app.getHttpServer())
+          .delete(`/api/v1/scenes/${scene.id}/clips/main.txt`)
+          .expect(200);
+
+        const updatedScene = res.body as Scene;
+        expect(updatedScene.clips).toEqual([]);
+      });
+
+      it('/api/v1/scenes/:sceneId/clips/:clipId (DELETE) should return 404 when the scene does not exist', async () => {
+        return await request(app.getHttpServer())
+          .delete('/api/v1/scenes/123/clips/main.txt')
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/clips/:clipId (DELETE) should return 404 when the clip does not exist', async () => {
+        return await request(app.getHttpServer())
+          .delete(`/api/v1/scenes/${scene.id}/clips/main.txt`)
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/clips/:clipId (PATCH) should update the clips name', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/workspaces/${workspace.id}/files`)
+          .send({
+            name: 'main.txt',
+            fileSize: 100
+          })
+          .expect(200);
+        
+        const clip = {
+          id: 'main.txt',
+          name: 'Main part'
+        }
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/clips`)
+          .send(clip)
+          .expect(200);
+
+        const updatedClip = {
+          name: 'New name'
+        }
+
+        const res = await request(app.getHttpServer())
+          .patch(`/api/v1/scenes/${scene.id}/clips/main.txt`)
+          .send(updatedClip)
+          .expect(200);
+
+        const updatedScene = res.body as Scene;
+        expect(updatedScene.clips[0].name).toBe('New name');
+      });
+
+      it('/api/v1/scenes/:sceneId/clips/:clipId (PATCH) should return 404 when the scene does not exist', async () => {
+        return await request(app.getHttpServer())
+          .patch('/api/v1/scenes/123/clips/main.txt')
+          .send({
+            name: 'main.txt',
+            id: 'main.txt'
+          })
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/clips/:clipId (PATCH) should return 404 when the clip does not exist', async () => {
+        return await request(app.getHttpServer())
+          .patch(`/api/v1/scenes/${scene.id}/clips/main.txt`)
+          .send({
+            name: 'main.txt',
+            id: 'main.txt'
+          })
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips (PUT) should add a clip to a layer', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/workspaces/${workspace.id}/files`)
+          .send({
+            name: 'main.txt',
+            fileSize: 100
+          })
+          .expect(200);
+        
+        
+        const clipDefinition = {
+          id: 'main.txt',
+          name: 'Main part'
+        }
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/clips`)
+          .send(clipDefinition)
+          .expect(200);
+
+        const clip = {
+          id: 'main.txt',
+          from: 0,
+          to: 5,
+          cut: {
+            from: 0,
+            to: 5
+          }
+        }
+
+        const res = await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers/0/clips`)
+          .send(clip)
+          // .expect(200);
+
+        const updatedScene = res.body as Scene;
+        console.dir(updatedScene, { depth: null });
         expect(updatedScene.layers[0].clips).toEqual([clip]);
       });
 
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips (PUT) should return 404 when the scene does not exist', async () => {
+        return await request(app.getHttpServer())
+          .put('/api/v1/scenes/123/layers/0/clips')
+          .send({
+            id: 'main.txt',
+            from: 0,
+            to: 5,
+            cut: {
+              from: 0,
+              to: 5
+            }
+          })
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips (PUT) should return 404 when the layer does not exist', async () => {
+        return await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers/0/clips`)
+          .send({
+            id: 'main.txt',
+            from: 0,
+            to: 5,
+            cut: {
+              from: 0,
+              to: 5
+            }
+          })
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips (PUT) should return 409 when the clip does not exist', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        return await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers/0/clips`)
+          .send({
+            id: 'main.txt',
+            from: 0,
+            to: 5,
+            cut: {
+              from: 0,
+              to: 5
+            }
+          })
+          .expect(409);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips/:clipId (DELETE) should remove a clip from a layer', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/workspaces/${workspace.id}/files`)
+          .send({
+            name: 'main.txt',
+            fileSize: 100
+          })
+          .expect(200);
+        
+        
+        const clipDefinition = {
+          id: 'main.txt',
+          name: 'Main part'
+        }
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/clips`)
+          .send(clipDefinition)
+          .expect(200);
+
+        const clip = {
+          id: 'main.txt',
+          from: 0,
+          to: 5,
+          cut: {
+            from: 0,
+            to: 5
+          }
+        }
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers/0/clips`)
+          .send(clip)
+          .expect(200);
+
+        const res = await request(app.getHttpServer())
+          .delete(`/api/v1/scenes/${scene.id}/layers/0/clips/main.txt`)
+          .expect(200);
+
+        const updatedScene = res.body as Scene;
+        expect(updatedScene.layers[0].clips).toEqual([]);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips/:clipId (DELETE) should return 404 when the scene does not exist', async () => {
+        return await request(app.getHttpServer())
+          .delete('/api/v1/scenes/123/layers/0/clips/main.txt')
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips/:clipId (DELETE) should return 404 when the layer does not exist', async () => {
+        return await request(app.getHttpServer())
+          .delete(`/api/v1/scenes/${scene.id}/layers/0/clips/main.txt`)
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips/:clipId (DELETE) should return 404 when the clip does not exist', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        return await request(app.getHttpServer())
+          .delete(`/api/v1/scenes/${scene.id}/layers/0/clips/main.txt`)
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips/:clipId (PATCH) should update the clips cut', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/workspaces/${workspace.id}/files`)
+          .send({
+            name: 'main.txt',
+            fileSize: 100
+          })
+          .expect(200);
+        
+        
+        const clipDefinition = {
+          id: 'main.txt',
+          name: 'Main part'
+        }
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/clips`)
+          .send(clipDefinition)
+          .expect(200);
+
+        const clip = {
+          id: 'main.txt',
+          from: 0,
+          to: 5,
+          cut: {
+            from: 0,
+            to: 5
+          }
+        }
+
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers/0/clips`)
+          .send(clip)
+          .expect(200);
+
+        const updatedClip = {
+          from: 1,
+          to: 4,
+          cut: {
+            from: 0,
+            to: 3
+          }
+        }
+
+        const res = await request(app.getHttpServer())
+          .patch(`/api/v1/scenes/${scene.id}/layers/0/clips/main.txt`)
+          .send(updatedClip)
+          .expect(200);
+
+        const updatedScene = res.body as Scene;
+        console.dir(updatedScene, { depth: null });
+        expect(updatedScene.layers[0].clips[0]).toEqual(updatedClip);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips/:clipId (PATCH) should return 404 when the scene does not exist', async () => {
+        return await request(app.getHttpServer())
+          .patch('/api/v1/scenes/123/layers/0/clips/main.txt')
+          .send({
+            from: 0,
+            to: 5,
+            cut: {
+              from: 0,
+              to: 5
+            }
+          })
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips/:clipId (PATCH) should return 404 when the layer does not exist', async () => {
+        return await request(app.getHttpServer())
+          .patch(`/api/v1/scenes/${scene.id}/layers/0/clips/main.txt`)
+          .send({
+            from: 0,
+            to: 5,
+            cut: {
+              from: 0,
+              to: 5
+            }
+          })
+          .expect(404);
+      });
+
+      it('/api/v1/scenes/:sceneId/layers/:layerIndex/clips/:clipId (PATCH) should return 404 when the clip does not exist', async () => {
+        await request(app.getHttpServer())
+          .put(`/api/v1/scenes/${scene.id}/layers`)
+          .expect(200);
+
+        return await request(app.getHttpServer())
+          .patch(`/api/v1/scenes/${scene.id}/layers/0/clips/main.txt`)
+          .send({
+            from: 0,
+            to: 5,
+            cut: {
+              from: 0,
+              to: 5
+            }
+          })
+          .expect(404);
+      });
 
     });
   });

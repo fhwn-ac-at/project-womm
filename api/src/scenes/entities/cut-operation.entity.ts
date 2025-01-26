@@ -1,6 +1,6 @@
 import { Prop, Schema } from "@nestjs/mongoose";
-import { IsNumber, Max, Min } from "class-validator";
-
+import { IsNumber, Max, Min, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
+import { Scene } from "./scene.entity";
 
 @Schema()
 export class CutOperation {

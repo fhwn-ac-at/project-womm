@@ -4,6 +4,10 @@ import { CreateSceneDto } from './dto/create-scene.dto';
 import { UpdateSceneDto } from './dto/update-scene.dto';
 import { SceneId } from './entities/scene.entity';
 import { CreateClipDto } from './dto/create-clip.dto';
+import { CreateClipDefinitionDto } from './dto/create-clip-definition.dto';
+import { ClipId } from './entities/clip-definition.entity';
+import { UpdateClipDefinitionDto } from './dto/update-clip-definition.dto';
+import { UpdateClipDto } from './dto/update-clip.dto';
 
 @Controller({
   version: '1',
@@ -48,30 +52,32 @@ export class ScenesController {
   }
 
   @Put(':id/clips')
-  addClipFromScene(@Param('id') id: SceneId) {
+  addClipToScene(@Param('id') sceneId: SceneId, @Body() clip: CreateClipDefinitionDto) {
+    return this.scenesService.addClipToScene(sceneId, clip);
   }
 
-  @Delete(':id/clips/:clipName')
-  removeClipFromScene() {
-
+  @Delete(':id/clips/:clipId')
+  removeClipFromScene(@Param('id') sceneId: SceneId, @Param('clipId') clipId: ClipId) {
+    return this.scenesService.removeClipFromScene(sceneId, clipId)
   }
 
-  @Patch(':id/clips/:clipName')
-  updateClipInScene() {
+  @Patch(':id/clips/:clipId')
+  updateClipInScene(@Param('id') sceneId: SceneId, @Param('clipId') clipId: ClipId, @Body() clip: UpdateClipDefinitionDto) {
+    return this.scenesService.updateClipInScene(sceneId, clipId, clip);
   }
 
-  @Patch(':id/layers/:layerIndex')
+  @Put(':id/layers/:layerIndex/clips')
   addClipToLayer(@Param('id') id: SceneId, @Param('layerIndex') layerIndex: number, @Body() clip: CreateClipDto) {
     return this.scenesService.addClipToLayer(id, layerIndex, clip);
-
   }
 
   @Delete(':id/layers/:layerIndex/clips/:clipName')
-  removeClipFromLayer() {
-
+  removeClipFromLayer(@Param('id') id: SceneId, @Param('layerIndex') layerIndex: number, @Param('clipName') clipId: ClipId) {
+    return this.scenesService.removeClipFromLayer(id, layerIndex, clipId);
   }
 
   @Patch(':id/layers/:layerIndex/clips/:clipName')
-  updateClipInLayer() {
+  updateClipInLayer(@Param('id') id: SceneId, @Param('layerIndex') layerIndex: number, @Param('clipName') clipId: ClipId, @Body() clip: UpdateClipDto) {
+    return this.scenesService.updateClipInLayer(id, layerIndex, clipId, clip);
   }
 }

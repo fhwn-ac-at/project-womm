@@ -3,11 +3,19 @@ import { IsNumber, IsOptional, IsString, Max, MaxLength, Min, MinLength, Validat
 import { CutOperation } from "./cut-operation.entity";
 import { Scene } from "./scene.entity";
 import { Type } from "class-transformer";
+import { ClipId } from "./clip-definition.entity";
 
 @ValidatorConstraint({ async: false })
 class ClipIdExistsConstraint implements ValidatorConstraintInterface {
   validate(id: string, args: ValidationArguments) {
+    if (!args.targetName.includes('Scene')) {
+      return true;
+    }
+    
     const object = args.object as Scene;
+    if (!object.clips) {
+      return false;
+    }
     // Validate that the `id` exists in the `clips` array
     return object.clips.some((clip) => clip.id === id);
   }
@@ -25,7 +33,7 @@ export class Clip {
   @MinLength(1)
   @MaxLength(50)
   @Validate(ClipIdExistsConstraint)
-  id: string;
+  id: ClipId;
 
   @Prop()
   @IsNumber()
