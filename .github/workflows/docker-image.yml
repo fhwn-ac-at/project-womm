@@ -15,5 +15,4 @@ jobs:
       run: cd worker &&  
             docker build --tag mwerfring/womm-worker:latest .
     - name: push
-      run: |
-        docker push mwerfring/womm-worker:latest
+      run: docker push mwerfring/womm-worker:latest
