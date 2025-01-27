@@ -254,7 +254,7 @@ export class ScenesService {
     return newScene.toObject();
   }
 
-  private async validateClipAvailability(scene: Scene, partialUploadAllowed: boolean = false) {
+  public async validateClipAvailability(scene: Scene, partialUploadAllowed: boolean = false) {
     if (!scene.workspace._workspace) {
       this.logger.debug('Workspace not found, loading it now');
       scene.workspace._workspace = await this.workspaceService.findOne(scene.workspace.id);
@@ -270,6 +270,12 @@ export class ScenesService {
       if (!partialUploadAllowed) {
         if (!file.uploadFinished) {
           throw new ConflictException(`Clip with ID ${clip} is not fully uploaded yet. Please wait until the upload has finished.`);
+        }
+      }
+
+      if (file.metadata) {
+        if (!file.metadata.isSupported) {
+          throw new ConflictException(`Clip with ID ${clip} is not in a supported format`);
         }
       }
     }

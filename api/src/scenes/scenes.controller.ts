@@ -8,13 +8,17 @@ import { CreateClipDefinitionDto } from './dto/create-clip-definition.dto';
 import { ClipId } from './entities/clip-definition.entity';
 import { UpdateClipDefinitionDto } from './dto/update-clip-definition.dto';
 import { UpdateClipDto } from './dto/update-clip.dto';
+import { RenderService } from '../render/render.service';
 
 @Controller({
   version: '1',
   path: 'scenes'
 })
 export class ScenesController {
-  constructor(private readonly scenesService: ScenesService) {}
+  constructor(
+    private readonly scenesService: ScenesService,
+    private readonly renderService: RenderService
+  ) {}
 
   @Post()
   create(@Body() createSceneDto: CreateSceneDto) {
@@ -79,5 +83,12 @@ export class ScenesController {
   @Patch(':id/layers/:layerIndex/clips/:clipName')
   updateClipInLayer(@Param('id') id: SceneId, @Param('layerIndex') layerIndex: number, @Param('clipName') clipId: ClipId, @Body() clip: UpdateClipDto) {
     return this.scenesService.updateClipInLayer(id, layerIndex, clipId, clip);
+  }
+
+  @Post(':id/render')
+  async renderScene(@Param('id') id: SceneId) {
+    const scene = await this.scenesService.findOne(id); 
+    await this.scenesService.validateClipAvailability(scene);
+    return this.renderService.renderScene(scene);
   }
 }

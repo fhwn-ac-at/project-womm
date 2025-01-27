@@ -37,9 +37,10 @@ export enum AudioFileContainer {
 export type FileContainer = VideoFileContainer | ImageFileContainer | AudioFileContainer;
 
 export type FileMetadataConstructor =
-  | { type: FileType.Video; container: VideoFileContainer; codec: VideoFileCodec, size: number, length: number }
-  | { type: FileType.Image; container: ImageFileContainer; codec: undefined, size: number, length: undefined }
-  | { type: FileType.Audio; container: AudioFileContainer; codec: undefined, size: number, length: number };
+  | { isSupported: true; type: FileType.Video; container: VideoFileContainer; codec: VideoFileCodec, size: number, length: number }
+  | { isSupported: true; type: FileType.Image; container: ImageFileContainer; codec: undefined, size: number, length: undefined }
+  | { isSupported: true; type: FileType.Audio; container: AudioFileContainer; codec: undefined, size: number, length: number }
+  | { isSupported: false };
 
 /**
  * Class representing the metadata of a file.
@@ -47,11 +48,12 @@ export type FileMetadataConstructor =
 @Schema()
 export class FileMetadata {
 
-  constructor({ type, container, codec }: FileMetadataConstructor) {
-    this.type = type;
-    this.container = container;
-    this.codec = codec;
+  constructor(data: Partial<FileMetadata>) {
+    Object.assign(this, data);
   }
+
+  @Prop()
+  isSupported: boolean;
 
   /**
    * The type of the file.
@@ -60,7 +62,7 @@ export class FileMetadata {
     type: String,
     enum: FileType,
   })
-  type: FileType;
+  type?: FileType;
 
   /**
    * The container of the file.
@@ -69,7 +71,7 @@ export class FileMetadata {
     type: String,
     enum: { ...VideoFileContainer, ...ImageFileContainer, ...AudioFileContainer },
   })
-  container: FileContainer;
+  container?: FileContainer;
 
   /**
    * The codec of the file (only applicable for video files).
@@ -84,7 +86,7 @@ export class FileMetadata {
    * The size of the file in bytes.
    */
   @Prop()
-  size: string;
+  size?: number;
 
   /**
    * The length of the file (only applicable for video and audio files).

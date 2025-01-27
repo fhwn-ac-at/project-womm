@@ -11,6 +11,8 @@ import { RegisteredUploadPartStatus } from './entities/upload-part.entity';
 import { ConfigService } from '@nestjs/config';
 import { UploadPartCommandOutput } from '@aws-sdk/client-s3';
 import { WorkspacesService } from '../workspaces/workspaces.service';
+import { VideoAnalyserService } from '../video-analyser/video-analyser.service';
+import { FileMetadata } from '../workspaces/entities/file-metadata.entity';
 
 @Injectable()
 export class UploadService {
@@ -23,7 +25,8 @@ export class UploadService {
     private readonly storageService: StorageService,
     private readonly configService: ConfigService,
     @Inject(forwardRef(() => WorkspacesService))
-    private readonly workspacesService: WorkspacesService
+    private readonly workspacesService: WorkspacesService,
+    private readonly videoAnalyserService: VideoAnalyserService
   ) { }
 
   public get maxPartSize(): number {
@@ -62,9 +65,25 @@ export class UploadService {
       this.logger.log(`Upload ${uploadId} is completed`);
       await this.storageService.finishMultiPartUpload(upload._s3UploadId, updatedUpload.parts, upload._s3Path);
       await this.workspacesService.fileUploadFinishedAt(uploadId, new Date());
+      this.analyzeUpload(updatedUpload);
     }
 
     return this.findOneOrThrow(uploadId);
+  }
+
+  public async analyzeUpload(upload: RegisteredUpload): Promise<void> {
+    try {
+      const fileMetadata = await this.videoAnalyserService.analyzeFileOfS3(upload._s3Path);
+      await this.workspacesService.addMetadataToFile(upload.uploadId, fileMetadata);
+      this.logger.debug(`Analyzed file ${upload._s3Path}`);
+    } catch (e) { 
+      this.logger.warn(`Failed to analyze file ${upload._s3Path}: ${e}`);
+      try {
+        await this.workspacesService.addMetadataToFile(upload.uploadId, new FileMetadata({isSupported: false}));
+      } catch (e) {
+        this.logger.error(`Failed to add metadata to file ${upload.uploadId}: ${e}`);
+      }
+    }
   }
 
 

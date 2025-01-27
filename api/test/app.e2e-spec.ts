@@ -11,6 +11,11 @@ import { RegisteredUpload } from '../src/upload/entities/upload.entity';
 import * as AWS from 'aws-sdk';
 import { createHash, randomBytes } from 'crypto';
 import { Scene } from '../src/scenes/entities/scene.entity';
+import { VideoAnalyserService } from '../src/video-analyser/video-analyser.service';
+import * as path from 'path';
+import * as fs from 'fs/promises';
+import e from 'express';
+import exp from 'constants';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -322,6 +327,215 @@ describe('AppController (e2e)', () => {
     const fileBufferHash = createHash('sha256').update(fileBuffer).digest('hex');
     const s3FileHash = createHash('sha256').update(s3File.Body as Buffer).digest('hex');
     expect(fileBufferHash).toEqual(s3FileHash);
+  });
+
+  it('/api/v1/uploads/:uploadId/part (PUT) should analyze the video file after is has been uplaoded', async () => {
+    const workspaceRes = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+    const workspace = workspaceRes.body as Workspace;
+    const videoPath = path.resolve("./test/test-video-sample.mp4");
+    const fileBuffer = await fs.readFile(videoPath);
+
+    const addFile: AddFileDto = {
+      name: 'test-video-sample.mp4',
+      fileSize: fileBuffer.byteLength
+    };
+    
+    const uploadRes = await request(app.getHttpServer())
+      .put(`/api/v1/workspaces/${workspace.id}/files`)
+      .send(addFile)
+      .expect(200);
+
+    const upload = uploadRes.body as RegisteredUpload;
+    expect(upload.expectedSize).toBe(fileBuffer.byteLength);
+    expect(upload.uploadedSize).toBe(0);
+    expect(upload.parts).toEqual([]);
+    expect(upload.uploadId).toMatch(uuidv4Regex);
+    expect(upload.maxPartSize).toBeDefined();
+
+    const maxPartSize = upload.maxPartSize;
+    let partNumber = 1;
+    for (let offset = 0; offset < fileBuffer.byteLength; offset += maxPartSize) {
+      const chunk = fileBuffer.subarray(offset, offset + maxPartSize);
+
+      const partRes = await request(app.getHttpServer())
+        .post(`/api/v1/uploads/${upload.uploadId}/part`)
+        .attach('part', chunk, 'test-video-sample.mp4')
+        .field('partNumber', partNumber.toString());
+
+      const finishedUpload = partRes.body as RegisteredUpload;
+      expect(finishedUpload.uploadedSize).toBe(offset + chunk.byteLength);
+      expect(finishedUpload.parts).toHaveLength(partNumber);
+      expect(finishedUpload.parts[partNumber - 1]).toEqual({ partNumber: partNumber, partSize: chunk.byteLength, status: 'completed' });
+      partNumber++;
+    }
+    const sleep = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
+    await sleep(500);
+
+    // check that upload is finished
+    const checkWorkspace = (await request(app.getHttpServer())
+      .get(`/api/v1/workspaces/${workspace.id}`)
+      .expect(200)).body as Workspace;
+
+    expect(checkWorkspace.files).toHaveLength(1);
+    expect(checkWorkspace.files[0].uploadFinished).toBeTruthy();
+
+    await sleep(500);
+
+    const finalWorkspace = (await request(app.getHttpServer())
+      .get(`/api/v1/workspaces/${workspace.id}`)
+      .expect(200)).body as Workspace;
+
+    expect(finalWorkspace.files).toHaveLength(1);
+    expect(finalWorkspace.files[0].uploadFinished).toBeTruthy();
+    expect(finalWorkspace.files[0].metadata).toBeDefined();
+    expect(finalWorkspace.files[0].metadata.type).toBe('video');
+    expect(finalWorkspace.files[0].metadata.isSupported).toBeTruthy();
+    expect(finalWorkspace.files[0].metadata.codec).toBe('h264');
+    expect(finalWorkspace.files[0].metadata.container).toBe('mov');
+    expect(finalWorkspace.files[0].metadata.size).toBe(1570024);
+    expect(finalWorkspace.files[0].metadata.length).toBe(30.526667);
+  });
+
+  it('/api/v1/uploads/:uploadId/part (PUT) should analyze the audio file after is has been uplaoded', async () => {
+    const workspaceRes = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+    const workspace = workspaceRes.body as Workspace;
+    const videoPath = path.resolve("./test/test-audio-sample.mp3");
+    const fileBuffer = await fs.readFile(videoPath);
+
+    const addFile: AddFileDto = {
+      name: 'test-audio-sample.mp3',
+      fileSize: fileBuffer.byteLength
+    };
+    
+    const uploadRes = await request(app.getHttpServer())
+      .put(`/api/v1/workspaces/${workspace.id}/files`)
+      .send(addFile)
+      .expect(200);
+
+    const upload = uploadRes.body as RegisteredUpload;
+    expect(upload.expectedSize).toBe(fileBuffer.byteLength);
+    expect(upload.uploadedSize).toBe(0);
+    expect(upload.parts).toEqual([]);
+    expect(upload.uploadId).toMatch(uuidv4Regex);
+    expect(upload.maxPartSize).toBeDefined();
+
+    const maxPartSize = upload.maxPartSize;
+    let partNumber = 1;
+    for (let offset = 0; offset < fileBuffer.byteLength; offset += maxPartSize) {
+      const chunk = fileBuffer.subarray(offset, offset + maxPartSize);
+
+      const partRes = await request(app.getHttpServer())
+        .post(`/api/v1/uploads/${upload.uploadId}/part`)
+        .attach('part', chunk, 'test-audio-sample.mp3')
+        .field('partNumber', partNumber.toString());
+
+      const finishedUpload = partRes.body as RegisteredUpload;
+      expect(finishedUpload.uploadedSize).toBe(offset + chunk.byteLength);
+      expect(finishedUpload.parts).toHaveLength(partNumber);
+      expect(finishedUpload.parts[partNumber - 1]).toEqual({ partNumber: partNumber, partSize: chunk.byteLength, status: 'completed' });
+      partNumber++;
+    }
+    const sleep = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
+    await sleep(500);
+
+    // check that upload is finished
+    const checkWorkspace = (await request(app.getHttpServer())
+      .get(`/api/v1/workspaces/${workspace.id}`)
+      .expect(200)).body as Workspace;
+
+    expect(checkWorkspace.files).toHaveLength(1);
+    expect(checkWorkspace.files[0].uploadFinished).toBeTruthy();
+
+    await sleep(500);
+
+    const finalWorkspace = (await request(app.getHttpServer())
+      .get(`/api/v1/workspaces/${workspace.id}`)
+      .expect(200)).body as Workspace;
+
+    expect(finalWorkspace.files).toHaveLength(1);
+    expect(finalWorkspace.files[0].uploadFinished).toBeTruthy();
+    expect(finalWorkspace.files[0].metadata).toBeDefined();
+    expect(finalWorkspace.files[0].metadata.type).toBe('audio');
+    expect(finalWorkspace.files[0].metadata.isSupported).toBeTruthy();
+    expect(finalWorkspace.files[0].metadata.codec).toBeNull();
+    expect(finalWorkspace.files[0].metadata.container).toBe('mp3');
+    expect(finalWorkspace.files[0].metadata.size).toBe(1954212);
+    expect(finalWorkspace.files[0].metadata.length).toBe(122.122449);
+  });
+
+  it('/api/v1/uploads/:uploadId/part (PUT) should analyze the file after is has been uplaoded and mark it as unsupported', async () => {
+    const workspaceRes = await request(app.getHttpServer())
+      .post('/api/v1/workspaces')
+      .expect(201);
+
+    const workspace = workspaceRes.body as Workspace;
+    const fileBuffer = randomBytes(1024 * 1024 * 100);;
+
+    const addFile: AddFileDto = {
+      name: 'test-audio-sample.mp3',
+      fileSize: fileBuffer.byteLength
+    };
+    
+    const uploadRes = await request(app.getHttpServer())
+      .put(`/api/v1/workspaces/${workspace.id}/files`)
+      .send(addFile)
+      .expect(200);
+
+    const upload = uploadRes.body as RegisteredUpload;
+    expect(upload.expectedSize).toBe(fileBuffer.byteLength);
+    expect(upload.uploadedSize).toBe(0);
+    expect(upload.parts).toEqual([]);
+    expect(upload.uploadId).toMatch(uuidv4Regex);
+    expect(upload.maxPartSize).toBeDefined();
+
+    const maxPartSize = upload.maxPartSize;
+    let partNumber = 1;
+    for (let offset = 0; offset < fileBuffer.byteLength; offset += maxPartSize) {
+      const chunk = fileBuffer.subarray(offset, offset + maxPartSize);
+
+      const partRes = await request(app.getHttpServer())
+        .post(`/api/v1/uploads/${upload.uploadId}/part`)
+        .attach('part', chunk, 'test-audio-sample.mp3')
+        .field('partNumber', partNumber.toString());
+
+      const finishedUpload = partRes.body as RegisteredUpload;
+      expect(finishedUpload.uploadedSize).toBe(offset + chunk.byteLength);
+      expect(finishedUpload.parts).toHaveLength(partNumber);
+      expect(finishedUpload.parts[partNumber - 1]).toEqual({ partNumber: partNumber, partSize: chunk.byteLength, status: 'completed' });
+      partNumber++;
+    }
+    const sleep = (timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout));
+    await sleep(500);
+
+    // check that upload is finished
+    const checkWorkspace = (await request(app.getHttpServer())
+      .get(`/api/v1/workspaces/${workspace.id}`)
+      .expect(200)).body as Workspace;
+
+    expect(checkWorkspace.files).toHaveLength(1);
+    expect(checkWorkspace.files[0].uploadFinished).toBeTruthy();
+
+    await sleep(500);
+
+    const finalWorkspace = (await request(app.getHttpServer())
+      .get(`/api/v1/workspaces/${workspace.id}`)
+      .expect(200)).body as Workspace;
+
+    expect(finalWorkspace.files).toHaveLength(1);
+    expect(finalWorkspace.files[0].uploadFinished).toBeTruthy();
+    expect(finalWorkspace.files[0].metadata).toBeDefined();
+    expect(finalWorkspace.files[0].metadata.type).toBeUndefined();
+    expect(finalWorkspace.files[0].metadata.isSupported).toBeFalsy();
+    expect(finalWorkspace.files[0].metadata.codec).toBeUndefined();
+    expect(finalWorkspace.files[0].metadata.container).toBeUndefined();
+    expect(finalWorkspace.files[0].metadata.size).toBeUndefined();
+    expect(finalWorkspace.files[0].metadata.length).toBeUndefined();
   });
 
   describe('Scene Creation and Deletion API', () => {
@@ -1304,4 +1518,5 @@ describe('AppController (e2e)', () => {
 
     });
   });
+
 });

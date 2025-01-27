@@ -15,6 +15,9 @@ FROM node:${NODE_VERSION}-alpine as base
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
 
+RUN apk update
+RUN apk upgrade
+RUN apk add --no-cache ffmpeg
 
 ################################################################################
 # Create a stage for installing production dependecies.

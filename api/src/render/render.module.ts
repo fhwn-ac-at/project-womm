@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { RenderService } from './render.service';
-import { RenderController } from './render.controller';
+import { WorkspacesModule } from '../workspaces/workspaces.module';
 
 @Module({
-  controllers: [RenderController],
   providers: [RenderService],
+  exports: [RenderService],
+  imports: [WorkspacesModule]
 })
 export class RenderModule {}
