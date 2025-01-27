@@ -1,0 +1,10 @@
+.video-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.controls {
+  margin-top: 10px;
+}
