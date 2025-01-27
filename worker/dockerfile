@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+WORKDIR /worker
+COPY ./app ./app
+COPY ./lib ./lib
+
+WORKDIR /worker/app
+RUN dotnet publish -c Release -o /publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+
+RUN apt update -y
+RUN apt upgrade -y
+RUN apt install -y ffmpeg 
+
+WORKDIR /app
+COPY --from=build /publish .
+
+ENTRYPOINT ["dotnet", "app.dll"]

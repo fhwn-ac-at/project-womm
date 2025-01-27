@@ -1,11 +1,19 @@
 import { Optional } from "@nestjs/common";
 import { ExecFileSyncOptionsWithBufferEncoding } from "child_process";
-import { IsArray, IsEnum, IsOptional, IsString, Matches, MaxLength, MinLength, ValidateNested } from "class-validator";
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString, Matches, MaxLength, MinLength, Validate, ValidateNested } from "class-validator";
 import { CompletionCriteria } from "../entities/completion-criteria.entity";
-import { WorkflowDefinition } from "../entities/workflow-definition.entity";
+import { CreateWorkflowDefinition } from "../entities/create-workflow-definition.entity";
+import { Type } from "class-transformer";
 
-export class WorkflowDefinitionDto extends WorkflowDefinition {
+export class WorkflowDefinitionDto {
 
+  @IsNumber()
+  @IsEnum([1])
+  version: 1
+
+  @ValidateNested()
+  @Type(() => CreateWorkflowDefinition)
+  workflow: CreateWorkflowDefinition
 }
 
 

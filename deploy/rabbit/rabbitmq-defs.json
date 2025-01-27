@@ -1,0 +1,77 @@
+{
+
+  "queues": [
+    {
+      "name": "task_events",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "artifact_events",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "worker_events",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "amq.direct",
+      "vhost": "/",
+      "destination": "task_events",
+      "destination_type": "queue",
+      "routing_key": "task_events",
+      "arguments": {}
+    },
+    {
+      "source": "amq.direct",
+      "vhost": "/",
+      "destination": "artifact_events",
+      "destination_type": "queue",
+      "routing_key": "artifact_events",
+      "arguments": {}
+    },
+    {
+      "source": "amq.direct",
+      "vhost": "/",
+      "destination": "worker_events",
+      "destination_type": "queue",
+      "routing_key": "worker_events",
+      "arguments": {}
+    }
+  ],
+    "users": [
+      {
+        "name": "guest",
+        "password_hash": "BMfxN8drrYcIqXZMr+pWTpDT0nMcOagMduLX0bjr4jwud/pN",
+        "hashing_algorithm": "rabbit_password_hashing_sha256",
+        "tags": [
+          "administrator"
+        ],
+        "limits": {}
+      }
+    ],
+    "vhosts": [
+      {
+        "name": "/"
+      }
+    ],
+    "permissions": [
+      {
+        "user": "guest",
+        "vhost": "/",
+        "configure": ".*",
+        "write": ".*",
+        "read": ".*"
+      }
+    ]
+  }
