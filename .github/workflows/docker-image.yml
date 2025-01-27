@@ -15,4 +15,6 @@ jobs:
       run: cd worker &&  
             docker build --tag mwerfring/womm-worker:latest .
     - name: push
-      run: docker push mwerfring/womm-worker:latest
+      run: |
+        docker login -u mwerfring -p ${{ secrets.DOCKER_HUB_TOKEN }} 
+        docker push mwerfring/womm-worker:latest
