@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Build the Docker image
+    - name: build
       run: cd worker &&  
-            docker build --tag womm-worker:$(date +%s) .
+            docker build --tag mwerfring/womm-worker:latest .
+    - name: push
+      run: |
+        docker login -u mwerfring -p ${{ secrets.DOCKER_HUB_TOKEN }} 
+        docker push mwerfring/womm-worker:latest

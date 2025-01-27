@@ -97,3 +97,4 @@ docker compose up
 ```
 
 Notice that, rabbitmq queues neccessary for the worker, are also being created on deployment. If you change the names of TaskQueueName, ArtifactQueueName or WorkerQueueName, make sure to change them in /deplyoment/rabbit/rabbitmq-defs.json as well.
+A github action has also been configured to automatically build and publish the docker image when changes to the /worker folder are commited onto the main branch, but has not been since github secrets are not allowed in the project.
