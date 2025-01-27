@@ -254,7 +254,7 @@ export class ScenesService {
     return newScene.toObject();
   }
 
-  private async validateClipAvailability(scene: Scene, partialUploadAllowed: boolean = false) {
+  public async validateClipAvailability(scene: Scene, partialUploadAllowed: boolean = false) {
     if (!scene.workspace._workspace) {
       this.logger.debug('Workspace not found, loading it now');
       scene.workspace._workspace = await this.workspaceService.findOne(scene.workspace.id);

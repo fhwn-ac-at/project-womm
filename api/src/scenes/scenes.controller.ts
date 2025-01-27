@@ -88,6 +88,7 @@ export class ScenesController {
   @Post(':id/render')
   async renderScene(@Param('id') id: SceneId) {
     const scene = await this.scenesService.findOne(id); 
+    await this.scenesService.validateClipAvailability(scene);
     return this.renderService.renderScene(scene);
   }
 }
