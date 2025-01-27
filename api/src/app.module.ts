@@ -7,6 +7,7 @@ import { S3Module } from 'nestjs-s3';
 import { StorageModule } from './storage/storage.module';
 import { UploadModule } from './upload/upload.module';
 import { ScenesModule } from './scenes/scenes.module';
+import { RenderModule } from './render/render.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ScenesModule } from './scenes/scenes.module';
     StorageModule,
     UploadModule,
     ScenesModule,
+    RenderModule,
   ],
   controllers: [],
   providers: [],

@@ -17,4 +17,9 @@ export class SceneVideo {
   @IsString()
   @IsEnum(VideoFileContainer)
   container: VideoFileContainer;
+
+  @Prop({
+    required: false
+  })
+  downloadUrl?: string;
 }
