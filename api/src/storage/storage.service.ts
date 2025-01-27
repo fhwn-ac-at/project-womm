@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { InjectS3, S3 } from 'nestjs-s3';
 import { S3Path } from '../types/s3Path.type';
 import { RegisterdUplaodPart } from '../upload/entities/upload-part.entity';
+import * as fs from 'fs';
+import { Readable } from 'stream';
+import { VideoAnalyserService } from '../video-analyser/video-analyser.service';
 
 @Injectable()
 export class StorageService {
@@ -14,7 +17,7 @@ export class StorageService {
   public constructor(
     @InjectS3()
     private readonly s3: S3,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) { }
 
   public async uploadFileFromBuffer(buffer: Buffer, path: S3Path) {
@@ -60,6 +63,23 @@ export class StorageService {
         }))
       }
     })
+  }
+
+  public async downloadFileToDisk(path: S3Path, diskPath: string): Promise<string> {
+    const res = await this.s3.getObject({
+      Bucket: this.bucketName,
+      Key: path,
+
+    });
+
+    return new Promise((resolve, reject) => {
+      if (res.Body instanceof Readable) {
+        const writeStream = fs.createWriteStream(diskPath);
+        res.Body.pipe(writeStream)
+          .on('close', () => resolve(diskPath))
+          .on('error', reject);
+      }
+    });
   }
 
 }

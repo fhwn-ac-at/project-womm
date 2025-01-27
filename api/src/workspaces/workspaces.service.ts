@@ -12,6 +12,7 @@ import { UploadService } from '../upload/upload.service';
 import { ConfigService } from '@nestjs/config';
 import { RegisteredUpload } from 'src/upload/entities/upload.entity';
 import { UploadId } from 'aws-sdk/clients/ecr';
+import { FileMetadata } from './entities/file-metadata.entity';
 
 @Injectable()
 export class WorkspacesService {
@@ -76,15 +77,26 @@ export class WorkspacesService {
       throw new NotFoundException(`Workspace with id ${id} not found`);
     }
 
-    return workspace;
+    return workspace.toObject();
   }
 
-  public fileUploadFinishedAt(uplaodId: UploadId, finishedAt: Date) {
-    return this.workspaceModel.updateOne({
-      'files.uploadId': uplaodId
+  public async fileUploadFinishedAt(uploadId: UploadId, finishedAt: Date) {
+    const res = await this.workspaceModel.updateOne({
+      'files.uploadId': uploadId
     }, {
       $set: {
-        'files.$.uploadFinishedAt': finishedAt
+        'files.$.uploadFinishedAt': finishedAt,
+        'files.$.uploadFinished': true,
+      }
+    });
+  }
+
+  public addMetadataToFile(uploadId: UploadId, metadata: FileMetadata) {
+    return this.workspaceModel.updateOne({
+      'files.uploadId': uploadId
+    }, {
+      $set: {
+        'files.$.metadata': metadata
       }
     });
   }

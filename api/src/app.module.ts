@@ -8,6 +8,7 @@ import { StorageModule } from './storage/storage.module';
 import { UploadModule } from './upload/upload.module';
 import { ScenesModule } from './scenes/scenes.module';
 import { RenderModule } from './render/render.module';
+import { VideoAnalyserModule } from './video-analyser/video-analyser.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { RenderModule } from './render/render.module';
     UploadModule,
     ScenesModule,
     RenderModule,
+    VideoAnalyserModule,
   ],
   controllers: [],
   providers: [],

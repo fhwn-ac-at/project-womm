@@ -272,6 +272,12 @@ export class ScenesService {
           throw new ConflictException(`Clip with ID ${clip} is not fully uploaded yet. Please wait until the upload has finished.`);
         }
       }
+
+      if (file.metadata) {
+        if (!file.metadata.isSupported) {
+          throw new ConflictException(`Clip with ID ${clip} is not in a supported format`);
+        }
+      }
     }
 
     for (const layer of scene.layers) {

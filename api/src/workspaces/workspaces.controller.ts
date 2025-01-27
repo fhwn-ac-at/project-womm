@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Logger, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';

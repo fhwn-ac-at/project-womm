@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { RegisteredUpload, RegisteredUploadSchema } from './entities/upload.entity';
 import { StorageModule } from '../storage/storage.module';
 import { WorkspacesModule } from '../workspaces/workspaces.module';
+import { VideoAnalyserModule } from '../video-analyser/video-analyser.module';
 
 @Module({
   controllers: [UploadController],
@@ -14,7 +15,8 @@ import { WorkspacesModule } from '../workspaces/workspaces.module';
       { name: RegisteredUpload.name, schema: RegisteredUploadSchema }
     ]),
     StorageModule,
-    forwardRef(() => WorkspacesModule)
+    forwardRef(() => WorkspacesModule),
+    VideoAnalyserModule
   ],
   exports: [UploadService]
 })

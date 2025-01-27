@@ -24,14 +24,13 @@ export class WorkspaceFile {
   uploadedAt?: Date;
 
   @Prop({
-    required: false
+    required: false,
+    type: Date,
   })
   uploadFinishedAt?: Date;
 
-  @Expose()
-  get uploadFinished() {
-    return !!this.uploadFinishedAt;
-  }
+  @Prop()
+  uploadFinished: boolean;
 
   @Prop()
   _s3Path: S3Path;

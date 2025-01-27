@@ -22,6 +22,9 @@ export class RemoveUnderscoreFieldsInterceptor implements NestInterceptor {
     }
 
     if (typeof obj === 'object' && obj) {
+      if (obj instanceof Date) {
+        return obj;
+      }
       if (obj instanceof Model) {
         return this.stripUnderscoreFields(obj._doc);
       }
