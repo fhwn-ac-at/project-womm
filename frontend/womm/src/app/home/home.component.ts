@@ -3,6 +3,8 @@ import {MatToolbar} from '@angular/material/toolbar';
 import {MatButton} from '@angular/material/button';
 import {NgForOf} from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../environment/environment';
+import { ApiService } from '../apiService';
 
 interface VideoFile {
   file: File;
@@ -17,7 +19,7 @@ interface VideoFile {
     MatToolbar,
     MatButton,
     NgForOf,
-    RouterModule
+    RouterModule,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
@@ -25,6 +27,8 @@ interface VideoFile {
 export class HomeComponent {
   videos: VideoFile[] = [];
   draggedIndex: number | null = null;
+
+  constructor(private apiService: ApiService) {}
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -63,5 +67,24 @@ export class HomeComponent {
       this.videos.splice(index, 0, draggedVideo);
     }
     this.draggedIndex = null;
+  }
+
+  uploadAndRenderVideo(): void {
+    if (this.videos.length == 0) {
+      console.log("No videos");
+      // Maybe add pop-up
+    } else {
+      console.log(environment.apiURL);
+
+      // Create Workspace, get ID
+      this.apiService.postData('workspaces',{}).subscribe(
+        (response) => {
+          console.log('Workspace created: ', response);
+        },
+        (error) => {
+          console.error('Error creating user:', error);
+        }
+      )
+    }
   }
 }

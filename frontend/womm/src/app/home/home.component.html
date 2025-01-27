@@ -16,7 +16,7 @@
   <div class="uploaded-videos-container">
     <!-- Headline Div -->
     <div class="uploaded-videos-heading">
-      <h3>Uploaded Videos</h3>
+      <h3>Selected Videos</h3>
     </div>
 
     <!-- Video List Div -->
@@ -29,8 +29,8 @@
   </div>
 
   <div>
-    <button mat-raised-button>
-      Render video
+    <button mat-raised-button (click)="uploadAndRenderVideo()">
+      Upload and Render Video
     </button>
   </div>
 </div>
