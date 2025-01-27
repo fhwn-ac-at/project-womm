@@ -33,6 +33,15 @@ export class ApiService {
     });
   }
 
+  
+  // PUT request
+  postMultiFormData(endpoint: string, body: any): Observable<any> {
+    const url = `${this.baseUrl}/${endpoint}`;
+    return this.http.post(url, body, {
+      headers: new HttpHeaders().set('Content-Type', 'multipart/form-data'),
+    });
+  }
+
   // DELETE request
   deleteData(endpoint: string): Observable<any> {
     const url = `${this.baseUrl}/${endpoint}`;

@@ -75,16 +75,88 @@ export class HomeComponent {
       // Maybe add pop-up
     } else {
       console.log(environment.apiURL);
-
+  
       // Create Workspace, get ID
-      this.apiService.postData('workspaces',{}).subscribe(
-        (response) => {
+      this.apiService.postData('workspaces', {}).subscribe({
+        next: (response) => {
           console.log('Workspace created: ', response);
+  
+          const workspaceID = response.id;
+          // Initiate file upload by setting file size
+          let size = 0;
+          this.videos.forEach(video => {
+            size += video.file.size;
+          });
+          console.log("size: " + size);
+  
+          const workspaceString = "workspaces/" + workspaceID + "/files";
+
+          this.apiService.putData(workspaceString, { "fileSize": size, "name": 'video' }).subscribe({
+            next: (response) => {
+              console.log(response);
+          
+              const uploadID = response.uploadId;
+              const maxPartSize = response.maxPartSize;
+
+              // Upload video parts
+              this.videos.forEach(video => {
+                const file = video.file;
+                const totalParts = Math.ceil(file.size / maxPartSize);
+          
+                const uploadPart = (partIndex: number) => {
+                  if (partIndex >= totalParts) {
+                    console.log("All parts uploaded for: ", file.name);
+                    return;
+                  }
+          
+                  const start = partIndex * maxPartSize;
+                  const end = Math.min(start + maxPartSize, file.size);
+          
+                  const fileSlice = file.slice(start, end);
+          
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    if (reader.readyState === FileReader.DONE) {
+                      const arrayBuffer = reader.result as ArrayBuffer;
+                      const byteArray = new Uint8Array(arrayBuffer);
+                      console.log(byteArray);
+                      
+                      const uploadString = 'uploads/' + uploadID + '/part';
+                      console.log(uploadString);
+                      // Send the byte data as part of the request body
+                      const formData = new FormData();
+                      formData.append('partNumber', (partIndex + 1).toString());
+                      formData.append('part', new Blob([byteArray]));
+
+                      this.apiService.postMultiFormData(uploadString, formData).subscribe({
+                        next: () => {
+                          console.log(`Uploaded part ${partIndex} of ${totalParts} for file:`, file.name);
+                          uploadPart(partIndex + 1); // Upload the next part
+                        },
+                        error: (error) => {
+                          console.error(`Error uploading part ${partIndex + 1} for file:`, file.name, error);
+                        }
+                      });
+                    }
+                  };
+          
+                  // Read the file slice as an ArrayBuffer
+                  reader.readAsArrayBuffer(fileSlice);
+                };
+          
+                // Start uploading from the first part
+                uploadPart(0);
+              });
+            },
+            error: (error) => {
+              console.error('Error registering file size in workspace:', error);
+            }
+          });
         },
-        (error) => {
-          console.error('Error creating user:', error);
+        error: (error) => {
+          console.error('Error creating workspace:', error);
         }
-      )
+      });
     }
-  }
+  } 
 }
