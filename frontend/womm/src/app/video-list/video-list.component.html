@@ -1,0 +1,25 @@
+<mat-toolbar color="primary">
+  <span>Video Library</span>
+  <span class="spacer"></span>
+  <button mat-button routerLink="/">Home</button>
+  <button mat-button>About</button>
+  <button mat-button>Contact</button>
+</mat-toolbar>
+
+<div class="main-content">
+  <div class="video-container">
+    <div class="video-heading">
+      <h2>Available Videos</h2>
+    </div>
+
+    <div class="video-list">
+      <div *ngFor="let video of availableVideos" class="video-list-item">
+        <p class="video-name">{{ video.name }}</p>
+        <button mat-raised-button color="primary" (click)="downloadVideo(video)">
+          Download
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
