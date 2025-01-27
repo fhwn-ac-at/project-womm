@@ -4,6 +4,7 @@ import { ScenesController } from './scenes.controller';
 import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Scene, SceneSchema } from './entities/scene.entity';
+import { RenderModule } from '../render/render.module';
 
 @Module({
   controllers: [ScenesController],
@@ -12,7 +13,8 @@ import { Scene, SceneSchema } from './entities/scene.entity';
     MongooseModule.forFeature([
       { name: Scene.name, schema: SceneSchema }
     ]),
-    WorkspacesModule
+    WorkspacesModule,
+    RenderModule
   ]
 })
 export class ScenesModule {}
