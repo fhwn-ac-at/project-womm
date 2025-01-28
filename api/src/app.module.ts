@@ -9,6 +9,8 @@ import { UploadModule } from './upload/upload.module';
 import { ScenesModule } from './scenes/scenes.module';
 import { RenderModule } from './render/render.module';
 import { VideoAnalyserModule } from './video-analyser/video-analyser.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -45,6 +47,9 @@ import { VideoAnalyserModule } from './video-analyser/video-analyser.module';
     ScenesModule,
     RenderModule,
     VideoAnalyserModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
   ],
   controllers: [],
   providers: [],

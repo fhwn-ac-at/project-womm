@@ -19,48 +19,42 @@ namespace lib.tasks.types
                 throw new InvalidDataException("parameters must be of type SplitParameters");
             }
 
+            if (data.results.Length != 1)
+            {
+                throw new InvalidDataException("Expecting exactly one result");
+            }
+
             _parameters = parameters;
         }
 
-        public string SegmentTime => _parameters.segmentTime;
+        public double From => _parameters.from;
+
+        public double To => _parameters.to;
 
         public string KeyName => _parameters.keyName;
         
         public override void Process()
         {
             string downloadedFile = Path.Join(WorkingDirectory, _parameters.keyName);
-            Storage.Download(WorkingDirectory, 
-                KeyName);
+            Storage.Download(WorkingDirectory, KeyName);
             
-            string destination = Path.Join(WorkingDirectory, "output%03d.mp4");
+            string destination = Path.Join(WorkingDirectory, "output.mp4");
             FFmpegCommand command = new(
                 source: $"\"{downloadedFile}\"",
                 destination: $"\"{destination}\"");
 
             command.AddArgument("-c", "copy");
-            command.AddArgument("-map", "0");
-            command.AddArgument("-segment_time", SegmentTime);
-            command.AddArgument("-f", "segment");
-            command.AddArgument("-reset_timestamps", "1");
+            command.AddArgument("-ss", From.ToString());
+            command.AddArgument("-to", To.ToString());
 
             try
             {
                 command.Execute();
-            
-                File.Delete(downloadedFile);
-                var files = Directory.GetFiles(WorkingDirectory, 
-                    "*", 
-                    SearchOption.AllDirectories);
 
-                if (files.Length != Results.Length)
-                {
-                    throw new Exception($"Found {files.Length} files but expected {Results.Length}");
-                }
+                File.Delete(downloadedFile);
             
-                for (int i = 0; i < files.Length; i++)
-                {
-                    Storage.Upload(files[i], Results[i]);
-                }
+                // there can only be one result otherwise the constructor would throw an error.
+                Storage.Upload(destination, Results[0]);
             }
             catch (Exception e)
             {

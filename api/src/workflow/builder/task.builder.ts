@@ -2,6 +2,7 @@ import { CompletionCriteriaDto, CompletionCriteriaType } from "../dto/completion
 import { DependencyDto, DependencyType } from "../dto/dependency.dto";
 import { ErrorHandlingAction, ErrorHandlingDto } from "../dto/error-handling.dto";
 import { RetryPolicyDto } from "../dto/retry-policy.dto";
+import { TaskDto } from "../dto/task.dto";
 
 
 export class TaskBuilder {
@@ -67,6 +68,7 @@ export class TaskBuilder {
   }
 
   public withDefaultRetryPolicy() {
+    this._onError = new ErrorHandlingDto({ action: ErrorHandlingAction.retry });
     return this.withRetryPolicy(new RetryPolicyDto({
       retryDelay: 1000,
       maxRetryCount: 3,
@@ -102,7 +104,7 @@ export class TaskBuilder {
     return this.withCompletionCriteria(CompletionCriteriaType.artifact, id);
   }
 
-  public build() {
+  public build(): TaskDto {
     return {
       name: this._name,
       dependencies: this._dependencies,

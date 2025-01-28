@@ -30,8 +30,10 @@ export class WorkflowBuilder {
     return this;
   }
 
-  public withTask(builder: () => TaskBuilder) {
-    this._tasks.push(builder());
+  public withTask(builder: (t: TaskBuilder) => void) {
+    const taskBuilder = new TaskBuilder();
+    builder(taskBuilder);
+    this._tasks.push(taskBuilder);
     return this;
   }
 

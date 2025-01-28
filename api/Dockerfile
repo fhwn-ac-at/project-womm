@@ -19,22 +19,20 @@ RUN apk update
 RUN apk upgrade
 RUN apk add --no-cache ffmpeg
 
-################################################################################
-# Create a stage for installing production dependecies.
-FROM base as deps
 
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.npm to speed up subsequent builds.
-# Leverage bind mounts to package.json and package-lock.json to avoid having to copy them
-# into this layer.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+################################################################################
+# Create a stage for installing frontend dependencies.
+FROM base as frontend-deps
+
+# Copy the frontend package files into the image.
+RUN --mount=type=bind,source=../frontend/womm/package.json,target=package.json \
+    --mount=type=bind,source=../frontend/womm/package-lock.json,target=package-lock.json \
     --mount=type=cache,target=/root/.npm \
     npm ci --omit=dev
 
 ################################################################################
-# Create a stage for building the application.
-FROM deps as build
+# Create a stage for building the frontend.
+FROM deps as build-frontend
 
 # Download additional development dependencies before building, as some projects require
 # "devDependencies" to be installed to build. If you don't need this, remove this step.
@@ -45,6 +43,22 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 
 # Copy the rest of the source files into the image.
 COPY . .
+# Run the build script.
+RUN npm run build
+
+################################################################################
+# Create a stage for building the application.
+FROM deps as build
+
+# Download additional development dependencies before building, as some projects require
+# "devDependencies" to be installed to build. If you don't need this, remove this step.
+RUN --mount=type=bind,source=../frontend/womm/package.json,target=package.json \
+    --mount=type=bind,source=../frontend/womm/package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    npm ci
+
+# Copy the rest of the source files into the image.
+COPY ../frontend/womm .
 # Run the build script.
 RUN npm run build
 
@@ -102,6 +116,7 @@ COPY package.json .
 # the built application from the build stage into the image.
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build-frontend /usr/src/app/dist ./dist/static
 
 
 # Expose the port that the application listens on.

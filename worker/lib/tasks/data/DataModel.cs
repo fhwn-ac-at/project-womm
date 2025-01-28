@@ -20,7 +20,10 @@
 
     public class SplitParameters : IParameter
     {
-        public string segmentTime { get; set; }
+        public double to { get; set; }
+
+        public double from { get; set; }
+
         public string keyName { get; set; }
     }
 
