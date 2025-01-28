@@ -11,6 +11,7 @@ import { RenderModule } from './render/render.module';
 import { VideoAnalyserModule } from './video-analyser/video-analyser.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { WorkflowListenerModule } from './workflow-listener/workflow-listener.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { join } from 'path';
         },
       }
     }),
+    WorkflowListenerModule,
     
   ],
   controllers: [],

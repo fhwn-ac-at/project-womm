@@ -5,6 +5,7 @@ import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Scene, SceneSchema } from './entities/scene.entity';
 import { RenderModule } from '../render/render.module';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   controllers: [ScenesController],
@@ -14,7 +15,9 @@ import { RenderModule } from '../render/render.module';
       { name: Scene.name, schema: SceneSchema }
     ]),
     WorkspacesModule,
-    RenderModule
-  ]
+    RenderModule,
+    StorageModule
+  ],
+  exports: [ScenesService]
 })
 export class ScenesModule {}

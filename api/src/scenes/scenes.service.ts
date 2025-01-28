@@ -12,6 +12,8 @@ import { CreateClipDefinitionDto } from './dto/create-clip-definition.dto';
 import { ClipId } from './entities/clip-definition.entity';
 import { Clip } from './entities/clip.entity';
 import { UpdateClipDto } from './dto/update-clip.dto';
+import { S3Path } from '../types/s3Path.type';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class ScenesService {
@@ -22,6 +24,7 @@ export class ScenesService {
     @InjectModel(Scene.name)
     private readonly sceneModel: Model<Scene>,
     private readonly workspaceService: WorkspacesService,
+    private readonly storageService: StorageService
   ) {}
   
   async create(createSceneDto: CreateSceneDto) {
@@ -39,10 +42,18 @@ export class ScenesService {
 
   async findAll() {
     const scenes = await this.sceneModel.find().exec();
-    return scenes.map((scene) => scene.toObject());
+    const objScenes = scenes.map((scene) => scene.toObject());
+
+    for (const scene of objScenes) {
+      if (scene.video._processingFinished) {
+        scene.video.downloadUrl = await this.storageService.getDownloadUrlFor(scene.video._s3Key);
+      }
+    }
+
+    return objScenes;
   }
 
-  async findOne(id: SceneId) {
+  async findOne(id: SceneId, appendDownloadUrl: boolean = false) {
     const scene = await this.sceneModel.findOne({
       id: id
     });
@@ -51,7 +62,13 @@ export class ScenesService {
       throw new NotFoundException(`Scene with ID ${id} not found`);
     }
 
-    return scene.toObject();
+    const obj = scene.toObject();
+
+    if (appendDownloadUrl && obj.video._processingFinished) {
+      obj.video.downloadUrl = await this.storageService.getDownloadUrlFor(obj.video._s3Key);
+    }
+
+    return obj;
   }
 
   async update(id: SceneId, updateSceneDto: UpdateSceneDto) {
@@ -71,6 +88,14 @@ export class ScenesService {
     await this.sceneModel.deleteOne({
       id: id
     });
+  }
+
+  public async finishProcessingOfWorkflow(workflowId: string) {
+    await this.sceneModel.updateOne({
+      'video._workflowId': workflowId
+    }, {
+      'video._processingFinished': true
+    })
   }
 
   public async addLayerToScene(id: SceneId) {
@@ -117,6 +142,15 @@ export class ScenesService {
     }, {new: true});
 
     return newScene.toObject();
+  }
+
+  public async registerWorkflowForScene(id: SceneId, workflowId: string, videoS3Path: S3Path) {
+    await this.sceneModel.updateOne({
+      id: id
+    }, {
+      'video._workflowId': workflowId,
+      'video._s3Key': videoS3Path
+    })
   }
 
   public async addClipToScene(id: SceneId, clip: CreateClipDefinitionDto) {

@@ -10,6 +10,7 @@ import { UpdateClipDefinitionDto } from './dto/update-clip-definition.dto';
 import { UpdateClipDto } from './dto/update-clip.dto';
 import { RenderService } from '../render/render.service';
 import { firstValueFrom } from 'rxjs';
+import { S3Path } from '../types/s3Path.type';
 
 @Controller({
   version: '1',
@@ -90,6 +91,10 @@ export class ScenesController {
   async renderScene(@Param('id') id: SceneId) {
     const scene = await this.scenesService.findOne(id); 
     await this.scenesService.validateClipAvailability(scene);
-    return this.renderService.renderScene(scene);
+    const renderRes = await this.renderService.renderScene(scene);
+
+    this.scenesService.registerWorkflowForScene(scene.id, renderRes.dag.workflowDefinitionId, `${scene.workspace._workspace._s3BasePath}video/${scene.video.name}` as S3Path);
+
+    return renderRes;
   }
 }

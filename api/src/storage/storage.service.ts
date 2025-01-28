@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectS3, S3 } from 'nestjs-s3';
 import { S3Path } from '../types/s3Path.type';
@@ -6,6 +6,8 @@ import { RegisterdUplaodPart } from '../upload/entities/upload-part.entity';
 import * as fs from 'fs';
 import { Readable } from 'stream';
 import { VideoAnalyserService } from '../video-analyser/video-analyser.service';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class StorageService implements OnModuleInit {
@@ -28,6 +30,19 @@ export class StorageService implements OnModuleInit {
     if (!(await this.checkIfBucketExists(this.bucketName))) {
       await this.createBucket(this.bucketName);
       this.logger.log(`Created new bucket with name ${this.bucketName}`);
+    }
+  }
+
+  public async getDownloadUrlFor(path: S3Path) {
+    try {
+      // Use the @aws-sdk/s3-request-presigner to generate a signed URL
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: path,
+      });
+      return await getSignedUrl(this.s3, command, { expiresIn: 3600 });
+    } catch (error) {
+      throw new InternalServerErrorException(`Error generating signed URL: ${error.message}`);
     }
   }
 

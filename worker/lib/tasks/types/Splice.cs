@@ -36,7 +36,7 @@ public class Splice : ScheduledTask
         foreach (var fileKey in FileKeys)
         {
             Storage.Download(WorkingDirectory, fileKey);
-            files.Add(Path.GetRelativePath(Directory.GetCurrentDirectory(),fileKey));
+            files.Add(Path.GetRelativePath(Directory.GetCurrentDirectory(), fileKey));
         }
 
         string destination = Path.Join(WorkingDirectory, Path.GetFileName(Results[0]));
@@ -62,7 +62,7 @@ public class Splice : ScheduledTask
         }
         finally
         {
-            // CleanUp();
+            CleanUp();
         }
     }
     

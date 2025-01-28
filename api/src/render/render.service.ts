@@ -58,8 +58,6 @@ export class RenderService {
       map((result) => {
         this.logger.log(`Render workflow started for scene ${scene.id}`);
 
-
-        console.dir(result);
         return {
           renderPlan: renderPlan.workflow,
           warnings: renderPlan.warnings,
