@@ -266,10 +266,15 @@ export class ScenesService {
       if (!file) {
         throw new ConflictException(`Clip with ID ${clip} not found in workspace`);
       }
-
+      
       if (!partialUploadAllowed) {
         if (!file.uploadFinished) {
           throw new ConflictException(`Clip with ID ${clip} is not fully uploaded yet. Please wait until the upload has finished.`);
+        }
+        
+        if (file.metadata === undefined) {
+          console.dir(file);
+          throw new ConflictException(`Clip with ID ${clip} is not jet fully analyzed. Please wait until the analysis has finished.`);
         }
       }
 

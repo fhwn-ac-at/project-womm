@@ -49,6 +49,14 @@ import { join } from 'path';
     VideoAnalyserModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
+      serveStaticOptions: {
+        setHeaders(res, path, stat) {
+          res.setHeader(
+            'Content-Security-Policy',
+            "default-src * 'unsafe-inline' 'unsafe-eval' blob: data:;"
+          );
+        },
+      }
     }),
   ],
   controllers: [],

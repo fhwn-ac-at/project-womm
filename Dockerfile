@@ -6,7 +6,7 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-ARG NODE_VERSION=18.18.0
+ARG NODE_VERSION=18.19.0
 
 ################################################################################
 # Use node image for base image for all stages.
@@ -25,8 +25,8 @@ RUN apk add --no-cache ffmpeg
 FROM base as deps
 
 # Copy the frontend package files into the image.
-RUN --mount=type=bind,source=./package.json,target=package.json \
-    --mount=type=bind,source=./package-lock.json,target=package-lock.json \
+RUN --mount=type=bind,source=./api/package.json,target=package.json \
+    --mount=type=bind,source=./api/package-lock.json,target=package-lock.json \
     --mount=type=cache,target=/root/.npm \
     npm ci --omit=dev
 
@@ -36,13 +36,13 @@ FROM base as build-frontend
 
 # Download additional development dependencies before building, as some projects require
 # "devDependencies" to be installed to build. If you don't need this, remove this step.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+RUN --mount=type=bind,source=./frontend/womm/package.json,target=package.json \
+    --mount=type=bind,source=./frontend/womm/package-lock.json,target=package-lock.json \
     --mount=type=cache,target=/root/.npm \
     npm ci
 
 # Copy the rest of the source files into the image.
-COPY . .
+COPY ./frontend/womm .
 # Run the build script.
 RUN npm run build
 
@@ -52,51 +52,15 @@ FROM deps as build
 
 # Download additional development dependencies before building, as some projects require
 # "devDependencies" to be installed to build. If you don't need this, remove this step.
-RUN --mount=type=bind,source=../frontend/womm/package.json,target=package.json \
-    --mount=type=bind,source=../frontend/womm/package-lock.json,target=package-lock.json \
+RUN --mount=type=bind,source=../api/package.json,target=package.json \
+    --mount=type=bind,source=../api/package-lock.json,target=package-lock.json \
     --mount=type=cache,target=/root/.npm \
     npm ci
 
 # Copy the rest of the source files into the image.
-COPY ../frontend/womm .
+COPY ./api .
 # Run the build script.
 RUN npm run build
-
-################################################################################
-# Create a stage for running E2E tests
-FROM build as e2e-tests
-
-# Install development dependencies required for E2E testing.
-RUN --mount=type=cache,target=/root/.npm \
-    npm install --only=dev
-
-COPY test ./test
-
-# Run E2E tests
-CMD ["npm", "run", "test:e2e"]
-
-################################################################################
-# Create a new development stage for local development.
-FROM base as dev
-
-# Set development environment.
-ENV NODE_ENV development
-
-# Install all dependencies, including devDependencies.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
-    --mount=type=cache,target=/root/.npm \
-    npm ci
-
-# Copy source files for live development.
-COPY . .
-
-# Expose the application port for development.
-EXPOSE 3000
-
-# Run the application in development mode.
-CMD ["npm", "run", "start:dev"]
-
 
 ################################################################################
 # Create a new stage to run the application with minimal runtime dependencies
@@ -110,17 +74,17 @@ ENV NODE_ENV production
 USER node
 
 # Copy package.json so that package manager commands can be used.
-COPY package.json .
+COPY api/package.json .
 
 # Copy the production dependencies from the deps stage and also
 # the built application from the build stage into the image.
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build-frontend /usr/src/app/dist ./dist/static
+COPY --from=build-frontend /usr/src/app/dist/womm/browser ./public
 
 
 # Expose the port that the application listens on.
 EXPOSE 3000
 
 # Run the application.
-CMD npm start:prod
+CMD npm run start:prod

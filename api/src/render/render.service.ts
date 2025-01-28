@@ -7,7 +7,7 @@ import { SimpleSingleLayerRenderStrategy } from './render-strategies/simple-sing
 import { RenderStrategyResult } from './render-strategies/render-strategy-result';
 import { CreateWorkflowDto } from '../workflow/dto/create-workflow.dto';
 import { WorkflowService } from '../workflow/workflow.service';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 @Injectable()
 export class RenderService {
@@ -51,8 +51,10 @@ export class RenderService {
 
   public async renderScene(scene: Scene) {
     const renderPlan = await this.createRenderPlan(scene); 
+    this.logger.debug(`Render plan for scene ${scene.id} created`);
+    console.dir(renderPlan);
 
-    return this.workflowService.startWorkflow(renderPlan.workflow).pipe(
+    return firstValueFrom(this.workflowService.startWorkflow(renderPlan.workflow).pipe(
       map((result) => {
         this.logger.log(`Render workflow started for scene ${scene.id}`);
 
@@ -65,7 +67,7 @@ export class RenderService {
           scene: scene,
         };
       })
-    )
+    ));
   }
 
 }

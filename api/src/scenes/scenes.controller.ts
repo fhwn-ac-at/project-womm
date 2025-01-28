@@ -9,6 +9,7 @@ import { ClipId } from './entities/clip-definition.entity';
 import { UpdateClipDefinitionDto } from './dto/update-clip-definition.dto';
 import { UpdateClipDto } from './dto/update-clip.dto';
 import { RenderService } from '../render/render.service';
+import { firstValueFrom } from 'rxjs';
 
 @Controller({
   version: '1',

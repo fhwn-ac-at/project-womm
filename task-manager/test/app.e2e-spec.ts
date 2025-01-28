@@ -140,7 +140,7 @@ describe('Single Worker (e2e)', () => {
     expect(dag.nodes[1].edges).toHaveLength(1);
 
     expect(message).toBeDefined();
-    expect(message.id).toBe('w-test-workflow-t-0');
+    expect(message.taskId).toBe('w-test-workflow-t-0');
     expect(message.name).toBe('task-1');
     expect(message.parameters).toEqual({ message: 'Hello World!' });
     expect(message.results).toEqual(['result-1']);
@@ -157,7 +157,7 @@ describe('Single Worker (e2e)', () => {
     // Check that the second task is scheduled
     const message2 = await worker.receiveTask();
     expect(message2).toBeDefined();
-    expect(message2.id).toBe('w-test-workflow-t-1');
+    expect(message2.taskId).toBe('w-test-workflow-t-1');
     expect(message2.name).toBe('task-2');
     expect(message2.parameters).toEqual({ message: 'Hello World!' });
     console.log('Received and validated message for second task');
@@ -247,7 +247,7 @@ describe('Single Worker (e2e)', () => {
     expect(dag.nodes[1].edges).toHaveLength(1);
 
     expect(message).toBeDefined();
-    expect(message.id).toBe('w-test-workflow-t-0');
+    expect(message.taskId).toBe('w-test-workflow-t-0');
     expect(message.name).toBe('task-1');
     expect(message.parameters).toEqual({ message: 'Hello World!' });
     expect(message.results).toEqual(['result-1']);
@@ -264,7 +264,7 @@ describe('Single Worker (e2e)', () => {
     // Check that the second task is scheduled
     const message2 = await worker.receiveTask();
     expect(message2).toBeDefined();
-    expect(message2.id).toBe('w-test-workflow-t-1');
+    expect(message2.taskId).toBe('w-test-workflow-t-1');
     expect(message2.name).toBe('task-2');
     expect(message2.parameters).toEqual({ message: 'Hello World!' });
     console.log('Received and validated message for second task');
@@ -365,7 +365,7 @@ describe('Single Worker (e2e)', () => {
     expect(dag.nodes[1].edges).toHaveLength(1);
 
     expect(message).toBeDefined();
-    expect(message.id).toBe('w-test-workflow-t-0');
+    expect(message.taskId).toBe('w-test-workflow-t-0');
     expect(message.name).toBe('task-1');
     expect(message.parameters).toEqual({ message: 'Hello World!' });
     expect(message.results).toEqual(['result-1']);
@@ -382,7 +382,7 @@ describe('Single Worker (e2e)', () => {
     // Check that the second task is scheduled
     const message2 = await worker.receiveTask();
     expect(message2).toBeDefined();
-    expect(message2.id).toBe('w-test-workflow-t-1');
+    expect(message2.taskId).toBe('w-test-workflow-t-1');
     expect(message2.name).toBe('task-2');
     expect(message2.parameters).toEqual({ message: 'Hello World!' });
     console.log('Received and validated message for second task');
@@ -486,7 +486,7 @@ describe('Single Worker (e2e)', () => {
     expect(dag.nodes[1].edges).toHaveLength(1);
 
     expect(message).toBeDefined();
-    expect(message.id).toBe('w-test-workflow-t-0');
+    expect(message.taskId).toBe('w-test-workflow-t-0');
     expect(message.name).toBe('task-1');
     expect(message.parameters).toEqual({ message: 'Hello World!' });
     expect(message.results).toEqual(['result-1']);
@@ -503,7 +503,7 @@ describe('Single Worker (e2e)', () => {
     // Check that the first task is rescheduled
     const message2 = await worker.receiveTask();
     expect(message2).toBeDefined();
-    expect(message2.id).toBe('w-test-workflow-t-0');
+    expect(message2.taskId).toBe('w-test-workflow-t-0');
     expect(message2.name).toBe('task-1');
     expect(message2.parameters).toEqual({ message: 'Hello World!' });
     expect(message2.results).toEqual(['result-1']);
@@ -519,7 +519,7 @@ describe('Single Worker (e2e)', () => {
     // Check that the second task is scheduled
     const message3 = await worker.receiveTask();
     expect(message3).toBeDefined();
-    expect(message3.id).toBe('w-test-workflow-t-1');
+    expect(message3.taskId).toBe('w-test-workflow-t-1');
     expect(message3.name).toBe('task-2');
     expect(message3.parameters).toEqual({ message: 'Hello World!' });
     console.log('Received and validated message for second task');
@@ -623,7 +623,7 @@ describe('Single Worker (e2e)', () => {
     expect(dag.nodes[1].edges).toHaveLength(1);
 
     expect(message).toBeDefined();
-    expect(message.id).toBe('w-test-workflow-t-0');
+    expect(message.taskId).toBe('w-test-workflow-t-0');
     expect(message.name).toBe('task-1');
     expect(message.parameters).toEqual({ message: 'Hello World!' });
     expect(message.results).toEqual(['result-1']);
@@ -640,7 +640,7 @@ describe('Single Worker (e2e)', () => {
     // Check that the first task is rescheduled
     const message2 = await worker.receiveTask();
     expect(message2).toBeDefined();
-    expect(message2.id).toBe('w-test-workflow-t-0');
+    expect(message2.taskId).toBe('w-test-workflow-t-0');
     expect(message2.name).toBe('task-1');
     expect(message2.parameters).toEqual({ message: 'Hello World!' });
     expect(message2.results).toEqual(['result-1']);
@@ -743,7 +743,7 @@ describe('Single Worker (e2e)', () => {
     expect(dag.nodes[1].edges).toHaveLength(1);
 
     expect(message).toBeDefined();
-    expect(message.id).toBe('w-test-workflow-t-0');
+    expect(message.taskId).toBe('w-test-workflow-t-0');
     expect(message.name).toBe('task-1');
     expect(message.parameters).toEqual({ message: 'Hello World!' });
     expect(message.results).toEqual(['result-1']);
@@ -770,7 +770,7 @@ describe('Single Worker (e2e)', () => {
     // Check that the second task is scheduled
     const message2 = await worker.receiveTask();
     expect(message2).toBeDefined();
-    expect(message2.id).toBe('w-test-workflow-t-1');
+    expect(message2.taskId).toBe('w-test-workflow-t-1');
     expect(message2.name).toBe('task-2');
     expect(message2.parameters).toEqual({ message: 'Hello World!' });
     console.log('Received and validated message for second task');

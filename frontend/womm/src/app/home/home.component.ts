@@ -213,11 +213,13 @@ export class HomeComponent {
 
                                         const renderURL = 'scenes/' + response.id + '/render';
 
-                                        this.apiService.postData(renderURL, {}).subscribe({
-                                          next: (response) => {
-                                            console.log("sent render command", response);
-                                          }
-                                        })
+                                        setTimeout(() => {
+                                          this.apiService.postData(renderURL, {}).subscribe({
+                                            next: (response) => {
+                                              console.log("sent render command", response);
+                                            }
+                                          })
+                                        }, 1000);
                                     },
                                     error: (error) => {
                                         console.error("Error creating scene", error);

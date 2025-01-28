@@ -7,7 +7,7 @@ export class ScheduledTaskDto {
     Object.assign(this, partial);
   }
 
-  id: DagNodeId;
+  taskId: DagNodeId;
 
   name: string;
 

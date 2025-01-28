@@ -29,7 +29,7 @@ export class SimpleSingleLayerRenderStrategy implements RenderStrategy {
 
     const clipPrepArtifactIds: Map<string, string> = new Map();
     for (const clip of clips.filter(clip => clip.cut)) {
-      const artifactId = `${context.workspace._s3BasePath}/processing-artifacts/clip-cut-${clip.cut.from}-${clip.cut.to}-${clip.id}`;
+      const artifactId = `${context.workspace._s3BasePath}processing-artifacts/clip-cut-${clip.cut.from}-${clip.cut.to}-${clip.id}`;
       
       const clipS3Path = context.workspace.files.find(file => file.name === clip.id)._s3Path;      
       
@@ -48,7 +48,7 @@ export class SimpleSingleLayerRenderStrategy implements RenderStrategy {
       clipPrepArtifactIds.set(clip.id, artifactId);
     }
 
-    const finalVideoPath = `${context.workspace._s3BasePath}/video/${scene.video.name}`;
+    const finalVideoPath = `${context.workspace._s3BasePath}video/${scene.video.name}`;
 
     // create the final task that will merge all the clips
     workflow.withTask(t => {
@@ -81,11 +81,12 @@ export class SimpleSingleLayerRenderStrategy implements RenderStrategy {
         }
       }
 
-      // add clips to the final task
-      for (const clip of clipOrder) {
-        t.withArtifactDependency(clipPrepArtifactIds.get(clip.id));
-      }
+      t.withParameters({
+        fileKeys: clipOrder.map(clip => clipPrepArtifactIds.get(clip.id) ?? `${context.workspace._s3BasePath}${clip.id}`), 
+      })
     });
+
+    workflow.withArtifactCompletionCriteria(finalVideoPath);
 
     result.workflow = workflow.build();
     return result;

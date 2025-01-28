@@ -16,7 +16,7 @@ import { ConfigService } from '@nestjs/config';
               urls: [config.getOrThrow<string>("RABBITMQ_URL")],
               queue: 'workflow_control',
               queueOptions: {
-                durable: false
+                durable: true
               },
             },
             transport: Transport.RMQ

@@ -269,14 +269,14 @@ export class SchedulerService {
     }
 
     const scheduledTask = new ScheduledTaskDto({
-      id: task.nodeId,
+      taskId: task.nodeId,
       name: task.task.name,
       parameters: task.task.parameters,
       results: task.task.results
     });
 
     await this.queueService.emit(worker.listensOn, scheduledTask.name, scheduledTask);
-    this.logger.log(`Scheduled task ${scheduledTask.name} with id ${scheduledTask.id} on worker ${worker.name}`);
+    this.logger.log(`Scheduled task ${scheduledTask.name} with id ${scheduledTask.taskId} on worker ${worker.name}`);
     return true;
   }
 
