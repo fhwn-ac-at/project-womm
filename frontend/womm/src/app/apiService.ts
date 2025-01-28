@@ -37,9 +37,7 @@ export class ApiService {
   // PUT request
   postMultiFormData(endpoint: string, body: any): Observable<any> {
     const url = `${this.baseUrl}/${endpoint}`;
-    return this.http.post(url, body, {
-      headers: new HttpHeaders().set('Content-Type', 'multipart/form-data'),
-    });
+    return this.http.post(url, body);
   }
 
   // DELETE request
