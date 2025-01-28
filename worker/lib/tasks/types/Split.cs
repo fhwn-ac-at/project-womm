@@ -33,7 +33,7 @@ namespace lib.tasks.types
 
         public string KeyName => _parameters.keyName;
         
-        public override void Process()
+        public override List<string> Process()
         {
             string downloadedFile = Path.Join(WorkingDirectory, _parameters.keyName);
             Storage.Download(WorkingDirectory, KeyName);
@@ -52,9 +52,10 @@ namespace lib.tasks.types
                 command.Execute();
 
                 File.Delete(downloadedFile);
-            
+
                 // there can only be one result otherwise the constructor would throw an error.
                 Storage.Upload(destination, Results[0]);
+                return [Results[0]];
             }
             catch (Exception e)
             {

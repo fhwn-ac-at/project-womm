@@ -4,6 +4,7 @@ using lib.exceptions;
 using lib.storage;
 using lib.tasks.data;
 using lib.tasks.exec;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace lib.tasks.types
 {
@@ -26,7 +27,7 @@ namespace lib.tasks.types
 
         public string GoalFormat => _parameters.goalFormat;
         
-        public override void Process()
+        public override List<string> Process()
         {
             if (Results.Length != 1)
             {
@@ -48,6 +49,7 @@ namespace lib.tasks.types
             {
                 command.Execute();
                 Storage.Upload(destination, Results[0]);
+                return [Results[0]];
             }
             catch (Exception e)
             {

@@ -74,15 +74,23 @@ public class TaskExecutor : ITaskExecutor
             _logger.LogInformation("Started processing: " + taskData.name);
             
             
-            task.Process();
+            var results = task.Process();
             
             FireOnTaskStatusChanged(new TaskStatusEventArgs(
                 _messagingOptions.ProcessingCompleted, 
                 "Completed processing: " + taskData.name, 
                 taskData.taskId));
             _logger.LogInformation("Completed processing: " + taskData.name);
-            
-            _logger.LogInformation("Uploaded Artifacts: " + taskData.name);
+
+            foreach (var result in results)
+            {
+                FireOnTaskStatusChanged(new TaskStatusEventArgs(
+                        _messagingOptions.ArtifactUploaded,
+                        "Uploaded Artifacts: " + taskData.name,
+                        taskData.taskId,
+                        result));
+                _logger.LogInformation("Uploaded Artifacts: " + result);
+            }
         }
         catch (Exception e)
         {
