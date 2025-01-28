@@ -10,6 +10,7 @@ interface VideoFile {
   file: File;
   url: string;
   name: string;
+  duration?: number;
 }
 
 @Component({
@@ -71,159 +72,174 @@ export class HomeComponent {
 
   uploadAndRenderVideo(): void {
     if (this.videos.length == 0) {
-      console.log("No videos");
-      // TODO: Maybe add pop-up
+        console.log("No videos");
+        // TODO: Maybe add pop-up
     } else {
-      console.log(environment.apiURL);
-  
-      // Create Workspace, get ID
-      this.apiService.postData('workspaces', {}).subscribe({
-        next: (response) => {
-          console.log('Workspace created: ', response);
-      
-          const workspaceID = response.id;
-          let size = 0;
-      
-          this.videos.forEach(video => {
-            size += video.file.size;
-          });
-      
-          console.log("size: " + size);
-      
-          const workspaceString = "workspaces/" + workspaceID + "/files";
-      
-          this.apiService.putData(workspaceString, { "fileSize": size, "name": 'video' }).subscribe({
+        console.log(environment.apiURL);
+
+        // Create Workspace, get ID
+        this.apiService.postData('workspaces', {}).subscribe({
             next: (response) => {
-              console.log(response);
-      
-              const uploadID = response.uploadId;
-              const maxPartSize = response.maxPartSize;
-              let globalPartNumber = 1;
-      
-              // Create an array of Promises for each upload
-              const uploadPromises: Promise<void>[] = [];
-      
-              // Process uploads in chunks
-              this.videos.forEach(video => {
-                const file = video.file;
-                const totalParts = Math.ceil(file.size / maxPartSize);
-      
-                const uploadPart = (partIndex: number): Promise<void> => {
-                  return new Promise((resolve, reject) => {
-                    if (partIndex >= totalParts) {
-                      console.log("All parts uploaded for: ", file.name);
-                      resolve();
-                      return;
-                    }
-      
-                    const start = partIndex * maxPartSize;
-                    const end = Math.min(start + maxPartSize, file.size);
-      
-                    const fileSlice = file.slice(start, end);
-      
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      if (reader.readyState === FileReader.DONE) {
-                        const arrayBuffer = reader.result as ArrayBuffer;
-                        const byteArray = new Uint8Array(arrayBuffer);
-      
-                        const uploadString = 'uploads/' + uploadID + '/part';
-                        const formData = new FormData();
-                        formData.append('partNumber', globalPartNumber.toString());
-                        formData.append('part', new Blob([byteArray]));
-      
-                        this.apiService.postMultiFormData(uploadString, formData).subscribe({
-                          next: () => {
-                            console.log(`Uploaded global part ${globalPartNumber} for file:`, file.name);
-                            globalPartNumber++; // Increment the global part counter
-                            uploadPart(partIndex + 1).then(resolve).catch(reject); // Continue with the next part
-                          },
-                          error: (error) => {
-                            console.error(`Error uploading part ${globalPartNumber} for file:`, file.name, error);
-                            reject(error);
-                          }
+                console.log('Workspace created: ', response);
+
+                const workspaceID = response.id;
+
+                const uploadPromises: Promise<void>[] = [];
+
+                this.videos.forEach(video => {
+                    const size = video.file.size;
+
+                    const workspaceString = `workspaces/${workspaceID}/files`;
+
+                    const uploadPromise = new Promise<void>((resolve, reject) => {
+                        this.apiService.putData(workspaceString, { "fileSize": size, "name": video.file.name }).subscribe({
+                            next: (response) => {
+                                console.log(response);
+
+                                const uploadID = response.uploadId;
+                                const maxPartSize = response.maxPartSize;
+
+                                // Process uploads for this specific video
+                                const file = video.file;
+                                const totalParts = Math.ceil(file.size / maxPartSize);
+
+                                const uploadPart = (partIndex: number): Promise<void> => {
+                                    return new Promise((resolve, reject) => {
+                                        if (partIndex >= totalParts) {
+                                            console.log("All parts uploaded for: ", file.name);
+                                            resolve();
+                                            return;
+                                        }
+
+                                        const start = partIndex * maxPartSize;
+                                        const end = Math.min(start + maxPartSize, file.size);
+
+                                        const fileSlice = file.slice(start, end);
+
+                                        const reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            if (reader.readyState === FileReader.DONE) {
+                                                const arrayBuffer = reader.result as ArrayBuffer;
+                                                const byteArray = new Uint8Array(arrayBuffer);
+
+                                                const uploadString = `uploads/${uploadID}/part`;
+                                                const formData = new FormData();
+                                                formData.append('partNumber', (partIndex + 1).toString()); // Part number specific to this video
+                                                formData.append('part', new Blob([byteArray]));
+
+                                                this.apiService.postMultiFormData(uploadString, formData).subscribe({
+                                                    next: () => {
+                                                        console.log(`Uploaded part ${partIndex + 1} for file:`, file.name);
+                                                        uploadPart(partIndex + 1).then(resolve).catch(reject); // Continue with the next part
+                                                    },
+                                                    error: (error) => {
+                                                        console.error(`Error uploading part ${partIndex + 1} for file:`, file.name, error);
+                                                        reject(error);
+                                                    }
+                                                });
+                                            }
+                                        };
+
+                                        // Read the file slice as an ArrayBuffer
+                                        reader.readAsArrayBuffer(fileSlice);
+                                    });
+                                };
+
+                                // Start uploading parts for this video
+                                uploadPart(0).then(() => {
+                                    console.log(`Upload completed for file: ${file.name}`);
+                                    resolve();
+                                }).catch(error => {
+                                    console.error(`Error during upload for file: ${file.name}`, error);
+                                    reject(error);
+                                });
+                            },
+                            error: (error) => {
+                                console.error(`Error registering file size for video: ${video.file.name}`, error);
+                                reject(error);
+                            }
                         });
-                      }
-                    };
-      
-                    // Read the file slice as an ArrayBuffer
-                    reader.readAsArrayBuffer(fileSlice);
-                  });
-                };
-      
-                // Add the upload operation for this video to the promises array
-                uploadPromises.push(uploadPart(0));
-              });
-      
-              // Wait for all uploads to complete
-              Promise.all(uploadPromises)
-                .then(() => {
-                  console.log("All uploads completed successfully. Proceeding to the next step.");
-      
-                  console.log(this.videos);
-                  this.getTotalVideoDuration()
-                  .then(totalDuration => {
-                    console.log(`Total video duration: ${totalDuration.toFixed(2)} seconds`);
+                    });
 
-                    // Create scene here:
-                    const scene = {
-                      scene: {
-                        version: 1,
-                        video: {
-                          name: 'video.mp4',
-                          container: 'mp4',
-                        },
-                        workspace: {
-                          id: workspaceID,
-                        },
-                        clips: [
-                          {
-                            name: 'video',
-                            id: 'video',
-                          },
-                        ],
-                        layers: [
-                          {
-                            clips: [
-                              {
-                                id: 'video',
-                                from: 0, // Start time in seconds
-                                to: totalDuration, // End time in seconds
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    };
-
-                    this.apiService.postData('scenes', scene).subscribe({
-                      next: (response) => {
-                        console.log(response);
-                      },
-                      error: (error) => {
-
-                      }
-                    })
-                  })
-                  .catch(error => {
-                    console.error('Error calculating video duration:', error);
-                  });
-                })
-                .catch((error) => {
-                  console.error("Error during file uploads:", error);
+                    uploadPromises.push(uploadPromise);
                 });
+
+                // Wait for all uploads to complete
+                Promise.all(uploadPromises)
+                    .then(() => {
+                        console.log("All uploads completed successfully. Proceeding to the next step.");
+
+                        this.getTotalVideoDuration()
+                            .then(totalDuration => {
+                                console.log(`Total video duration: ${totalDuration.toFixed(2)} seconds`);
+
+                                this.setVideoDurations()
+                                .then( () => {
+                                  // Create scene here after all uploads are done
+                                let currentTime = 0;
+                                const scene = {
+                                    scene: {
+                                        version: 1,
+                                        video: {
+                                            name: 'video.mp4',
+                                            container: 'mp4',
+                                        },
+                                        workspace: {
+                                            id: workspaceID,
+                                        },
+                                        clips: this.videos.map(video => ({
+                                            name: video.file.name,
+                                            id: video.file.name,
+                                        })),
+                                        layers: [
+                                            {
+                                                clips: this.videos.map(video => {
+                                                    const clip = {
+                                                        id: video.file.name,
+                                                        from: currentTime, // Start time in seconds
+                                                        to: currentTime + video.duration!, // End time in seconds
+                                                    };
+                                                    currentTime += video.duration!; // Update current time for the next clip
+                                                    return clip;
+                                                }),
+                                            },
+                                        ],
+                                    },
+                                };
+
+                                this.apiService.postData('scenes', scene).subscribe({
+                                    next: (response) => {
+                                        console.log("Scene created successfully", response);
+
+                                        const renderURL = 'scenes/' + response.id + '/render';
+
+                                        this.apiService.postData(renderURL, {}).subscribe({
+                                          next: (response) => {
+                                            console.log("sent render command", response);
+                                          }
+                                        })
+                                    },
+                                    error: (error) => {
+                                        console.error("Error creating scene", error);
+                                    }
+                                });
+                                })
+                            })
+                            .catch(error => {
+                                console.error('Error calculating video duration:', error);
+                            });
+                    })
+                    .catch((error) => {
+                        console.error("Error during file uploads:", error);
+                    });
             },
             error: (error) => {
-              console.error('Error registering file size in workspace:', error);
+                console.error('Error creating workspace:', error);
             }
-          });
-        },
-        error: (error) => {
-          console.error('Error creating workspace:', error);
-        }
-      });      
+        });
     }
-  } 
+}
+
 
   getTotalVideoDuration(): Promise<number> {
     return new Promise((resolve, reject) => {
@@ -258,4 +274,37 @@ export class HomeComponent {
       });
     });
   }  
+
+  setVideoDurations(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        let processedVideos = 0;
+
+        this.videos.forEach((video) => {
+            const videoElement = document.createElement('video');
+            videoElement.preload = 'metadata';
+
+            // When metadata is loaded, set the duration
+            videoElement.onloadedmetadata = () => {
+                video.duration = videoElement.duration; // Set the duration property
+                processedVideos++;
+
+                // Clean up the object URL after use
+                window.URL.revokeObjectURL(videoElement.src);
+
+                // If all videos are processed, resolve the promise
+                if (processedVideos === this.videos.length) {
+                    resolve();
+                }
+            };
+
+            // Handle error in loading video metadata
+            videoElement.onerror = () => {
+                reject(new Error(`Failed to load metadata for video: ${video.file.name}`));
+            };
+
+            // Create an object URL for the video file to load metadata
+            videoElement.src = URL.createObjectURL(video.file);
+        });
+    });
+  }
 }
