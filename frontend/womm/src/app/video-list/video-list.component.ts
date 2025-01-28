@@ -7,10 +7,13 @@ import { HttpClient } from '@angular/common/http';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { environment } from '../../environment/environment';
 
-interface Video {
-  name: string;
-  url: string;
+interface Scene {
+  video: {
+    name: string;
+    downloadUrl?: string;
+  };
 }
 
 @Component({
@@ -24,21 +27,17 @@ interface Video {
     MatSnackBarModule
   ],
   templateUrl: './video-list.component.html',
-  styleUrl: './video-list.component.css',
+  styleUrls: ['./video-list.component.css'],
 })
 export class VideoListComponent implements OnInit, OnDestroy {
-  availableVideos: Video[] = [];
+  availableVideos: { name: string; url: string }[] = [];
   pollingSubscription: Subscription | null = null;
-  private apiUrl = 'https://your-api-endpoint.com/videos'; // API-Endpunkt
+  private apiUrl = `${environment.apiURL}/scenes`; // Aktualisierter API-Endpunkt mit Environment-Variable
 
   constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
-    this.availableVideos = [
-      { name: 'Sample Video 1', url: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4' },
-      { name: 'Sample Video 2', url: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_2mb.mp4' },
-      { name: 'Sample Video 3', url: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_5mb.mp4' },
-    ];
+    this.fetchVideos(); // Sofortige API-Abfrage
     this.startPolling();
   }
 
@@ -46,11 +45,31 @@ export class VideoListComponent implements OnInit, OnDestroy {
     this.stopPolling();
   }
 
+  private fetchVideos(): void {
+    this.http.get<Scene[]>(this.apiUrl).subscribe((data) => {
+      this.availableVideos = data
+        .filter(scene => scene.video?.downloadUrl) // Nur Videos mit gültiger URL
+        .map(scene => ({
+          name: scene.video.name,
+          url: scene.video.downloadUrl!
+        }));
+    }, (error) => {
+      this.showErrorMessage('Failed to fetch videos. Please try again later.');
+    });
+  }
+
   private startPolling(): void {
     this.pollingSubscription = interval(5000)
-      .pipe(switchMap(() => this.http.get<Video[]>(this.apiUrl)))
+      .pipe(switchMap(() => this.http.get<Scene[]>(this.apiUrl)))
       .subscribe((data) => {
-        this.availableVideos = data; // Aktualisiert die Video-Liste
+        this.availableVideos = data
+          .filter(scene => scene.video?.downloadUrl) // Nur Videos mit gültiger URL
+          .map(scene => ({
+            name: scene.video.name,
+            url: scene.video.downloadUrl!
+          }));
+      }, (error) => {
+        this.showErrorMessage('Failed to fetch videos. Please try again later.');
       });
   }
 
@@ -61,36 +80,34 @@ export class VideoListComponent implements OnInit, OnDestroy {
     }
   }
 
-  downloadVideo(video: Video): void {
+  downloadVideo(video: { name: string; url: string }): void {
     fetch(video.url)
       .then((response) => {
         if (!response.ok) {
-          // Direkt zur Snackbar
-          this.showErrorMessage(`The video "${video.name}" could not be downloaded. (Status: ${response.status})`);
-          return null; // Beendet die Verarbeitung hier
+          this.showErrorMessage(`The video \"${video.name}\" could not be downloaded. (Status: ${response.status})`);
+          return null;
         }
         return response.blob();
       })
       .then((blob) => {
-        if (!blob) return; // Falls ein Fehler aufgetreten ist, mache nichts
+        if (!blob) return;
         const anchor = document.createElement('a');
         const url = URL.createObjectURL(blob);
         anchor.href = url;
         anchor.download = video.name;
         anchor.click();
-        URL.revokeObjectURL(url); // Speicher freigeben
+        URL.revokeObjectURL(url);
       })
       .catch(() => {
-        this.showErrorMessage(`The video "${video.name}" could not be downloaded. Please check your connection.`);
+        this.showErrorMessage(`The video \"${video.name}\" could not be downloaded. Please check your connection.`);
       });
   }
 
   private showErrorMessage(message: string): void {
     this.snackBar.open(message, 'Close', {
-      duration: 5000, // Die Nachricht bleibt 5 Sekunden sichtbar
+      duration: 5000,
       horizontalPosition: 'center',
       verticalPosition: 'top',
     });
   }
-  
 }
