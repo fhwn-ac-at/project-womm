@@ -135,7 +135,7 @@ public class Worker : IDisposable, IHostedService
     {
         if (e.Status == _messagingOptions.ArtifactUploaded)
         {
-            var m = _messageService.GetArtifactUploadedMessage(e.Status, e.TaskId);
+            var m = _messageService.GetArtifactUploadedMessage(e.Status, e.ArtifactId);
             _queuingSystem.Enqueue(_queueOptions.ArtifactQueueName, m);
         }
         else if (e.Status == _messagingOptions.ProcessingFailed)

@@ -25,7 +25,7 @@ public class Splice : ScheduledTask
 
     public string[] FileKeys => _parameters.fileKeys;
     
-    public override void Process()
+    public override List<string> Process()
     {
         if (Results.Length != 1)
         {
@@ -53,6 +53,7 @@ public class Splice : ScheduledTask
         {
             command.Execute();
             Storage.Upload(destination, Results[0]);
+            return [Results[0]];
         }
         catch (CommandExecutionException e)
         {

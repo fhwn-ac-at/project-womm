@@ -18,7 +18,7 @@ public abstract class ScheduledTask(TaskData taskData, IFileSystem fs,
 
     public string[] Results => taskData.results;
     
-    public abstract void Process();
+    public abstract List<string> Process();
 
     protected void CleanUp()
     {
