@@ -11,6 +11,8 @@ import { Dependency, DependencySchema } from './entities/dependency.entity';
 import { CompletionCriteria, CompletionCriteriaSchema } from './entities/completion-criteria.entity';
 import { SchedulerModule } from '../scheduler/scheduler.module';
 import { ArtifactStoreModule } from '../artifact-store/artifact-store.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   controllers: [WorkflowsController],
@@ -21,7 +23,25 @@ import { ArtifactStoreModule } from '../artifact-store/artifact-store.module';
     ]),
     DagModule,
     SchedulerModule,
-    ArtifactStoreModule
+    ArtifactStoreModule,
+    ClientsModule.registerAsync({
+      clients: [
+        {
+          name: 'WORKFLOW_UPDATES',
+          useFactory: (config: ConfigService) => ({
+            options: {
+              urls: [config.getOrThrow<string>("RABBITMQ_URL")],
+              queue: 'workflow_updates',
+              queueOptions: {
+                durable: true
+              },
+            },
+            transport: Transport.RMQ
+          }),
+          inject: [ConfigService]
+        }
+      ]
+    }),
   ]
 })
 export class WorkflowsModule { }

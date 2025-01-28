@@ -291,6 +291,9 @@ export class DagService {
       }
     }, { session, new: true });
 
+    if (!dag) {
+      return this.getDagById(dagId, session);
+    }
     return this.convertDtoToDAG(dag);
   }
 
@@ -319,7 +322,7 @@ export class DagService {
       throw new NotFoundException(`Node with id ${nodeId} not found or in an invalid state to be marked as failed`);
     }
 
-    this.logger.debug(`Marked node as failed and increased retry count. NodeId: w-test-workflow-t-1`);
+    this.logger.debug(`Marked node as failed and increased retry count. NodeId: ${nodeId}`);
     return this.convertDtoToDAG(dag);
   }
 

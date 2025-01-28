@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { WorkflowService } from './workflow.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
+import { WorkflowController } from './workflow.controller';
 
 
 @Module({
@@ -26,6 +27,7 @@ import { ConfigService } from '@nestjs/config';
       ]
     }),
   ],
-  exports: [WorkflowService]
+  exports: [WorkflowService],
+  controllers: [WorkflowController]
 })
 export class WorkflowModule {}

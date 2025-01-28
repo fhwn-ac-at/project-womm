@@ -82,10 +82,6 @@ public class TaskExecutor : ITaskExecutor
                 taskData.taskId));
             _logger.LogInformation("Completed processing: " + taskData.name);
             
-            FireOnTaskStatusChanged(new TaskStatusEventArgs(
-                _messagingOptions.ArtifactUploaded, 
-                "Uploaded Artifacts: " + taskData.name, 
-                taskData.taskId));
             _logger.LogInformation("Uploaded Artifacts: " + taskData.name);
         }
         catch (Exception e)

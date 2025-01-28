@@ -39,7 +39,7 @@ public class Splice : ScheduledTask
             files.Add(Path.GetRelativePath(Directory.GetCurrentDirectory(),fileKey));
         }
 
-        string destination = Path.Join(WorkingDirectory, Results[0]);
+        string destination = Path.Join(WorkingDirectory, Path.GetFileName(Results[0]));
 
         string fileList = GenerateListFile(files);
         
@@ -61,7 +61,7 @@ public class Splice : ScheduledTask
         }
         finally
         {
-            CleanUp();
+            // CleanUp();
         }
     }
     

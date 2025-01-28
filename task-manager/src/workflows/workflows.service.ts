@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { UpdateWorkflowDto } from './dto/update-workflow.dto';
 import { DagService } from '../dag/dag.service';
 import { WorkflowDefinitionDto } from './dto/workflow-definition.dto';
@@ -17,6 +17,7 @@ import { DAG } from '../dag/entities/dag.entity';
 import { ArtifactStoreService } from '../artifact-store/artifact-store.service';
 import { DagArtifactStore } from '../artifact-store/entities/dag-artifact-store.entity';
 import { ArtifactAddedEvent } from '../artifact-store/events/artifact-added-event.dto';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class WorkflowsService {
@@ -28,7 +29,8 @@ export class WorkflowsService {
     @InjectModel(CreateWorkflowDefinition.name)
     private readonly workflowDefinitionModel: Model<CreateWorkflowDefinition>,
     private readonly schedulerService: SchedulerService,
-    private readonly artifactStoreService: ArtifactStoreService
+    private readonly artifactStoreService: ArtifactStoreService,
+    @Inject('WORKFLOW_UPDATES') private workflowUpdateClient: ClientProxy,
   ) { }
 
   async create(createWorkflowDto: WorkflowDefinitionDto): Promise<SendWorkflowDto> {
@@ -137,5 +139,8 @@ export class WorkflowsService {
     // All criteria met
     this.logger.log(`All completion criteria met for workflow ${workflowDef.id}`);
     await this.workflowDefinitionModel.findByIdAndUpdate(workflowDef.id, { status: WorkflowStatus.Succeeded }, { new: true });
+
+    // Send workflow update that workflow has finished.
+    this.workflowUpdateClient.emit('workflow_finished', workflowDef.id);
   }
 }

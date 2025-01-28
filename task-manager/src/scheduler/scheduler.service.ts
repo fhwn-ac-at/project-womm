@@ -121,6 +121,7 @@ export class SchedulerService {
       this.logger.warn(`Task ${nodeId} reached maximum retry count. Cancelling all pending tasks of dag ${dag.id}.`);
 
       const endDag = await this.dagService.cancelAllPendingTasksOf(dag.id);
+      await this.workersService.clearWorkOfWorkerWorkingOn(nodeId);
       this.eventEmitter.emit('dag.failed', endDag);
       return endDag;
     }

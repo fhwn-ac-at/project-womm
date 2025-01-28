@@ -17,8 +17,12 @@ export class ArtifactEventListenerController {
   @EventPattern('artifact_uploaded')
   public async artifactUploaded(event: ArtifactEventDto) {
     this.logger.log(`New artifact uploaded: ${event.artifactId} on task ${event.taskId}`);
-    const dag = await this.dagService.getDagWithNodeId(event.taskId);
-    this.artifactStoreService.addArtifactToStoreOfDag(dag.id, event.artifactId);
+    try {
+      const dag = await this.dagService.getDagWithNodeId(event.taskId);
+      this.artifactStoreService.addArtifactToStoreOfDag(dag.id, event.artifactId);
+    } catch (error) {
+      this.logger.error(`Error while processing uploaded artifact ${event.artifactId}: ${error}`);
+    }
   }
 
 }
